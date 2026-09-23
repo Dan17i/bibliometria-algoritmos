@@ -216,3 +216,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# Datos y modelos
+data/raw/*.pdf
+models/
+*.bin
+*.model
+
+CLAUDE.md
