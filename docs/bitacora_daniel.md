@@ -59,3 +59,91 @@
   - Los tres cortes en k=3 coinciden; la diferencia está en las alturas y en el CPCC. Single une los temas a alturas ~4 veces menores que complete (el puente basta para conectarlos): efecto de encadenamiento, pérdida de contraste en el dendrograma y menor correlación cofenética. Average es el que mejor conserva las distancias originales.
   - Para la justificación: la silueta, calculada sobre un corte, no distingue los enlaces cuando coinciden en la partición; el CPCC sí, porque mide todo el árbol.
 - **Pruebas:** suite completa: 72 passed.
+
+---
+
+## Borrador: justificación matemática de la evaluación interna (Req. 2)
+
+> Borrador para el documento de diseño. Los números salen del ejemplo sintético (`tests/fixtures/daniel/`, 8 abstracts con 2 "puente", distancia coseno sobre promedio de vectores de palabras). Hay que repetir el cálculo con los 20 abstracts reales.
+
+### 1. Correlación cofenética (CPCC)
+
+**Distancia cofenética.** Dado un dendrograma, la distancia cofenética $C(x,y)$ entre dos elementos es la altura $h$ de la fusión que los reúne por primera vez en un mismo cluster. En el código, para cada fusión $(a, b, h, \cdot)$ todo par $(x \in a,\ y \in b)$ recibe $C(x,y)=h$ (`cophenetic_matrix`).
+
+**Definición.** Sea $d(x,y)$ la distancia original y sean $x<y$ los $m = n(n-1)/2$ pares de elementos:
+
+$$
+\mathrm{CPCC}=\frac{\sum_{x<y}\bigl(d(x,y)-\bar d\bigr)\bigl(C(x,y)-\bar C\bigr)}
+{\sqrt{\sum_{x<y}\bigl(d(x,y)-\bar d\bigr)^2\;\sum_{x<y}\bigl(C(x,y)-\bar C\bigr)^2}},
+\qquad \bar d=\tfrac1m\sum_{x<y} d(x,y),\ \ \bar C=\tfrac1m\sum_{x<y} C(x,y)
+$$
+
+Es el coeficiente de correlación de Pearson entre las dos listas de $m$ distancias. Toma valores en $[-1,1]$; en la práctica queda en $(0,1]$ y **más cerca de 1 significa que el dendrograma conserva mejor las distancias originales**. Si una de las series es constante la varianza es 0 y el código devuelve 0.0 (`pearson`).
+
+**Qué mide.** Evalúa **el árbol completo**: usa los $m$ pares y todas las alturas de fusión, sin elegir un número de clusters. Es la medida natural cuando el entregable es el dendrograma.
+
+**Ejemplo a mano** (4 puntos en la recta 0, 1, 5, 7; single linkage). Distancias originales $[1,5,7,4,6,2]$ y cofenéticas $[1,4,4,4,4,2]$, con $\bar d = 25/6$ y $\bar C = 19/6$:
+$\sum (d-\bar d)(C-\bar C)=83/6$, $\sum (d-\bar d)^2=161/6$, $\sum (C-\bar C)^2=53/6$, luego $\mathrm{CPCC}=\dfrac{83/6}{\sqrt{(161/6)(53/6)}}\approx 0.8985$ (verificado en `tests/test_clustering.py`).
+
+### 2. Coeficiente de silueta
+
+**Definición.** Dada una partición en $k$ clusters (un corte del dendrograma, `cut_tree`) y un elemento $i$ del cluster $C_i$:
+
+$$
+a(i)=\frac{1}{|C_i|-1}\sum_{j\in C_i,\ j\ne i} d(i,j),\qquad
+b(i)=\min_{C\ne C_i}\ \frac1{|C|}\sum_{j\in C} d(i,j),\qquad
+s(i)=\frac{b(i)-a(i)}{\max\{a(i),\,b(i)\}}
+$$
+
+con $s(i)=0$ si $|C_i|=1$ (o si $\max\{a,b\}=0$). La silueta global es $S=\frac1n\sum_i s(i)\in[-1,1]$. $a(i)$ es la cohesión (distancia media a su propio cluster) y $b(i)$ la separación (distancia media al cluster vecino más cercano): $s(i)\to1$ si $i$ está bien asignado, $\approx 0$ si está en la frontera y $<0$ si probablemente está en el cluster equivocado.
+
+**Qué mide.** Evalúa **una partición concreta** (un corte en $k$ clusters), no el árbol. Depende de $k$: `best_k_by_silhouette` recorre $k=2,\dots,n-1$ y elige el mejor.
+
+**Ejemplo a mano** (mismos 4 puntos, etiquetas $[0,0,1,1]$): $s=\left(\tfrac56,\ \tfrac45,\ \tfrac59,\ \tfrac9{13}\right)$ y $S\approx0.7203$ (verificado en los tests).
+
+### 3. Complejidad (con $n$ abstracts, $m=n(n-1)/2$ pares)
+
+| Cálculo | Tiempo | Espacio | Justificación |
+|---|---|---|---|
+| Matriz de distancias (`pairwise_matrix`, dim. $p$) | $O(n^2 p)$ | $O(n^2)$ | $m$ evaluaciones de una métrica $O(p)$ |
+| Clustering jerárquico (`hierarchical_clustering`) | $O(n^3)$ | $O(n^2)$ | $n-1$ iteraciones; buscar el mínimo recorre $O(k^2)$ pares y actualizar cuesta $O(k)$; $\sum_{k} k^2=O(n^3)$ |
+| Matriz cofenética | $O(n^2)$ | $O(n^2)$ | cada par se asigna una sola vez, en la fusión que lo reúne |
+| CPCC (cofenética + Pearson) | $O(n^2)$ | $O(n^2)$ | Pearson hace 4 recorridos sobre $m$ valores; el costo total dado el árbol es $O(n^2)$ |
+| Silueta de un corte | $O(n^2)$ | $O(n)$ | para cada $i$ se recorren sus $n-1$ distancias |
+| Silueta para todos los cortes (`best_k_by_silhouette`) | $O(n^3)$ | $O(n)$ | $n-2$ cortes, cada uno con `cut_tree` y silueta $O(n^2)$ |
+
+Con $n=20$ todo es inmediato; el clustering ($O(n^3)$) domina el costo en ambos casos y la evaluación no lo cambia asintóticamente.
+
+### 4. Por qué el CPCC es la métrica principal para comparar Single, Complete y Average
+
+Resultados del ejemplo sintético con abstracts puente:
+
+| Enlace | CPCC | Altura de las 2 últimas fusiones | Silueta en $k=3$ |
+|---|---|---|---|
+| Single | 0.671 | 0.062 / 0.067 | 0.746 |
+| Complete | 0.749 | 0.270 / 0.278 | 0.746 |
+| Average | 0.751 | 0.183 / 0.198 | 0.746 |
+
+1. **El entregable es un dendrograma por criterio.** La pregunta es qué enlace produce el *árbol* más fiel, y el CPCC es la única de las dos que evalúa el árbol entero. La silueta evalúa un corte.
+2. **La silueta no discrimina aquí.** Los tres enlaces dan el mismo corte en $k=3$ ($\{V_1,V_2,B_1\}$, $\{L_1,L_2,B_2\}$, $\{A_1,A_2\}$) y, por tanto, exactamente la misma silueta (0.746). Dos criterios distintos quedan empatados porque la silueta solo ve la partición, no las alturas a las que se construyó.
+3. **El CPCC sí los separa** ($0.671<0.749<0.751$) y lo hace por una causa interpretable: el **encadenamiento de Single**. Single define $D(A,B)=\min d(x,y)$, así que un abstract puente basta para unir dos temas; por eso reúne los temas a alturas $\approx4$ veces menores que Complete (0.067 vs 0.278). Muchos pares quedan con una distancia cofenética muy inferior a la real, lo que reduce la correlación y aplana el dendrograma (poco contraste entre las últimas fusiones).
+4. **No depende de $k$.** No hay que fijar de antemano el número de clusters, que además no es conocido en un corpus real de 20 abstracts.
+5. **Es comparable entre enlaces** porque usa la misma matriz $d$ y la misma escala para todos.
+
+**Limitaciones (a declarar en el documento).**
+- El CPCC mide **fidelidad a las distancias**, no coherencia temática. Un árbol puede reproducir bien las distancias de una representación pobre de los abstracts.
+- Está sesgado a favor de Average: en UPGMA la altura de cada fusión es la media de las distancias originales entre los dos clusters, es decir, el árbol "promedia" por construcción la matriz $d$. La diferencia Average–Complete (0.751 vs 0.749) es pequeña y no es concluyente por sí sola.
+- La silueta sigue siendo útil como **complemento**: una vez elegido el enlace, sirve para escoger el corte ($k$) y detectar elementos mal asignados (en el ejemplo los puentes tienen $s(B_1)=0.209$ y $s(B_2)=0.326$, frente a $0.87$–$0.98$ de los abstracts puros).
+- El ejemplo es sintético y de 8 elementos: la conclusión se debe contrastar con los 20 abstracts reales y, si es posible, con una clasificación temática de referencia.
+
+**Decisión propuesta:** comparar los tres enlaces con el CPCC (métrica principal), usar la silueta de `best_k_by_silhouette` para elegir el corte y reportar ambas, junto con una lectura de las alturas del dendrograma.
+
+---
+
+- **Actividad:** exportación de fusiones a JSON para los dendrogramas de Cayón.
+- **Detalles:**
+  - `src/clustering/export.py`: `build_export`, `export_merges_json(path, dist, labels)` y `load_export` (valida el archivo). Usa solo el módulo `json`.
+  - Formato (documentado en el docstring del módulo): `version`, `n`, `labels`, `ids` y, por enlace (`single`, `complete`, `average`), `merges` = lista de `[a, b, distancia, tamaño]` y `cpcc`. Ids: hojas `0..n-1`, la fusión `k` crea el cluster `n+k`; alturas no decrecientes.
+  - Se serializa antes de abrir el archivo y se rechaza NaN/Infinity (`allow_nan=False`), para no dejar JSON a medias o inválido.
+- **Pruebas:** `tests/test_clustering_export.py`.
+- **Pendiente:** acordar con Cayón la ruta de salida del JSON (no se escribe nada en `data/processed/`).
