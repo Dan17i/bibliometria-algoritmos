@@ -19,7 +19,7 @@ sin descargar modelos. Los cargadores `load_*` importan las librerías de forma
 perezosa y convierten todo a `list[float]` con `.tolist()`.
 """
 import re
-from typing import Callable, Mapping
+from typing import Callable, Collection, Mapping
 
 from src.similarity.metrics import mean_vector
 
@@ -39,10 +39,16 @@ def tokenize(text: str) -> list[str]:
 
 
 def average_word_vectors(
-    text: str, word_vectors: Mapping[str, list[float]]
+    text: str,
+    word_vectors: Mapping[str, list[float]],
+    stopwords: Collection[str] | None = None,
 ) -> dict:
     """
     Enfoque 1: embedding del documento = promedio de los vectores de sus palabras.
+
+    Si se pasa `stopwords` (p. ej. `src.similarity.ai.stopwords.STOPWORDS`), esos
+    tokens se eliminan antes de promediar y se reportan en `removed_stopwords`;
+    `tokens` contiene entonces solo los que quedan.
 
     Fórmula: d = (1/k) * sum_{w in T'} v_w, donde T' son los tokens del texto
     presentes en el vocabulario del modelo (k = |T'|, contando repeticiones).
@@ -53,14 +59,22 @@ def average_word_vectors(
     estén. Si ningún token está en el vocabulario, lanza ValueError.
 
     Returns:
-        dict con: tokens, used_tokens, missing_tokens, token_vectors, vector.
+        dict con: tokens, removed_stopwords, used_tokens, missing_tokens,
+        token_vectors, vector.
 
     Complejidad temporal: O(T + k*n): T tokens consultados en el diccionario
     (O(1) cada uno) más el promedio de k vectores de dimensión n.
     Complejidad espacial: O(k*n) por los vectores de palabras que se conservan
     para mostrar los pasos; el resultado es O(n).
     """
-    tokens = tokenize(text)
+    all_tokens = tokenize(text)
+    removed = []
+    if stopwords is None:
+        tokens = all_tokens
+    else:
+        tokens = []
+        for tok in all_tokens:
+            (removed if tok in stopwords else tokens).append(tok)
     used = []
     missing = []
     token_vectors = []
@@ -72,7 +86,7 @@ def average_word_vectors(
             continue
         # palabra compuesta ("problem-solving"): se prueban sus partes
         parts = [p for p in re.split(r"[-']", tok) if p] if ("-" in tok or "'" in tok) else []
-        found = [p for p in parts if p in word_vectors]
+        found = [p for p in parts if p in word_vectors and not (stopwords and p in stopwords)]
         if found:
             for p in found:
                 used.append(p)
@@ -85,6 +99,7 @@ def average_word_vectors(
 
     return {
         "tokens": tokens,
+        "removed_stopwords": removed,
         "used_tokens": used,
         "missing_tokens": missing,
         "token_vectors": token_vectors,

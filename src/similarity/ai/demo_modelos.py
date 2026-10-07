@@ -31,13 +31,20 @@ def load_abstracts(path: Path = FIXTURE) -> tuple[list[str], list[str]]:
     return [a["id"] for a in abstracts], [a["texto"] for a in abstracts]
 
 
-def glove_embeddings(textos: list[str], model_name: str = "glove-wiki-gigaword-100") -> dict:
-    """Enfoque 1: promedio de vectores de palabras. Devuelve vectores y cobertura."""
+def glove_embeddings(
+    textos: list[str],
+    model_name: str = "glove-wiki-gigaword-100",
+    stopwords=None,
+) -> dict:
+    """
+    Enfoque 1: promedio de vectores de palabras. Devuelve vectores y cobertura.
+    Con `stopwords` se eliminan esos tokens antes de promediar.
+    """
     vocabulario = set()
     for t in textos:
         vocabulario.update(tokenize(t))
     vectores = load_gensim_vectors(model_name, vocabulario)
-    pasos = [average_word_vectors(t, vectores) for t in textos]
+    pasos = [average_word_vectors(t, vectores, stopwords) for t in textos]
     return {
         "vectors": [p["vector"] for p in pasos],
         "missing": [p["missing_tokens"] for p in pasos],

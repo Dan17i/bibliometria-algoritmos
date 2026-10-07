@@ -169,3 +169,38 @@ Resultados del ejemplo sintético con abstracts puente:
   - **Hallazgo para el análisis crítico:** el promedio de vectores GloVe sin quitar stopwords da similitudes casi idénticas (0.987–0.994) porque las palabras funcionales dominan el promedio; no discrimina. MiniLM sí separa (0.43–0.74) y el par más cercano es P1–P3 (alfabetización y concepciones erróneas de IA), el más alejado P4 (resolución de problemas complejos).
 - **Pruebas:** por defecto 84 passed, 2 skipped; con `RUN_MODEL_TESTS=1`, los 2 de modelos pasan (77 s).
 - **Pendiente:** probar el promedio de GloVe quitando stopwords (permitido por el enunciado) o ponderando; comparar con los 4 clásicos de Samuel sobre el mismo par.
+
+- **Actividad:** enfoque 1 sin stopwords y caso de estudio P1–P3.
+- **Detalles:**
+  - `src/similarity/ai/stopwords.py`: lista de stopwords en inglés escrita a mano (sin NLTK ni spaCy) y `remove_stopwords`. `average_word_vectors(..., stopwords=...)` las elimina antes de promediar y las reporta en `removed_stopwords`.
+  - `src/similarity/ai/caso_estudio.py`: corre sobre un par los clásicos de Samuel importados sin modificar (`levenshtein_distance`, `jaccard_similarity`, `cosine_similarity`) y los enfoques de IA; Needleman-Wunsch y coseno TF-IDF quedan marcados como pendientes de Samuel. Guarda `tests/fixtures/daniel/matrices_p1_p4.json` y `tests/fixtures/daniel/caso_estudio_p1_p3.json`.
+  - Elección del caso: P1–P3 es el par más parecido según MiniLM (0.735).
+- **Efecto de las stopwords en el enfoque 1 (similitud coseno):**
+
+  | Par | GloVe con stopwords | GloVe sin stopwords | MiniLM |
+  |---|---|---|---|
+  | P1–P2 | 0.9884 | 0.9760 | 0.5898 |
+  | P1–P3 | 0.9938 | 0.9810 | 0.7353 |
+  | P1–P4 | 0.9882 | 0.9592 | 0.4307 |
+  | P2–P3 | 0.9885 | 0.9657 | 0.5916 |
+  | P2–P4 | 0.9874 | 0.9664 | 0.4309 |
+  | P3–P4 | 0.9897 | 0.9657 | 0.4825 |
+  | Rango (máx − mín) | 0.0064 | 0.0218 | 0.3044 |
+
+  Quitar stopwords baja todos los valores y triplica el rango (0.006 → 0.022), pero el promedio de GloVe sigue casi sin discriminar frente a MiniLM (0.30). Queda como hipótesis, sin probar, que los vectores de GloVe comparten una dirección dominante que el promedio conserva; una prueba posible es restar el vector medio del corpus (no implementada). El orden relativo se mantiene: P1–P3 sigue siendo el par más cercano con los tres métodos.
+- **Caso de estudio P1 vs P3:**
+
+  | Algoritmo | Tipo | Resultado | Similitud |
+  |---|---|---|---|
+  | Levenshtein (caracteres) | clásico, PD | distancia 1100 de 1544 | 0.2876 (normalizada) |
+  | Jaccard (palabras) | clásico, conjuntos | \|∩\| = 35, \|∪\| = 221 | 0.1584 |
+  | Coseno TF | clásico, espacio vectorial | 221 dimensiones | 0.7360 |
+  | Needleman-Wunsch | clásico, PD | pendiente (Samuel) | — |
+  | Coseno TF-IDF | clásico, espacio vectorial | pendiente (Samuel) | — |
+  | GloVe-100 promedio, con stopwords | IA | ángulo 6.4°, euclidiana 0.465 | 0.9938 |
+  | GloVe-100 promedio, sin stopwords | IA | ángulo 11.2°, euclidiana 0.606 | 0.9810 |
+  | all-MiniLM-L6-v2 | IA | ángulo 42.7°, euclidiana 0.728 | 0.7353 |
+
+  Lectura preliminar (para el análisis crítico): Jaccard y Levenshtein dan valores bajos porque miden coincidencia literal (palabras o caracteres) y los dos abstracts tratan lo mismo con vocabulario distinto; el coseno TF (0.736) y MiniLM (0.735) coinciden casi por azar, pues miden cosas distintas (frecuencia de palabras exactas frente a significado). GloVe promedio satura cerca de 1. La normalización de Levenshtein (1 − d/máx) es nuestra, no de Samuel. Levenshtein sobre caracteres de textos de ~1500 caracteres es O(m·n) ≈ 1.6 M celdas y mide poco semántica.
+- **Observación para Samuel (solo lectura):** `src/similarity/classic/jaccard.py:30-31` y `src/similarity/classic/cosine.py:22-23` eliminan toda la puntuación con `replace`, así que "problem-solving" se vuelve "problemsolving" y "AI's" se vuelve "ais"; además no quitan stopwords.
+- **Pruebas:** `tests/test_ai_caso_estudio.py`; por defecto 94 passed, 2 skipped.

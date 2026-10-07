@@ -1,0 +1,64 @@
+{
+  "par": [
+    "P1",
+    "P3"
+  ],
+  "filas": [
+    {
+      "algoritmo": "Levenshtein (caracteres)",
+      "tipo": "clásico, PD",
+      "valor": "distancia 1100 de 1544",
+      "similitud": 0.28756476683937826,
+      "nota": "normalizada: 1 - d / max(|A|, |B|)"
+    },
+    {
+      "algoritmo": "Jaccard (palabras)",
+      "tipo": "clásico, conjuntos",
+      "valor": "|∩| = 35, |∪| = 221",
+      "similitud": 0.1583710407239819,
+      "nota": "sin stopwords removidas"
+    },
+    {
+      "algoritmo": "Coseno TF (frecuencias)",
+      "tipo": "clásico, espacio vectorial",
+      "valor": "221 dimensiones",
+      "similitud": 0.7359907858690117,
+      "nota": "solo TF, sin IDF"
+    },
+    {
+      "algoritmo": "Needleman-Wunsch",
+      "tipo": "clásico, PD",
+      "valor": "pendiente (Samuel)",
+      "similitud": null,
+      "nota": "needleman_wunsch.py está vacío"
+    },
+    {
+      "algoritmo": "Coseno TF-IDF",
+      "tipo": "clásico, espacio vectorial",
+      "valor": "pendiente (Samuel)",
+      "similitud": null,
+      "nota": "falta el IDF en cosine.py"
+    },
+    {
+      "algoritmo": "GloVe-100 promedio",
+      "tipo": "IA, vectores de palabras",
+      "valor": "ángulo 6.4°, euclidiana 0.465",
+      "similitud": 0.9938342218557495,
+      "nota": "con stopwords"
+    },
+    {
+      "algoritmo": "GloVe-100 promedio",
+      "tipo": "IA, vectores de palabras",
+      "valor": "ángulo 11.2°, euclidiana 0.606",
+      "similitud": 0.9809621190243191,
+      "nota": "sin stopwords"
+    },
+    {
+      "algoritmo": "all-MiniLM-L6-v2",
+      "tipo": "IA, embedding de oración",
+      "valor": "ángulo 42.7°, euclidiana 0.728",
+      "similitud": 0.7352568558388004,
+      "nota": "384 dimensiones"
+    }
+  ]
+}
