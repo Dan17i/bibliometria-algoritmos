@@ -1,0 +1,14 @@
+{
+  "_nota": "Vectores de palabras de 3 dimensiones inventados (ejes: visión, lenguaje, audio). Palabras ausentes simulan tokens fuera de vocabulario.",
+  "vectores": {
+    "image": [1.0, 0.1, 0.0], "images": [0.9, 0.1, 0.1], "pixel": [1.0, 0.0, 0.1],
+    "diffusion": [0.8, 0.2, 0.1], "visual": [1.0, 0.1, 0.0], "refines": [0.7, 0.2, 0.1],
+    "text": [0.1, 1.0, 0.1], "language": [0.0, 1.0, 0.1], "token": [0.1, 0.9, 0.0],
+    "transformer": [0.1, 0.8, 0.2], "prompt": [0.0, 1.0, 0.0], "predicts": [0.2, 0.7, 0.1],
+    "audio": [0.0, 0.1, 1.0], "speech": [0.1, 0.0, 1.0], "sound": [0.0, 0.1, 0.9],
+    "waveform": [0.1, 0.0, 1.0], "voice": [0.0, 0.0, 1.0], "speaker": [0.1, 0.1, 0.8],
+    "generative": [0.4, 0.4, 0.4], "model": [0.3, 0.3, 0.3], "we": [0.3, 0.3, 0.3],
+    "propose": [0.3, 0.3, 0.3], "a": [0.3, 0.3, 0.3], "the": [0.3, 0.3, 0.3],
+    "of": [0.3, 0.3, 0.3], "and": [0.3, 0.3, 0.3], "that": [0.3, 0.3, 0.3]
+  }
+}

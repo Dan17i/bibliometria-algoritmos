@@ -1,0 +1,11 @@
+{
+  "_nota": "Datos SINTÉTICOS para probar el flujo completo sin esperar los abstracts reales. Tres temas: visión (V), lenguaje (L) y audio (A).",
+  "abstracts": [
+    {"id": "V1", "tema": "vision",   "texto": "We propose a generative diffusion model for image synthesis that refines each pixel and improves visual quality."},
+    {"id": "V2", "tema": "vision",   "texto": "A generative model of images based on diffusion: we sample pixel details and evaluate the visual realism of the images."},
+    {"id": "L1", "tema": "lenguaje", "texto": "We propose a generative language model, a transformer that predicts the next token and follows a text prompt."},
+    {"id": "L2", "tema": "lenguaje", "texto": "A transformer model for text generation: we study the prompt, the token distribution and the quality of language outputs."},
+    {"id": "A1", "tema": "audio",    "texto": "We propose a generative model of speech that synthesizes a waveform and reproduces the voice and the sound of a speaker."},
+    {"id": "A2", "tema": "audio",    "texto": "A generative audio model: we generate the waveform of the sound, the speech and the voice from short recordings."}
+  ]
+}

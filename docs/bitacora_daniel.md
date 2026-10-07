@@ -33,3 +33,12 @@
   - El dendrograma lo dibuja Cayón a partir de la lista de fusiones.
 - **Pruebas:** `tests/test_clustering.py` con 4 puntos en una recta resueltos a mano (single/complete/average, CPCC ≈ 0.8985, silueta 5/6, 4/5, 5/9, 9/13). Suite completa: 40 passed.
 - **Pendiente:** justificación matemática de CPCC vs silueta para el documento; aplicar sobre los 20 abstracts cuando Cayón entregue `data/processed/`; Ward no se implementó (se eligieron Single/Complete/Average).
+
+- **Actividad:** flujo sintético completo y guardia de transparencia.
+- **Detalles:**
+  - Revisión: `compare.py` solo importa `cosine_steps` y `euclidean_steps` de `metrics.py`; en `src/` no hay llamadas a `util.cos_sim`, `.similarity()`, `n_similarity` ni `wmdistance` (las menciones están en comentarios).
+  - `tests/fixtures/daniel/`: 6 abstracts sintéticos (visión, lenguaje, audio) y vectores de palabras de 3 dimensiones inventados.
+  - `tests/test_flujo_sintetico.py`: abstracts → promedio de vectores → matriz de distancias coseno → 3 enlaces → CPCC y silueta. Los 3 enlaces recuperan los 3 temas (CPCC ≈ 0.973, silueta 0.991 en k = 3).
+  - `tests/test_transparencia.py`: revisa el AST de mis módulos y falla si importan sklearn/scipy/numpy/difflib o llaman a `cos_sim`, `similarity`, `n_similarity`, `wmdistance`.
+- **Pruebas:** suite completa: 58 passed.
+- **Aviso al equipo:** `sentence-transformers` instala PyTorch (varios GB); avisar a Samuel y Cayón antes de `pip install -r requirements.txt`.
