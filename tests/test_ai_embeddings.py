@@ -42,6 +42,16 @@ def test_promedio_cuenta_repeticiones_y_reporta_faltantes():
     assert res["missing_tokens"] == ["xyz"]
 
 
+def test_palabra_compuesta_usa_sus_partes():
+    # 'gato-casa' no está, pero 'gato' y 'casa' sí: (1,0) y (1,1) -> (1, 0.5)
+    res = average_word_vectors("gato-casa", VECTORES)
+    assert res["used_tokens"] == ["gato", "casa"]
+    assert res["vector"] == [1.0, 0.5]
+    # si ninguna parte está, el token se reporta como faltante
+    res = average_word_vectors("gato xyz-abc", VECTORES)
+    assert res["missing_tokens"] == ["xyz-abc"]
+
+
 def test_promedio_sin_vocabulario_lanza_error():
     with pytest.raises(ValueError):
         average_word_vectors("desconocida", VECTORES)

@@ -147,3 +147,25 @@ Resultados del ejemplo sintético con abstracts puente:
   - Se serializa antes de abrir el archivo y se rechaza NaN/Infinity (`allow_nan=False`), para no dejar JSON a medias o inválido.
 - **Pruebas:** `tests/test_clustering_export.py`.
 - **Pendiente:** acordar con Cayón la ruta de salida del JSON (no se escribe nada en `data/processed/`).
+
+- **Actividad:** modelos preentrenados reales sobre los abstracts de `docs/articulos/`.
+- **Detalles:**
+  - Se instaló `requirements-ai.txt` en `.venv` (torch 2.14.1 CPU, transformers, gensim 4.4.0, sentence-transformers 6.1.0). Arrastra `numpy`, `scipy` y `scikit-learn` como dependencias transitivas: están instaladas pero **no se importan** (lo vigila `test_transparencia.py`).
+  - Fixture `tests/fixtures/daniel/abstracts_pdfs.json`: abstracts de los 4 PDFs copiados a mano (P1–P4). Son de IA en educación, no de IA generativa.
+  - `embeddings.py`: `load_gensim_vectors` (solo convierte a listas las palabras necesarias) y `load_sentence_encoder` con `all-MiniLM-L6-v2` por defecto. `average_word_vectors` ahora prueba las partes de las palabras compuestas ("problem-solving") si el token completo no está en el vocabulario.
+  - `src/similarity/ai/demo_modelos.py` (`python -m src.similarity.ai.demo_modelos`) imprime ambas matrices; el coseno sale de `metrics.py`.
+  - Pruebas con descarga en `tests/test_ai_modelos.py`: se saltan salvo que `RUN_MODEL_TESTS=1`.
+- **Resultados (similitud coseno):**
+
+  | | GloVe-100 promedio | | | | MiniLM-L6-v2 | | | |
+  |---|---|---|---|---|---|---|---|---|
+  | | P1 | P2 | P3 | P4 | P1 | P2 | P3 | P4 |
+  | P1 | 1.000 | 0.988 | 0.994 | 0.988 | 1.000 | 0.590 | 0.735 | 0.431 |
+  | P2 | | 1.000 | 0.989 | 0.987 | | 1.000 | 0.592 | 0.431 |
+  | P3 | | | 1.000 | 0.990 | | | 1.000 | 0.483 |
+  | P4 | | | | 1.000 | | | | 1.000 |
+
+  - Cobertura de GloVe: 0 a 5 tokens fuera de vocabulario por abstract (`aied`, `decremental`).
+  - **Hallazgo para el análisis crítico:** el promedio de vectores GloVe sin quitar stopwords da similitudes casi idénticas (0.987–0.994) porque las palabras funcionales dominan el promedio; no discrimina. MiniLM sí separa (0.43–0.74) y el par más cercano es P1–P3 (alfabetización y concepciones erróneas de IA), el más alejado P4 (resolución de problemas complejos).
+- **Pruebas:** por defecto 84 passed, 2 skipped; con `RUN_MODEL_TESTS=1`, los 2 de modelos pasan (77 s).
+- **Pendiente:** probar el promedio de GloVe quitando stopwords (permitido por el enunciado) o ponderando; comparar con los 4 clásicos de Samuel sobre el mismo par.

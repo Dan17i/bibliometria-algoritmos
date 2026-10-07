@@ -48,7 +48,9 @@ def average_word_vectors(
     presentes en el vocabulario del modelo (k = |T'|, contando repeticiones).
 
     Los tokens fuera del vocabulario se descartan y se reportan en
-    `missing_tokens`. Si ninguno está en el vocabulario, lanza ValueError.
+    `missing_tokens`. Si un token compuesto ("problem-solving", "AI's") no está,
+    se prueban sus partes separadas por guion o apóstrofe y se usan las que sí
+    estén. Si ningún token está en el vocabulario, lanza ValueError.
 
     Returns:
         dict con: tokens, used_tokens, missing_tokens, token_vectors, vector.
@@ -64,11 +66,19 @@ def average_word_vectors(
     token_vectors = []
     for tok in tokens:
         vec = word_vectors.get(tok)
-        if vec is None:
-            missing.append(tok)
-        else:
+        if vec is not None:
             used.append(tok)
             token_vectors.append(list(vec))
+            continue
+        # palabra compuesta ("problem-solving"): se prueban sus partes
+        parts = [p for p in re.split(r"[-']", tok) if p] if ("-" in tok or "'" in tok) else []
+        found = [p for p in parts if p in word_vectors]
+        if found:
+            for p in found:
+                used.append(p)
+                token_vectors.append(list(word_vectors[p]))
+        else:
+            missing.append(tok)
 
     if not token_vectors:
         raise ValueError("Ningún token del texto está en el vocabulario del modelo")
@@ -123,8 +133,35 @@ def load_word_vectors(path: str, binary: bool = False) -> dict[str, list[float]]
     return {word: kv[word].tolist() for word in kv.index_to_key}
 
 
+def load_gensim_vectors(
+    model_name: str = "glove-wiki-gigaword-100", vocabulary: set[str] | None = None
+) -> dict[str, list[float]]:
+    """
+    Descarga (con `gensim.downloader`) un modelo de vectores de palabras y lo
+    devuelve como {palabra: vector}. Si se pasa `vocabulary`, solo se convierten
+    esas palabras (y las partes de las compuestas), para no volcar cientos de
+    miles de vectores a listas de Python.
+
+    Solo se obtienen vectores (`kv[word].tolist()`); nunca se usa `.similarity()`.
+    Complejidad: O(|vocabulary| * n), con n la dimensión de los vectores.
+    """
+    import gensim.downloader as api  # import perezoso
+
+    kv = api.load(model_name)
+    if vocabulary is None:
+        return {w: kv[w].tolist() for w in kv.index_to_key}
+
+    needed = set()
+    for w in vocabulary:
+        needed.add(w)
+        for part in re.split(r"[-']", w):
+            if part:
+                needed.add(part)
+    return {w: kv[w].tolist() for w in needed if w in kv.key_to_index}
+
+
 def load_sentence_encoder(
-    model_name: str = "paraphrase-multilingual-MiniLM-L12-v2",
+    model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
 ) -> Callable[[list[str]], list[list[float]]]:
     """
     Devuelve una función `encode(textos) -> list[list[float]]` basada en
