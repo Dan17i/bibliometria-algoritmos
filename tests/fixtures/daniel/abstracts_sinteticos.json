@@ -1,11 +1,13 @@
 {
-  "_nota": "Datos SINTÉTICOS para probar el flujo completo sin esperar los abstracts reales. Tres temas: visión (V), lenguaje (L) y audio (A).",
+  "_nota": "Datos SINTÉTICOS para probar el flujo completo sin esperar los abstracts reales. Tres temas: visión (V), lenguaje (L) y audio (A), más dos abstracts 'puente' (B1 mezcla visión y lenguaje; B2 mezcla lenguaje y audio) para que los enlaces se diferencien.",
   "abstracts": [
     {"id": "V1", "tema": "vision",   "texto": "We propose a generative diffusion model for image synthesis that refines each pixel and improves visual quality."},
     {"id": "V2", "tema": "vision",   "texto": "A generative model of images based on diffusion: we sample pixel details and evaluate the visual realism of the images."},
     {"id": "L1", "tema": "lenguaje", "texto": "We propose a generative language model, a transformer that predicts the next token and follows a text prompt."},
     {"id": "L2", "tema": "lenguaje", "texto": "A transformer model for text generation: we study the prompt, the token distribution and the quality of language outputs."},
     {"id": "A1", "tema": "audio",    "texto": "We propose a generative model of speech that synthesizes a waveform and reproduces the voice and the sound of a speaker."},
-    {"id": "A2", "tema": "audio",    "texto": "A generative audio model: we generate the waveform of the sound, the speech and the voice from short recordings."}
+    {"id": "A2", "tema": "audio",    "texto": "A generative audio model: we generate the waveform of the sound, the speech and the voice from short recordings."},
+    {"id": "B1", "tema": "puente visión-lenguaje", "texto": "We propose a generative model that links image and text: a transformer reads the prompt and the diffusion process refines each pixel of the images with the language."},
+    {"id": "B2", "tema": "puente lenguaje-audio", "texto": "We propose a generative model for speech and text: a transformer predicts the token and the voice, and the sound of the waveform follows the language prompt."}
   ]
 }

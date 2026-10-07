@@ -42,3 +42,20 @@
   - `tests/test_transparencia.py`: revisa el AST de mis módulos y falla si importan sklearn/scipy/numpy/difflib o llaman a `cos_sim`, `similarity`, `n_similarity`, `wmdistance`.
 - **Pruebas:** suite completa: 58 passed.
 - **Aviso al equipo:** `sentence-transformers` instala PyTorch (varios GB); avisar a Samuel y Cayón antes de `pip install -r requirements.txt`.
+
+- **Actividad:** guardia verificada, abstracts "puente" y `requirements-ai.txt`.
+- **Detalles:**
+  - `test_transparencia.py`: la guardia ahora es la función `violaciones(codigo)`; 10 casos de código falso (import sklearn/scipy/numpy, `x.similarity(y)`, `cos_sim`, `n_similarity`, `wmdistance`) confirman que se detectan, y un caso limpio confirma que no hay falsos positivos (nombres solo en docstrings/comentarios).
+  - `requirements-ai.txt` (gensim, sentence-transformers) separado de `requirements.txt` (solo pytest) para que Samuel y Cayón no instalen PyTorch.
+  - Fixture ampliado a 8 abstracts: B1 mezcla visión y lenguaje, B2 mezcla lenguaje y audio.
+- **Resultados con puentes (distancia coseno):**
+
+  | Enlace | CPCC | Altura de las 2 últimas fusiones | Corte k=3 | Silueta k=3 |
+  |---|---|---|---|---|
+  | single | 0.671 | 0.062 / 0.067 | {V1,V2,B1} {L1,L2,B2} {A1,A2} | 0.746 |
+  | complete | 0.749 | 0.270 / 0.278 | igual | 0.746 |
+  | average | 0.751 | 0.183 / 0.198 | igual | 0.746 |
+
+  - Los tres cortes en k=3 coinciden; la diferencia está en las alturas y en el CPCC. Single une los temas a alturas ~4 veces menores que complete (el puente basta para conectarlos): efecto de encadenamiento, pérdida de contraste en el dendrograma y menor correlación cofenética. Average es el que mejor conserva las distancias originales.
+  - Para la justificación: la silueta, calculada sobre un corte, no distingue los enlaces cuando coinciden en la partición; el CPCC sí, porque mide todo el árbol.
+- **Pruebas:** suite completa: 72 passed.

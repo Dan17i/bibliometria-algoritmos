@@ -1,0 +1,5 @@
+# Librerías de IA de Daniel (Req. 1 IA). Solo para obtener embeddings.
+# sentence-transformers instala PyTorch (varios GB): instalar solo si se necesita.
+#   pip install -r requirements-ai.txt
+gensim
+sentence-transformers
