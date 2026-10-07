@@ -204,3 +204,136 @@ Resultados del ejemplo sintético con abstracts puente:
   Lectura preliminar (para el análisis crítico): Jaccard y Levenshtein dan valores bajos porque miden coincidencia literal (palabras o caracteres) y los dos abstracts tratan lo mismo con vocabulario distinto; el coseno TF (0.736) y MiniLM (0.735) coinciden casi por azar, pues miden cosas distintas (frecuencia de palabras exactas frente a significado). GloVe promedio satura cerca de 1. La normalización de Levenshtein (1 − d/máx) es nuestra, no de Samuel. Levenshtein sobre caracteres de textos de ~1500 caracteres es O(m·n) ≈ 1.6 M celdas y mide poco semántica.
 - **Observación para Samuel (solo lectura):** `src/similarity/classic/jaccard.py:30-31` y `src/similarity/classic/cosine.py:22-23` eliminan toda la puntuación con `replace`, así que "problem-solving" se vuelve "problemsolving" y "AI's" se vuelve "ais"; además no quitan stopwords.
 - **Pruebas:** `tests/test_ai_caso_estudio.py`; por defecto 94 passed, 2 skipped.
+
+---
+
+## Demostración paso a paso de los enfoques de IA (caso de estudio P1–P3)
+
+> Generada con `python -m src.similarity.ai.demo_flujo` (módulo `src/similarity/ai/demostracion.py`) sobre los abstracts de `docs/articulos/` P1 y P3. Para el enfoque 1 se usa la variante **sin stopwords**; con stopwords el coseno es 0.9938. Todo número intermedio sale de las funciones de `src/similarity/metrics.py`; los modelos solo aportan los vectores. Las tablas muestran las primeras 5 dimensiones; el producto punto y las normas cubren todas.
+
+### Cálculo P1 vs P3
+
+##### Enfoque 1: promedio de vectores GloVe-100 (sin stopwords)
+
+**Paso 1. Tokens que quedan.** Se pasa a minúsculas, se extraen las palabras con una expresión regular y se eliminan las stopwords de `src/similarity/ai/stopwords.py`.
+
+| Abstract | Tokens totales | Stopwords eliminadas | Tokens que quedan (k) | Fuera de vocabulario |
+|---|---|---|---|---|
+| P1 | 187 | 85 | 102 | — |
+| P3 | 232 | 91 | 142 | — |
+
+<details><summary>Los 102 tokens que quedan de P1</summary>
+
+since artificial intelligence ai finding way areas everyday life improving ai skills non-experts important become even relevant future necessary children learn possibilities ai early age adults higher education beyond least basic understanding ai e ai literacy able interact effectively technology evaluate current state literature ai literacy higher adult education scoping literature review conducted objective identifying thematic foci recent research trends ten research databases searched 902 initial records 30 studies identified using predefined eligibility criteria content evaluated review results indicated research area still infancy needs refinement terms define ai literacy adult education well content taught non-experts lastly several recommendations research practice derived results
+
+</details>
+
+<details><summary>Los 142 tokens que quedan de P3</summary>
+
+artificial intelligence ai prevalent nearly every aspect lives recent studies found significant amount confusion misunderstanding surrounding ai develop effective educational programs field ai vital examine understand learners pre misconceptions well myths ai study examined corpus 591 studies 25 relevant studies identified applying following eligibility criteria english written original empirical research education ai reporting ai conceptions formal learning context review found studies six continents majority conducted europe north america studies predominantly focus school university levels findings reveal range preconceptions misconceptions myths ai learners often limited understanding ai technical level tend attribute human-like characteristics attributes ai systems narrow views ai scope capabilities limitations review shows learners often binary unspecific views threats dangers benefits ai effective educational programs key empower learners understanding ai helping make informed decisions integration ai society rather swayed misinformation unnecessary fear review help inform development effective teaching outreach strategies ai education
+
+</details>
+
+**Paso 2. Vector promedio.** Para cada dimensión $j$: $d_j=\dfrac{1}{k}\sum_{w=1}^{k}v_{w,j}$, donde $v_w$ es el vector GloVe de la palabra $w$ (las repeticiones cuentan). Primeras dimensiones:
+
+| j | suma P1 | ÷ k=102 → dP1[j] | suma P3 | ÷ k=142 → dP3[j] |
+|---|---|---|---|---|
+| 1 | -5.3307 | -0.05226 | -5.1665 | -0.03638 |
+| 2 | 27.7267 | 0.27183 | 33.2762 | 0.23434 |
+| 3 | 10.1587 | 0.09959 | 17.8812 | 0.12592 |
+| 4 | 22.0165 | 0.21585 | 29.5589 | 0.20816 |
+| 5 | 3.1708 | 0.03109 | -5.1870 | -0.03653 |
+
+**Paso 3. Comparación** (100 dimensiones):
+
+| i | dP1[i] | dP3[i] | producto |
+|---|---|---|---|
+| 1 | -0.05226 | -0.03638 | 0.001901 |
+| 2 | 0.27183 | 0.23434 | 0.063701 |
+| 3 | 0.09959 | 0.12592 | 0.012541 |
+| 4 | 0.21585 | 0.20816 | 0.044931 |
+| 5 | 0.03109 | -0.03653 | -0.001136 |
+| … | … | … | … (hasta i = 100) |
+
+- Producto punto: $A\cdot B=\sum_{i=1}^{100}A_iB_i = 8.920022$
+- Normas: $\|A\|=\sqrt{\sum A_i^2}=3.089590$, $\|B\|=\sqrt{\sum B_i^2}=2.943153$
+- Coseno: $\cos\theta=\dfrac{A\cdot B}{\|A\|\,\|B\|}=\dfrac{8.920022}{3.089590\times2.943153}=0.980962$
+- Ángulo: $\theta=\arccos(0.980962)=11.20^\circ$
+- Euclidiana: $d=\sqrt{\sum(A_i-B_i)^2}=\sqrt{0.367672}=0.606360$
+
+##### Enfoque 2: all-MiniLM-L6-v2 (embedding de oración)
+
+**Paso 1.** El modelo recibe cada abstract completo y devuelve un vector de 384 dimensiones (caja negra permitida por el enunciado). **Paso 2. Comparación**, con la misma fórmula:
+
+| i | eP1[i] | eP3[i] | producto |
+|---|---|---|---|
+| 1 | 0.04327 | 0.01980 | 0.000857 |
+| 2 | 0.00399 | 0.01748 | 0.000070 |
+| 3 | 0.02517 | 0.04154 | 0.001046 |
+| 4 | 0.00726 | 0.06737 | 0.000489 |
+| 5 | -0.01554 | 0.04800 | -0.000746 |
+| … | … | … | … (hasta i = 384) |
+
+- Producto punto: $A\cdot B=\sum_{i=1}^{384}A_iB_i = 0.735257$
+- Normas: $\|A\|=\sqrt{\sum A_i^2}=1.000000$, $\|B\|=\sqrt{\sum B_i^2}=1.000000$
+- Coseno: $\cos\theta=\dfrac{A\cdot B}{\|A\|\,\|B\|}=\dfrac{0.735257}{1.000000\times1.000000}=0.735257$
+- Ángulo: $\theta=\arccos(0.735257)=42.67^\circ$
+- Euclidiana: $d=\sqrt{\sum(A_i-B_i)^2}=\sqrt{0.529486}=0.727658$
+
+Observaciones para el documento:
+- Los vectores de MiniLM ya vienen normalizados (norma = 1), así que su coseno coincide con el producto punto. Los promedios de GloVe no están normalizados (normas ≈ 3), por eso el coseno sí necesita dividir.
+- Con GloVe el ángulo es 11.2° y con MiniLM 42.7°: ambos miden el mismo par, pero el espacio de GloVe promediado concentra todos los abstracts en un cono estrecho (ver el experimento de centrado más abajo).
+
+## Complejidad (Big-O) de los dos enfoques de IA
+
+**Alcance.** La inferencia del modelo preentrenado (leer los vectores GloVe y ejecutar la red de `all-MiniLM-L6-v2`) es una **caja negra permitida por el enunciado**: solo se usa para obtener vectores y su costo no forma parte de este análisis. El análisis cubre **lo que implementamos nosotros**: tokenizar, quitar stopwords, buscar vectores, promediar y comparar.
+
+Notación: $L$ = caracteres del abstract, $T$ = tokens, $k\le T$ = tokens que quedan (con vector), $n$ = dimensión del embedding (100 en GloVe, 384 en MiniLM), $m$ = número de abstracts, $Q$ = palabras distintas que se consultan en el modelo.
+
+| Paso | Enfoque | Tiempo | Espacio | Justificación |
+|---|---|---|---|---|
+| Tokenizar (`tokenize`) | 1 | $O(L)$ | $O(T)$ | un recorrido del texto con una expresión regular y `lower()` |
+| Quitar stopwords (`remove_stopwords` / filtro en `average_word_vectors`) | 1 | $O(T)$ | $O(T)$ | una consulta a un conjunto (`frozenset`) por token: $O(1)$ promedio |
+| Buscar el vector de cada palabra | 1 | $O(k)$ | $O(1)$ | una consulta a un diccionario por token, $O(1)$ promedio; las palabras compuestas añaden $O(\text{longitud})$ |
+| Convertir a listas las palabras necesarias (`load_gensim_vectors`) | 1 | $O(Q\cdot n)$ | $O(Q\cdot n)$ | se convierte solo el vocabulario consultado, no los 400 000 vectores del modelo |
+| Promediar (`mean_vector`) | 1 | $O(k\cdot n)$ | $O(n)$ | $k$ vectores de dimensión $n$ sumados y divididos; $O(k\cdot n)$ si se guardan los vectores de palabras para mostrar los pasos |
+| Validar salida del modelo (`encode_documents`) | 2 | $O(m\cdot n)$ | $O(m\cdot n)$ | comprueba que haya $m$ vectores de la misma dimensión; la inferencia queda fuera |
+| Producto punto, normas y coseno (`cosine_steps`) | 1 y 2 | $O(n)$ | $O(1)$ | tres recorridos independientes de longitud $n$ |
+| Distancia euclidiana (`euclidean_distance`) | 1 y 2 | $O(n)$ | $O(1)$ | un recorrido; la versión con pasos usa $O(n)$ de espacio |
+| Ángulo (`angle_degrees`) | 1 y 2 | $O(1)$ | $O(1)$ | 60 iteraciones fijas de bisección |
+
+**Por abstract (enfoque 1):** $O(L + k\cdot n)$ en tiempo. El término $k\cdot n$ domina en la práctica: para P1, $k=102$ y $n=100$ son 10 200 multiplicaciones-sumas frente a 187 tokens por procesar.
+
+**Comparar un par:** $O(n)$, es decir ≈ $3n$ operaciones (300 con GloVe, 1 152 con MiniLM) más el ángulo.
+
+**Todos los pares de $m$ abstracts** (`pairwise_matrix`, `compare_embeddings`): $O(m\cdot(L+k\,n) + m^2\cdot n)$ para el enfoque 1 y $O(m^2\cdot n)$ más la inferencia para el enfoque 2; espacio $O(m\cdot n + m^2)$. Con $m = 20$ y $n\le 384$ el costo es insignificante frente a la inferencia del modelo.
+
+## Experimento: ¿centrar los vectores abre el rango de GloVe?
+
+**Hipótesis.** El promedio de vectores GloVe casi no discrimina (todos los pares entre 0.96 y 0.99) porque los vectores comparten una dirección dominante. Si se resta el vector medio de los abstracts (`metrics.center_vectors`) antes del coseno, el rango de similitudes debería abrirse y el orden de los pares acercarse al de MiniLM.
+
+**Resultado** (4 abstracts, 6 pares; $\tau$ = tau de Kendall frente al orden de MiniLM, 1 = mismo orden):
+
+| Variante | Rango (máx − mín) | $\tau$ vs MiniLM |
+|---|---|---|
+| MiniLM (referencia) | 0.3045 | — |
+| GloVe con stopwords, sin centrar | 0.0064 | +0.60 |
+| GloVe con stopwords, centrado | 0.4618 | +0.33 |
+| GloVe sin stopwords, sin centrar | 0.0217 | +0.47 |
+| GloVe sin stopwords, centrado | 0.7203 | +0.47 |
+
+**Conclusión.** El centrado **sí abre el rango** (de 0.02 a 0.72), lo que confirma que había una dirección común dominante. **No mejora** el acuerdo con MiniLM en el orden de los pares ($\tau$ igual sin stopwords y peor con stopwords). Además, con solo 4 abstracts el vector medio queda muy influido por los propios datos (restarlo fuerza que los vectores sumen cero), así que parte de la apertura es un efecto del centrado y no necesariamente de semántica. Decisión: `center_vectors` queda disponible como **opción** (no por defecto) y hay que repetir el experimento con los 20 abstracts, donde el vector medio es más estable, antes de recomendarlo.
+
+## Demo de punta a punta con los 4 abstracts reales y MiniLM
+
+Flujo ejecutado: abstracts reales → embeddings MiniLM → matriz de distancias coseno → 3 enlaces → CPCC y silueta → exportación JSON (`tests/fixtures/daniel/fusiones_p1_p4.json`, validado con `load_export`). Ids: P1 = 0, P2 = 1, P3 = 2, P4 = 3.
+
+| Enlace | Fusiones `(a, b, altura, tamaño)` | CPCC | Corte k = 2 | Silueta k = 2 |
+|---|---|---|---|---|
+| Single | (0, 2, 0.2647, 2) · (1, 4, 0.4084, 3) · (3, 5, 0.5175, 4) | 0.9841 | {P1,P2,P3} {P4} | 0.2594 |
+| Complete | (0, 2, 0.2647, 2) · (1, 4, 0.4102, 3) · (3, 5, 0.5693, 4) | 0.9868 | igual | 0.2594 |
+| Average | (0, 2, 0.2647, 2) · (1, 4, 0.4093, 3) · (3, 5, 0.5520, 4) | 0.9873 | igual | 0.2594 |
+
+Lectura: los tres enlaces producen la misma topología (P1 y P3 se unen primero, luego P2, y P4 queda como la hoja más aislada) y solo se diferencian en la altura de la última fusión (0.5175 < 0.5520 < 0.5693). Con 4 elementos el CPCC es alto en todos (> 0.98) y la diferencia entre enlaces es pequeña; hay que esperar a los 20 abstracts para que el criterio discrimine. La silueta mejor es k = 2 y no distingue los enlaces, igual que en el ejemplo sintético.
+
+- **Pruebas:** `tests/test_ai_demostracion.py` (sin descargas); por defecto 102 passed, 2 skipped.

@@ -212,6 +212,30 @@ def mean_vector(vectors: list[list[float]]) -> list[float]:
     return [s / k for s in sums]
 
 
+def center_vectors(vectors: list[list[float]]) -> tuple[list[list[float]], list[float]]:
+    """
+    Centra un conjunto de vectores restando el vector medio del conjunto:
+        V'_i = V_i - m,   con   m = (1/k) * sum_i V_i
+
+    Quita la dirección común a todos los vectores (por ejemplo, la que domina en
+    los promedios de GloVe), de modo que el coseno posterior refleje solo lo que
+    distingue a cada vector. Ojo: el vector medio depende del conjunto, así que
+    los valores solo son comparables dentro del mismo conjunto.
+
+    Returns:
+        (vectores centrados, vector medio).
+
+    Complejidad temporal: O(k * n) (el promedio y la resta recorren k vectores de
+    dimensión n). Complejidad espacial: O(k * n) por los vectores centrados.
+    """
+    m = mean_vector(vectors)
+    n = len(m)
+    centered = []
+    for v in vectors:
+        centered.append([v[j] - m[j] for j in range(n)])
+    return centered, m
+
+
 def angle_degrees(cosine: float) -> float:
     """
     Ángulo en grados a partir de un coseno: θ = arccos(cos) * 180 / π.
