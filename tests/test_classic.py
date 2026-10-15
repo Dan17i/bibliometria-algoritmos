@@ -1,7 +1,9 @@
 """Pruebas de los algoritmos clásicos (src/similarity/classic), con casos resueltos a mano."""
+import math
+
 import pytest
 
-from src.similarity.classic.cosine import cosine_similarity
+from src.similarity.classic.cosine import compute_idf, cosine_similarity, tfidf_cosine_similarity
 from src.similarity.classic.jaccard import jaccard_similarity
 from src.similarity.classic.levenshtein import levenshtein_distance
 from src.similarity.classic.needleman_wunsch import (
@@ -115,3 +117,57 @@ def test_coseno_textos_identicos_y_disjuntos():
 
 def test_coseno_texto_vacio():
     assert cosine_similarity("", "algo")[0] == 0.0
+
+
+# --- Coseno TF-IDF -----------------------------------------------------------
+
+CORPUS = ["a b c", "a b d", "a e f", "a g h"]
+
+
+def test_idf_a_mano():
+    idf = compute_idf(CORPUS)
+    assert idf["a"] == 0.0                              # en los 4: ln(4/4)
+    assert idf["b"] == pytest.approx(math.log(4 / 2))   # en 2 de 4
+    assert idf["c"] == pytest.approx(math.log(4 / 1))   # en 1 de 4
+
+
+def test_idf_cuenta_documentos_no_repeticiones():
+    # "b" se repite en el primer documento, pero df("b") sigue siendo 1
+    idf = compute_idf(["b b b", "c"])
+    assert idf["b"] == pytest.approx(math.log(2 / 1))
+
+
+def test_tfidf_coseno_a_mano():
+    # vocabulario [a, b, c, d], idf = [0, ln2, ln4, ln4]
+    # A = [0, ln2, ln4, 0], B = [0, ln2, 0, ln4]
+    # A·B = ln2^2, ||A|| = ||B|| = sqrt(ln2^2 + ln4^2) = sqrt(5)·ln2 -> cos = 1/5
+    pasos = tfidf_cosine_similarity("a b c", "a b d", CORPUS)
+    assert pasos["vocabulario"] == ["a", "b", "c", "d"]
+    assert pasos["tf_a"] == [1, 1, 1, 0]
+    assert pasos["pesos_a"][0] == 0.0
+    assert pasos["producto_punto"] == pytest.approx(math.log(2) ** 2)
+    assert pasos["coseno"] == pytest.approx(1 / 5)
+    assert pasos["angulo_grados"] == pytest.approx(math.degrees(math.acos(1 / 5)))
+
+
+def test_tfidf_baja_el_peso_de_palabras_comunes():
+    # Con TF, "a" (que está en todo el corpus) sube la similitud; con TF-IDF no cuenta
+    tf, _, _, _ = cosine_similarity("a b c", "a b d")
+    tfidf = tfidf_cosine_similarity("a b c", "a b d", CORPUS)["coseno"]
+    assert tfidf < tf
+
+
+def test_tfidf_agrega_los_textos_que_no_estan_en_el_corpus():
+    # "x y" no está en el corpus: se agrega, así que N = 5 y df("x") = 1
+    pasos = tfidf_cosine_similarity("x y", "a b c", CORPUS)
+    i = pasos["vocabulario"].index("x")
+    assert pasos["idf"][i] == pytest.approx(math.log(5 / 1))
+    assert pasos["coseno"] == 0.0
+
+
+def test_tfidf_textos_identicos_y_vector_nulo():
+    assert tfidf_cosine_similarity("a b c", "a b c", CORPUS)["coseno"] == pytest.approx(1.0)
+    # "a" está en todos los documentos: su vector TF-IDF es nulo
+    pasos = tfidf_cosine_similarity("a", "a b c", CORPUS)
+    assert pasos["norma_a"] == 0.0
+    assert pasos["coseno"] == 0.0
