@@ -7,7 +7,7 @@ Implementa, **desde cero y sin librerías que resuelvan el algoritmo**, técnica
 - **Similitud textual** entre abstracts: Levenshtein, Needleman-Wunsch, Jaccard, coseno con TF-IDF y similitud sobre *embeddings* de modelos preentrenados.
 - **Clustering jerárquico** de los 20 abstracts: tres criterios de enlace (Single, Complete, Average), evaluación interna y datos para dibujar los dendrogramas.
 
-> **Estado:** proyecto en desarrollo. La aplicación desplegada y el procesamiento de los 20 PDFs aún no están; ver [Estado del proyecto](#estado-del-proyecto).
+> **Estado:** proyecto en desarrollo. Ya están el procesamiento de los 20 PDFs, los dos enfoques de IA, los tres enlaces con su evaluación, los dendrogramas y los benchmarks. Faltan Needleman-Wunsch, el coseno con TF-IDF, la aplicación desplegada y el documento de diseño; ver [Estado del proyecto](#estado-del-proyecto).
 
 ## Tabla de contenido
 
@@ -17,7 +17,7 @@ Implementa, **desde cero y sin librerías que resuelvan el algoritmo**, técnica
 4. [Instalación](#instalación)
 5. [Uso](#uso)
 6. [Pruebas](#pruebas)
-7. [Resultados preliminares](#resultados-preliminares)
+7. [Resultados](#resultados)
 8. [Documentación](#documentación)
 9. [Equipo](#equipo)
 10. [Uso de IA generativa](#uso-de-ia-generativa)
@@ -33,11 +33,14 @@ Implementa, **desde cero y sin librerías que resuelvan el algoritmo**, técnica
 | Clustering jerárquico: Single, Complete, Average | Implementado y con pruebas |
 | Evaluación interna: correlación cofenética (CPCC) y silueta | Implementada y con pruebas |
 | Exportación de las fusiones a JSON para los dendrogramas | Implementada y con pruebas |
-| Extracción de abstracts de los 20 PDFs | Pendiente |
-| Dendrogramas, gráficas de rendimiento y benchmarks (`python_viz/`, `src/benchmark/`) | Pendiente |
+| Corrida de los 2 enfoques de IA y los 3 enlaces sobre los 20 abstracts (`demo_corpus20`) | Hecha; resultados en [Resultados](#resultados) |
+| Extracción de abstracts, títulos y autores de los 20 PDFs (`src/preprocessing/`) | Implementada (Cayón); salida en `data/processed/` |
+| Dendrogramas (`python_viz/dendrograma.py`) y gráficas de rendimiento (`python_viz/graficas.py`) | Implementados (Cayón); figuras en `data/figuras/` |
+| Benchmarks de tiempos (`src/benchmark/runner.py`) | Implementados (Cayón); salida en `data/benchmark/rendimiento.csv` |
+| Dendrograma oficial con la distancia de los embeddings | Pendiente de decidir con el equipo: hoy `python_viz` dibuja con distancia Jaccard |
 | Aplicación desplegada (`app/`) y documento de diseño final | Pendiente |
 
-Los resultados que se muestran más abajo se obtuvieron con cuatro artículos de ejemplo (`docs/articulos/`) y con datos sintéticos; **todavía no se han corrido sobre los 20 artículos del corpus**.
+Los resultados de la sección [Resultados](#resultados) se obtuvieron con los 20 abstracts del corpus. El análisis crítico clásicos frente a IA está incompleto hasta que estén Needleman-Wunsch y el coseno con TF-IDF.
 
 ## Regla de implementación explícita
 
@@ -59,22 +62,24 @@ bibliometria-algoritmos/
 ├── app/                      # Aplicación desplegable (pendiente)
 ├── data/
 │   ├── raw/                  # PDFs del docente (ignorados por git)
-│   └── processed/            # Abstracts, títulos y autores extraídos
+│   ├── processed/            # Abstracts, títulos y autores extraídos (CSV y JSON)
+│   ├── benchmark/            # rendimiento.csv con los tiempos medidos
+│   └── figuras/              # Dendrogramas y gráficas de rendimiento (PNG)
 ├── docs/
 │   ├── enunciado/            # Enunciado y plan de trabajo (PDF)
-│   ├── articulos/            # 4 artículos de ejemplo para pruebas
+│   ├── articulos/            # Los 20 PDFs del corpus
 │   ├── bitacora_samuel.md    # Bitácora de los algoritmos clásicos
 │   └── bitacora_daniel.md    # Bitácora de IA y clustering, con la justificación matemática
-├── python_viz/               # Visualización y benchmarks (pendiente)
+├── python_viz/               # Dendrogramas y gráficas de rendimiento (matplotlib)
 ├── src/
-│   ├── preprocessing/        # Extracción y limpieza de texto de los PDFs
+│   ├── preprocessing/        # Extracción de abstract, título y autores de los PDFs
 │   ├── similarity/
 │   │   ├── classic/          # Levenshtein, Needleman-Wunsch, Jaccard y coseno
-│   │   ├── ai/               # Embeddings, comparación y caso de estudio
+│   │   ├── ai/               # Embeddings, comparación, caso de estudio y corrida de los 20
 │   │   └── metrics.py        # Producto punto, norma, coseno y euclidiana a mano
 │   ├── clustering/           # Enlaces jerárquicos, evaluación interna y exportación
 │   └── benchmark/            # Medición de tiempos y exportación de CSV
-├── tests/                    # Pruebas con pytest y datos de prueba
+├── tests/                    # Pruebas con pytest y datos de prueba (fixtures/daniel/)
 ├── requirements.txt          # Dependencias base
 └── requirements-ai.txt       # Librerías de IA (pesadas, opcionales)
 ```
@@ -88,7 +93,7 @@ python -m venv .venv
 .venv\Scripts\activate          # Windows
 # source .venv/bin/activate     # Linux / macOS
 
-pip install -r requirements.txt
+pip install -r requirements.txt     # pytest, pdfplumber, matplotlib
 ```
 
 `requirements.txt` solo trae lo necesario para el código base y las pruebas. Las librerías de IA van aparte porque **`sentence-transformers` instala PyTorch (varios GB)**:
@@ -140,6 +145,23 @@ python -m src.similarity.ai.demo_modelos      # matrices de similitud de los 4 a
 python -m src.similarity.ai.caso_estudio      # tabla comparativa clásicos vs IA para un par de abstracts
 ```
 
+**Corrida sobre los 20 abstracts** (requiere `requirements-ai.txt`)
+
+```bash
+python -m src.similarity.ai.demo_corpus20     # GloVe, GloVe centrado y MiniLM con single/complete/average, CPCC y silueta
+```
+
+Escribe `resumen.json` y un `fusiones_<representacion>.json` por representación en `tests/fixtures/daniel/corpus20/`.
+
+**Pipeline de datos, dendrogramas y benchmarks** (desde `data/raw/` hasta las figuras)
+
+```bash
+python -m src.preprocessing.extractor         # PDFs -> data/processed/abstracts.csv y .json
+python -m python_viz.dendrograma              # dendrogramas -> data/figuras/ (hoy con distancia Jaccard)
+python -m src.benchmark.runner                # tiempos -> data/benchmark/rendimiento.csv
+python -m python_viz.graficas                 # gráficas de rendimiento -> data/figuras/
+```
+
 ## Pruebas
 
 ```bash
@@ -153,9 +175,21 @@ set RUN_MODEL_TESTS=1           # PowerShell: $env:RUN_MODEL_TESTS = "1"
 python -m pytest tests/test_ai_modelos.py -v
 ```
 
-## Resultados preliminares
+## Resultados
 
-Con cuatro artículos de ejemplo de IA en educación (`docs/articulos/`), el par más parecido según `all-MiniLM-L6-v2` es P1–P3. Sobre ese par:
+**Clustering sobre los 20 abstracts** (distancia = 1 − coseno calculado a mano; GloVe sin *stopwords*):
+
+| Representación | Single | Complete | Average |
+|---|---|---|---|
+| GloVe promediado | 0.6185 | 0.5673 | **0.7125** |
+| GloVe promediado y centrado | 0.3426 | 0.5820 | **0.6427** |
+| all-MiniLM-L6-v2 | 0.7453 | 0.5592 | **0.7765** |
+
+Los valores son el CPCC (correlación cofenética). **Average** es el enlace más coherente en las tres representaciones, así que la elección no depende del modelo. La silueta, que mide un solo corte, es baja en todos los casos (máximo 0.30, con mejor k = 2 casi siempre) porque el corpus es un solo tema; por eso el CPCC es la métrica principal y la silueta queda como complemento. La justificación matemática está en la bitácora.
+
+**Representaciones.** El promedio de vectores GloVe casi no discrimina: todos los pares de los 20 abstracts quedan en un rango de solo 0.085. Centrar los vectores abre ese rango (1.10), pero el tau de Kendall frente al orden de MiniLM baja de 0.32 a 0.18 y el CPCC empeora, de modo que la hipótesis del centrado quedó **refutada** (`center_vectors` queda como opción, no recomendada).
+
+**Caso de estudio P1–P3** (par más parecido según MiniLM entre los 4 primeros artículos):
 
 | Algoritmo | Similitud |
 |---|---|
@@ -166,7 +200,7 @@ Con cuatro artículos de ejemplo de IA en educación (`docs/articulos/`), el par
 | GloVe-100 promedio (con / sin stopwords) | 0.9938 / 0.9810 |
 | all-MiniLM-L6-v2 | 0.7353 |
 
-El promedio de vectores GloVe casi no discrimina entre abstracts (todos los pares quedan entre 0.96 y 0.99), mientras que MiniLM separa claramente (0.43 a 0.74). En el clustering, con datos sintéticos que incluyen abstracts «puente» entre temas, Single linkage encadena los grupos y reduce el CPCC a 0.67, frente a 0.75 de Complete y Average. Estos resultados son preliminares: se repetirán con los 20 abstracts. El análisis completo está en [`docs/bitacora_daniel.md`](docs/bitacora_daniel.md).
+**Limitaciones.** Los abstracts P13, P15, P16, P18 y P19 vienen marcados `_revisar` por el extractor (título o autores dudosos), y P6 y P15 tienen el texto con restos al final. El análisis crítico completo, con los pendientes, está en [`docs/bitacora_daniel.md`](docs/bitacora_daniel.md).
 
 ## Documentación
 

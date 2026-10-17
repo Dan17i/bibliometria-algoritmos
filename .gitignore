@@ -223,3 +223,6 @@ models/
 *.model
 
 CLAUDE.md
+
+# Respaldos del extractor
+*.bak
