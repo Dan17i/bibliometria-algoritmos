@@ -1,6 +1,7 @@
 """
-Guardia de la regla de transparencia algorítmica: el código de Daniel
-(src/similarity/ai, src/similarity/metrics.py, src/clustering) no puede importar
+Guardia de la regla de transparencia algorítmica: el código de los algoritmos
+(src/similarity/classic, src/similarity/ai, src/similarity/metrics.py,
+src/clustering) no puede importar
 librerías que resuelvan los algoritmos ni llamar a las similitudes que traen los
 modelos de embeddings. Se revisa el AST, así que los comentarios y docstrings
 que mencionan esos nombres no cuentan.
@@ -12,7 +13,8 @@ import pytest
 
 RAIZ = Path(__file__).resolve().parent.parent / "src"
 ARCHIVOS = sorted(
-    list((RAIZ / "similarity" / "ai").glob("*.py"))
+    list((RAIZ / "similarity" / "classic").glob("*.py"))
+    + list((RAIZ / "similarity" / "ai").glob("*.py"))
     + list((RAIZ / "clustering").glob("*.py"))
     + [RAIZ / "similarity" / "metrics.py"]
 )
