@@ -337,3 +337,90 @@ Flujo ejecutado: abstracts reales → embeddings MiniLM → matriz de distancias
 Lectura: los tres enlaces producen la misma topología (P1 y P3 se unen primero, luego P2, y P4 queda como la hoja más aislada) y solo se diferencian en la altura de la última fusión (0.5175 < 0.5520 < 0.5693). Con 4 elementos el CPCC es alto en todos (> 0.98) y la diferencia entre enlaces es pequeña; hay que esperar a los 20 abstracts para que el criterio discrimine. La silueta mejor es k = 2 y no distingue los enlaces, igual que en el ejemplo sintético.
 
 - **Pruebas:** `tests/test_ai_demostracion.py` (sin descargas); por defecto 102 passed, 2 skipped.
+
+## Corrida sobre los 20 abstracts reales (2026-10-17)
+
+Entrada: `data/processed/abstracts.json` (Cayón, 20 registros P1–P20). Script: `python -m src.similarity.ai.demo_corpus20`; salidas en `tests/fixtures/daniel/corpus20/` (`resumen.json` y un `fusiones_<representacion>.json` por representación). Distancia = 1 − coseno calculado a mano; GloVe sin stopwords.
+
+| Representación | Enlace | CPCC | Mejor k (silueta) | Silueta |
+|---|---|---|---|---|
+| GloVe | single | 0.6185 | 2 | 0.2993 |
+| GloVe | complete | 0.5673 | 2 | 0.1836 |
+| GloVe | **average** | **0.7125** | 2 | 0.2993 |
+| GloVe centrado | single | 0.3426 | 13 | 0.1877 |
+| GloVe centrado | complete | 0.5820 | 10 | 0.2527 |
+| GloVe centrado | **average** | **0.6427** | 10 | 0.2527 |
+| MiniLM | single | 0.7453 | 2 | 0.1187 |
+| MiniLM | complete | 0.5592 | 2 | 0.1981 |
+| MiniLM | **average** | **0.7765** | 2 | 0.1786 |
+
+**Enlace más coherente: average.** Tiene el CPCC más alto en las tres representaciones (0.71, 0.64, 0.78). Single queda segundo con MiniLM y GloVe (efecto cadena) y es el peor con GloVe centrado; complete es el peor con MiniLM y GloVe sin centrar. Con 4 abstracts los tres salían casi iguales; con 20 sí discriminan.
+
+**Hipótesis del centrado: refutada con 20 abstracts.** El rango de similitud se abre (0.085 → 1.099), pero el tau de Kendall frente a MiniLM baja de 0.322 a 0.177 y el CPCC empeora en los tres enlaces. Restar el vector medio abre la escala pero no acerca el orden de los pares al de MiniLM. `center_vectors` queda como opción, no recomendada.
+
+**Salvedades.**
+- La silueta por sí sola es poco informativa aquí: elige k = 2 (o 10 con centrado) con valores bajos (0.12–0.30), es decir, el corpus no tiene clusters bien separados; todo es "IA en educación".
+- Los abstracts P13, P15, P16, P18 y P19 vienen marcados `_revisar` por Cayón (título o autores dudosos); el texto del abstract sí se usó, pero P6 termina con el nombre de la revista y P15 parece cortado ("...document sources/authors,"). Avisar a Cayón.
+- El JSON de fusiones del dendrograma de Cayón (`python_viz/dendrograma.py`) se genera hoy con distancia Jaccard sobre `data/processed/fusiones.json`, no con embeddings. Decidir con el equipo con qué distancia se dibuja el dendrograma oficial.
+
+---
+
+## Justificación final: CPCC como métrica principal (datos reales, 20 abstracts)
+
+Sustituye al ejemplo sintético de la sección 4 como argumento principal (el sintético queda como ilustración del encadenamiento). Datos: `tests/fixtures/daniel/corpus20/resumen.json`, distancia $1-\cos$.
+
+| Representación | Enlace | CPCC | Silueta k=2 | Mejor k |
+|---|---|---|---|---|
+| MiniLM | single | 0.7453 | 0.119 | 2 |
+| MiniLM | complete | 0.5592 | 0.198 | 2 |
+| MiniLM | average | 0.7765 | 0.179 | 2 |
+| GloVe | single | 0.6185 | 0.299 | 2 |
+| GloVe | complete | 0.5673 | 0.184 | 2 |
+| GloVe | average | 0.7125 | 0.299 | 2 |
+
+**Qué mide cada una.**
+- CPCC $=\mathrm{Pearson}(d_{ij}, c_{ij})$ sobre los $n(n-1)/2=190$ pares, con $c_{ij}$ la altura a la que $i$ y $j$ quedan en el mismo cluster. Evalúa el **árbol completo**, que es lo que se entrega (un dendrograma por criterio).
+- Silueta $s(i)=\dfrac{b(i)-a(i)}{\max(a(i),b(i))}$ evalúa **una partición** (un corte en $k$ clusters). No ve las alturas del árbol.
+
+**Argumentos con los datos reales.**
+1. **Los dos criterios no coinciden.** Con MiniLM, el CPCC ordena average > single > complete; la silueta en k=2 ordena complete > average > single. Con GloVe, single y average empatan en silueta (0.299, mismo corte) pero el CPCC los separa (0.619 vs 0.713). Una métrica de partición no puede decidir qué *dendrograma* es mejor.
+2. **La silueta es baja en todos los casos** (máx. 0.30; valores < 0.5 indican estructura débil). El corpus es un solo tema (IA en educación) y no tiene clusters bien separados, así que la silueta tiene poca señal para comparar. Además depende de $k$ y su máximo cae en k=2 (un corte casi trivial).
+3. **El CPCC discrimina con claridad** (rango 0.56–0.78 con MiniLM) y es consistente en el ganador: average es el mayor en MiniLM, GloVe y GloVe centrado.
+4. **No requiere fijar $k$**, que en un corpus real no se conoce.
+
+**Limitaciones a declarar.**
+- El CPCC mide fidelidad a las distancias, no coherencia temática: un árbol puede reproducir bien distancias de una representación pobre.
+- Average (UPGMA) está favorecido por construcción: la altura de cada fusión es la media de las distancias originales, por eso su cofenética tiende a correlacionar más con $d$.
+- La diferencia average–single con MiniLM es pequeña (0.777 vs 0.745), así que no es concluyente por sí sola; la ventaja sobre complete (0.559) sí es clara.
+- Sin clasificación temática de referencia no hay métrica externa; la silueta queda como complemento para elegir el corte.
+
+**Decisión.** Criterio principal: CPCC → **average**. Silueta como complemento (corte y elementos mal asignados). Declarar ambas y las limitaciones.
+
+---
+
+## Análisis crítico clásicos vs IA (P1–P3) — BORRADOR, incompleto
+
+Datos: `tests/fixtures/daniel/caso_estudio_p1_p3.json` (similitud en [0,1]).
+
+| Algoritmo | Familia | Similitud P1–P3 |
+|---|---|---|
+| Levenshtein (1 − d/max) | PD, caracteres | 0.288 |
+| Jaccard (palabras) | conjuntos | 0.158 |
+| Coseno TF | espacio vectorial | 0.736 |
+| Needleman-Wunsch | PD | **PENDIENTE (Samuel)** |
+| Coseno TF-IDF | espacio vectorial | **PENDIENTE (Samuel)**; dato informal de Samuel: ≈ 0.049 (verificar al integrar) |
+| GloVe promedio (sin stopwords) | IA | 0.981 |
+| all-MiniLM-L6-v2 | IA | 0.735 |
+
+### Ya se puede afirmar
+1. **Los clásicos miden forma, la IA mide significado.** Levenshtein compara cadenas de caracteres (0.288) y Jaccard el solapamiento de vocabulario (35 de 221 palabras, 0.158); ninguno sabe que "learning" y "education" son cercanos. Los embeddings sí: MiniLM da 0.735 a un par que comparte poco vocabulario literal.
+2. **El coseno TF coincide con MiniLM (0.736 vs 0.735) por una razón distinta.** En TF dominan las palabras frecuentes y comunes ("the", "of", "ai"): es alto por las stopwords, no por semántica. Que coincidan numéricamente en este par es casualidad; el dato con TF-IDF (cuando llegue) debe mostrarlo: al ponderar por rareza, el valor cae.
+3. **GloVe promediado casi no discrimina.** 0.981 para este par y un rango de solo 0.085 entre todos los pares de los 20 abstracts: el promedio de muchas palabras colapsa en una dirección común. Con 20 abstracts, tau de Kendall vs MiniLM = 0.32 (orden poco coherente con MiniLM). Centrar abre el rango (1.10) pero baja tau a 0.18: refutado como solución.
+4. **MiniLM es el único con rango útil y semántica contextual**, a costa de depender de un modelo (caja negra, 384 dimensiones, inferencia fuera de nuestro análisis). Los clásicos son totalmente transparentes y baratos: $O(mn)$ Levenshtein, $O(m+n)$ Jaccard y coseno, frente a $O(n)$ por par de embeddings más el costo del modelo.
+5. **En clustering sobre los 20 abstracts** el enlace average gana el CPCC con las dos representaciones de IA; la elección del enlace es robusta a la representación.
+
+### Falta (depende de Samuel)
+- [ ] Needleman-Wunsch (`needleman_wunsch.py` está vacío): añadir su fila y comentar cómo el alineamiento global penaliza textos de distinta longitud (P1 tiene 186 palabras y P3 233).
+- [ ] Coseno TF-IDF real: confirmar el 0.049, mostrar los pesos de las palabras que más bajan y comparar con MiniLM (conclusión del punto 2).
+- [ ] Repetir la comparación con una matriz completa de los 20 abstracts para los clásicos (tau de Kendall clásicos vs MiniLM), no solo el par P1–P3.
+- [ ] Cierre: tabla final con 4 clásicos + 2 IA y recomendación (cuándo conviene cada familia).
