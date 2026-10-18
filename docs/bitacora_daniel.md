@@ -449,5 +449,5 @@ Se actualizó `caso_estudio.py` (usa `needleman_wunsch.py` y `tfidf_cosine_simil
 **Recomendación (cuándo conviene cada familia).** TF-IDF es el clásico a usar para comparar abstracts: barato (O(T)), transparente y el más cercano a la IA. Jaccard sirve como medida rápida de solapamiento de vocabulario. Levenshtein y NW (O(m·n)) no son adecuados para comparar temas en textos largos: su sentido es detectar ediciones o alineamientos entre secuencias parecidas. MiniLM es la mejor para similitud semántica a costa de un modelo opaco; GloVe promediado no se recomienda sin otro tratamiento.
 
 ### Falta
-- [ ] Revisar con Samuel el 0.049 informal frente al 0.052 de este cálculo (IDF sobre qué corpus).
+- [x] El 0.049 de Samuel salía de un IDF sobre los 4 artículos de prueba; con el IDF sobre los 20 abstracts el valor es 0.052 (comprobado 2026-10-18).
 - [ ] Decidir con el equipo con qué distancia se dibuja el dendrograma oficial (hoy Jaccard en `python_viz`).
