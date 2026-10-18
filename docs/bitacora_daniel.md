@@ -398,7 +398,7 @@ Sustituye al ejemplo sintético de la sección 4 como argumento principal (el si
 
 ---
 
-## Análisis crítico clásicos vs IA (P1–P3) — BORRADOR, incompleto
+## Análisis crítico clásicos vs IA (P1–P3 y 20 abstracts)
 
 Datos: `tests/fixtures/daniel/caso_estudio_p1_p3.json` (similitud en [0,1]).
 
@@ -407,8 +407,8 @@ Datos: `tests/fixtures/daniel/caso_estudio_p1_p3.json` (similitud en [0,1]).
 | Levenshtein (1 − d/max) | PD, caracteres | 0.288 |
 | Jaccard (palabras) | conjuntos | 0.158 |
 | Coseno TF | espacio vectorial | 0.736 |
-| Needleman-Wunsch | PD | **PENDIENTE (Samuel)** |
-| Coseno TF-IDF | espacio vectorial | **PENDIENTE (Samuel)**; dato informal de Samuel: ≈ 0.049 (verificar al integrar) |
+| Needleman-Wunsch (normalizada) | PD | 0.317 (puntaje −565 sobre L = 1544) |
+| Coseno TF-IDF (IDF sobre los 20 abstracts) | espacio vectorial | 0.052 (ángulo 87.0°) |
 | GloVe promedio (sin stopwords) | IA | 0.981 |
 | all-MiniLM-L6-v2 | IA | 0.735 |
 
@@ -419,8 +419,35 @@ Datos: `tests/fixtures/daniel/caso_estudio_p1_p3.json` (similitud en [0,1]).
 4. **MiniLM es el único con rango útil y semántica contextual**, a costa de depender de un modelo (caja negra, 384 dimensiones, inferencia fuera de nuestro análisis). Los clásicos son totalmente transparentes y baratos: $O(mn)$ Levenshtein, $O(m+n)$ Jaccard y coseno, frente a $O(n)$ por par de embeddings más el costo del modelo.
 5. **En clustering sobre los 20 abstracts** el enlace average gana el CPCC con las dos representaciones de IA; la elección del enlace es robusta a la representación.
 
-### Falta (depende de Samuel)
-- [ ] Needleman-Wunsch (`needleman_wunsch.py` está vacío): añadir su fila y comentar cómo el alineamiento global penaliza textos de distinta longitud (P1 tiene 186 palabras y P3 233).
-- [ ] Coseno TF-IDF real: confirmar el 0.049, mostrar los pesos de las palabras que más bajan y comparar con MiniLM (conclusión del punto 2).
-- [ ] Repetir la comparación con una matriz completa de los 20 abstracts para los clásicos (tau de Kendall clásicos vs MiniLM), no solo el par P1–P3.
-- [ ] Cierre: tabla final con 4 clásicos + 2 IA y recomendación (cuándo conviene cada familia).
+### Con Needleman-Wunsch y TF-IDF integrados (2026-10-18)
+
+Se actualizó `caso_estudio.py` (usa `needleman_wunsch.py` y `tfidf_cosine_similarity` de Samuel, sin modificarlos) y se añadió `demo_clasicos20.py`, que calcula los 5 clásicos (Levenshtein, NW, Jaccard, coseno TF, coseno TF-IDF) y las 2 representaciones de IA sobre los 190 pares de los 20 abstracts. Salida: `tests/fixtures/daniel/corpus20/clasicos_resumen.json`. Los 190 pares de los clásicos tardaron 420 s, dominados por las dos programaciones dinámicas.
+
+**Punto 2 del borrador, confirmado.** El coseno TF daba 0.736 por las palabras comunes; al ponderar por IDF cae a **0.052** (ángulo 87°, casi ortogonales). Coincidir con MiniLM en TF (0.736 vs 0.735) fue casualidad. El dato informal de Samuel (≈ 0.049) difiere en la tercera cifra porque nuestro IDF sale de los 20 abstracts; con otro corpus o preprocesamiento el valor cambia.
+
+**Needleman-Wunsch (0.317).** Con puntaje −565 sobre 1544 caracteres, alinea cadenas de 1544 y ~1500 caracteres: el alineamiento global obliga a emparejar todo el texto, así que el puntaje refleja sobre todo cuánto coinciden los caracteres posición a posición tras alinear, no el tema. Sale parecido a Levenshtein (0.288), y en los 190 pares ambos tienen el rango más estrecho (0.083 y 0.098).
+
+**Los 190 pares: ¿ordenan igual clásicos e IA?** Rango (máx − mín) y tau de Kendall frente a MiniLM y GloVe (sin stopwords):
+
+| Algoritmo | Rango | tau vs MiniLM | tau vs GloVe |
+|---|---|---|---|
+| Levenshtein | 0.098 | 0.183 | 0.118 |
+| Needleman-Wunsch | 0.083 | 0.145 | 0.142 |
+| Jaccard | 0.115 | 0.203 | 0.281 |
+| Coseno TF | 0.348 | 0.224 | 0.211 |
+| Coseno TF-IDF | 0.159 | **0.347** | **0.328** |
+| GloVe promedio | 0.085 | 0.322 | — |
+| MiniLM | 0.451 | — | 0.322 |
+
+1. **Ningún clásico ordena como la IA.** Todos los tau con MiniLM están por debajo de 0.35. Es esperable: unos miden forma (caracteres, palabras) y otros significado.
+2. **El TF-IDF es el clásico más cercano a la IA** (0.347 con MiniLM, 0.328 con GloVe), incluso más que GloVe frente a MiniLM (0.322). Ponderar por rareza elimina el ruido de las palabras comunes que domina el TF (0.224).
+3. **Levenshtein y NW son los más alejados** (0.145–0.183) y se parecen entre sí (tau 0.30): ambos son programación dinámica sobre caracteres y miden orden de letras, no tema. Con textos de ~1.500 caracteres y un solo dominio, sus valores se aprietan en un rango de ~0.09.
+4. **MiniLM tiene el rango más amplio (0.451)**, seguido del coseno TF (0.348, por las palabras comunes); GloVe promediado, NW y Levenshtein discriminan poco.
+
+**Limitaciones.** (a) No hay clasificación temática de referencia: el tau mide acuerdo entre métodos, no cuál acierta. (b) El tau de Kendall implementado no corrige empates (Jaccard puede tener pocos). (c) Un solo corpus de 20 abstracts de un mismo tema. (d) Los abstracts P6 y P15 tienen restos de texto (ver salvedades arriba), que afectan sobre todo a los métodos de caracteres.
+
+**Recomendación (cuándo conviene cada familia).** TF-IDF es el clásico a usar para comparar abstracts: barato (O(T)), transparente y el más cercano a la IA. Jaccard sirve como medida rápida de solapamiento de vocabulario. Levenshtein y NW (O(m·n)) no son adecuados para comparar temas en textos largos: su sentido es detectar ediciones o alineamientos entre secuencias parecidas. MiniLM es la mejor para similitud semántica a costa de un modelo opaco; GloVe promediado no se recomienda sin otro tratamiento.
+
+### Falta
+- [ ] Revisar con Samuel el 0.049 informal frente al 0.052 de este cálculo (IDF sobre qué corpus).
+- [ ] Decidir con el equipo con qué distancia se dibuja el dendrograma oficial (hoy Jaccard en `python_viz`).

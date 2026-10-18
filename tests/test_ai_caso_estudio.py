@@ -1,7 +1,9 @@
 """Pruebas sin descargas: stopwords, tabla comparativa y clásicos de Samuel importados."""
+import math
+
 import pytest
 
-from src.similarity.ai.caso_estudio import PENDIENTE, ai_scores, classic_scores, format_table
+from src.similarity.ai.caso_estudio import ai_scores, classic_scores, format_table
 from src.similarity.ai.embeddings import average_word_vectors
 from src.similarity.ai.stopwords import STOPWORDS, remove_stopwords
 
@@ -62,15 +64,24 @@ def test_clasicos_de_samuel_sobre_un_par_pequeno():
     assert por_nombre["Coseno TF (frecuencias)"]["similitud"] == pytest.approx(2 / 3)
 
 
-def test_pendientes_de_samuel_marcados_en_la_tabla():
-    filas = classic_scores("a b", "a c")
+def test_needleman_wunsch_y_tfidf_sobre_un_par_pequeno():
+    corpus = ["the cat sat", "the cat ran", "a dog barks loudly"]
+    filas = classic_scores("the cat sat", "the cat ran", corpus)
     por_nombre = {f["algoritmo"]: f for f in filas}
-    for nombre in ("Needleman-Wunsch", "Coseno TF-IDF"):
-        assert por_nombre[nombre]["valor"] == PENDIENTE
-        assert por_nombre[nombre]["similitud"] is None
-    tabla = format_table(filas)
-    assert tabla.count(PENDIENTE) == 2
-    assert "—" in tabla
+
+    nw = por_nombre["Needleman-Wunsch"]
+    # 11 caracteres, solo "sat" vs "ran" difiere en 2: 9 aciertos y 2 fallos = 9 - 2 = 7
+    assert nw["valor"] == "puntaje 7 (L = 11)"
+    assert nw["similitud"] == pytest.approx((7 + 11) / 22)
+
+    # idf: the, cat -> ln(3/2); sat, ran -> ln(3). Pesos A=(cat,ran,sat,the)=(a,0,b,a), B=(a,b,0,a)
+    a, b = math.log(1.5), math.log(3)
+    esperado = (2 * a * a) / (2 * a * a + b * b)
+    assert por_nombre["Coseno TF-IDF"]["similitud"] == pytest.approx(esperado)
+    # el IDF baja el coseno respecto al TF (2/3) porque pondera menos lo común
+    assert por_nombre["Coseno TF-IDF"]["similitud"] < por_nombre["Coseno TF (frecuencias)"]["similitud"]
+    assert all(f["similitud"] is not None for f in filas)
+    assert "—" not in format_table(filas)
 
 
 def test_ai_scores_usa_metrics():

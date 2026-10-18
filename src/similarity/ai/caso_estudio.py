@@ -2,11 +2,13 @@
 Caso de estudio P1-P3: clásicos de Samuel vs. enfoques de IA (Req. 1).
 ----------------------------------------------------------------------
 Compara un par de abstracts con:
-    - los clásicos de Samuel que ya funcionan, importados SIN modificarlos:
-      Levenshtein, Jaccard y coseno de frecuencias (TF);
+    - los 4 clásicos de Samuel (más el coseno TF), importados SIN modificarlos:
+      Levenshtein, Needleman-Wunsch, Jaccard, coseno TF y coseno TF-IDF;
     - los 2 enfoques de IA: promedio de vectores GloVe (con y sin stopwords) y
       embeddings de oración all-MiniLM-L6-v2.
-Needleman-Wunsch y coseno TF-IDF siguen pendientes de Samuel y se marcan así.
+El IDF del coseno TF-IDF se calcula sobre los 20 abstracts de
+data/processed/abstracts.json (con solo 2 textos toda palabra compartida tendría
+idf = 0).
 
     .venv\\Scripts\\python.exe -m src.similarity.ai.caso_estudio
 
@@ -27,32 +29,41 @@ from src.similarity.ai.demo_modelos import (
 )
 from src.similarity.ai.stopwords import STOPWORDS
 from src.similarity.classic.cosine import cosine_similarity as classic_cosine
+from src.similarity.classic.cosine import tfidf_cosine_similarity
 from src.similarity.classic.jaccard import jaccard_similarity
 from src.similarity.classic.levenshtein import levenshtein_distance
+from src.similarity.classic.needleman_wunsch import needleman_wunsch, normalized_needleman_wunsch
 from src.similarity.metrics import cosine_steps, euclidean_distance, pairwise_matrix
 
 SALIDA = FIXTURE.parent
-PENDIENTE = "pendiente (Samuel)"
+ABSTRACTS = Path(__file__).resolve().parents[3] / "data" / "processed" / "abstracts.json"
 
 
-def classic_scores(texto_a: str, texto_b: str) -> list[dict]:
+def classic_scores(texto_a: str, texto_b: str, corpus: list[str] | None = None) -> list[dict]:
     """
-    Corre los clásicos de Samuel que funcionan sobre el par de textos.
+    Corre los clásicos de Samuel sobre el par de textos.
+
+    `corpus` es el conjunto de documentos del que sale el IDF del coseno TF-IDF
+    (los 20 abstracts). Si se omite se usa solo el par, lo que anula el IDF de
+    toda palabra compartida: sirve para pruebas pequeñas, no para resultados.
 
     Levenshtein trabaja sobre caracteres y devuelve una distancia; para ponerla
     en [0, 1] se normaliza (normalización nuestra, no de Samuel):
         sim = 1 - d / max(|A|, |B|)
-    Jaccard y el coseno TF ya devuelven una similitud en [0, 1].
+    Needleman-Wunsch se toma de `normalized_needleman_wunsch` (pesos +1/-1/-1).
+    Jaccard y los cosenos ya devuelven una similitud en [0, 1].
 
-    Complejidad temporal: O(|A|*|B|) por Levenshtein (domina); O(T) por Jaccard
-    y por el coseno de frecuencias, salvo que `cosine.py` busca cada token con
-    `list.index`, lo que lo vuelve O(T*V).
-    Complejidad espacial: O(|A|*|B|) por la matriz de programación dinámica.
+    Complejidad temporal: O(|A|*|B|) por Levenshtein y por Needleman-Wunsch
+    (dominan); O(T) por Jaccard; O(T*V) por el coseno TF, que busca cada token
+    con `list.index`; O(T_corpus + V) por el TF-IDF (T_corpus = tokens del corpus).
+    Complejidad espacial: O(|A|*|B|) por las matrices de programación dinámica.
     """
     dist, _matriz = levenshtein_distance(texto_a, texto_b)
     largo = max(len(texto_a), len(texto_b))
     jac, inter, union = jaccard_similarity(texto_a, texto_b)
     cos, _va, _vb, vocab = classic_cosine(texto_a, texto_b)
+    nw_puntaje, _matriz_nw = needleman_wunsch(texto_a, texto_b)
+    tfidf = tfidf_cosine_similarity(texto_a, texto_b, corpus if corpus is not None else [texto_a, texto_b])
 
     return [
         {
@@ -79,16 +90,16 @@ def classic_scores(texto_a: str, texto_b: str) -> list[dict]:
         {
             "algoritmo": "Needleman-Wunsch",
             "tipo": "clásico, PD",
-            "valor": PENDIENTE,
-            "similitud": None,
-            "nota": "needleman_wunsch.py está vacío",
+            "valor": f"puntaje {nw_puntaje} (L = {largo})",
+            "similitud": normalized_needleman_wunsch(texto_a, texto_b),
+            "nota": "normalizada: (s - L*gap) / (L*match - L*gap), pesos +1/-1/-1",
         },
         {
             "algoritmo": "Coseno TF-IDF",
             "tipo": "clásico, espacio vectorial",
-            "valor": PENDIENTE,
-            "similitud": None,
-            "nota": "falta el IDF en cosine.py",
+            "valor": f"{len(tfidf['vocabulario'])} dimensiones, ángulo {tfidf['angulo_grados']:.1f}°",
+            "similitud": tfidf["coseno"],
+            "nota": "IDF = ln(N/df) sobre el corpus",
         },
     ]
 
@@ -136,6 +147,7 @@ def format_table(filas: list[dict]) -> str:
 
 def main(par: tuple[str, str] = ("P1", "P3")) -> None:
     ids, textos = load_abstracts()
+    corpus = [r["texto"] for r in json.loads(ABSTRACTS.read_text(encoding="utf-8"))]
     glove_con = glove_embeddings(textos)["vectors"]
     glove_sin = glove_embeddings(textos, stopwords=STOPWORDS)["vectors"]
     minilm = sentence_embeddings(textos)
@@ -159,7 +171,7 @@ def main(par: tuple[str, str] = ("P1", "P3")) -> None:
 
     # 2. caso de estudio: un par
     i, j = ids.index(par[0]), ids.index(par[1])
-    filas = classic_scores(textos[i], textos[j]) + ai_scores(
+    filas = classic_scores(textos[i], textos[j], corpus) + ai_scores(
         (glove_con[i], glove_con[j]), (glove_sin[i], glove_sin[j]), (minilm[i], minilm[j])
     )
     (SALIDA / f"caso_estudio_{par[0].lower()}_{par[1].lower()}.json").write_text(

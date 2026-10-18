@@ -28,16 +28,16 @@
     {
       "algoritmo": "Needleman-Wunsch",
       "tipo": "clásico, PD",
-      "valor": "pendiente (Samuel)",
-      "similitud": null,
-      "nota": "needleman_wunsch.py está vacío"
+      "valor": "puntaje -565 (L = 1544)",
+      "similitud": 0.3170336787564767,
+      "nota": "normalizada: (s - L*gap) / (L*match - L*gap), pesos +1/-1/-1"
     },
     {
       "algoritmo": "Coseno TF-IDF",
       "tipo": "clásico, espacio vectorial",
-      "valor": "pendiente (Samuel)",
-      "similitud": null,
-      "nota": "falta el IDF en cosine.py"
+      "valor": "221 dimensiones, ángulo 87.0°",
+      "similitud": 0.05207208955912569,
+      "nota": "IDF = ln(N/df) sobre el corpus"
     },
     {
       "algoritmo": "GloVe-100 promedio",
