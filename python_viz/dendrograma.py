@@ -169,9 +169,16 @@ def dibujar_dendrograma(
         ax.set_title(titulo, loc="left", pad=12)
 
 
-def renderizar(ruta_json: str, dir_salida: str) -> list[str]:
+def renderizar(ruta_json: str, dir_salida: str, sufijo: str = "",
+               fuente: str = "") -> list[str]:
     """
     Dibuja un dendrograma por enlace y una figura comparativa con los tres.
+
+    `sufijo` distingue los archivos cuando se renderiza más de una
+    representación; `fuente` se rotula en la figura para que nunca haya duda
+    de qué distancia produjo ese árbol. Rotularlo importa: los mismos 20
+    abstracts dan árboles distintos según se midan con Jaccard o con
+    embeddings, y una figura sin esa etiqueta es ambigua.
 
     Devuelve las rutas de los archivos generados.
     """
@@ -194,13 +201,19 @@ def renderizar(ruta_json: str, dir_salida: str) -> list[str]:
         dibujar_dendrograma(ax, info["merges"], labels, color)
         ax.set_title(f"Agrupamiento jerárquico — enlace {nombre}",
                      loc="left", pad=14)
+
+        pie = []
         if cpcc is not None:
             # El CPCC rotulado junto a la figura evita tener que buscarlo en el
             # texto para comparar la calidad de los tres enlaces.
-            ax.text(0.0, 1.015, f"Correlación cofenética (CPCC) = {cpcc:.4f}",
-                    transform=ax.transAxes, fontsize=9, color=TINTA_SECUNDARIA)
+            pie.append(f"Correlación cofenética (CPCC) = {cpcc:.4f}")
+        if fuente:
+            pie.append(f"distancia: {fuente}")
+        if pie:
+            ax.text(0.0, 1.015, "  ·  ".join(pie), transform=ax.transAxes,
+                    fontsize=9, color=TINTA_SECUNDARIA)
 
-        ruta = os.path.join(dir_salida, f"dendrograma_{nombre}.png")
+        ruta = os.path.join(dir_salida, f"dendrograma_{nombre}{sufijo}.png")
         fig.savefig(ruta)
         plt.close(fig)
         generados.append(ruta)
@@ -235,11 +248,13 @@ def renderizar(ruta_json: str, dir_salida: str) -> list[str]:
         etiqueta = f"{nombre}" + (f"  ·  CPCC {cpcc:.4f}" if cpcc is not None else "")
         ax.set_title(etiqueta, loc="left", pad=8)
 
-    fig.suptitle("Comparación de criterios de enlace",
-                 x=0.125, ha="left", fontsize=14, fontweight="bold")
+    titulo = "Comparación de criterios de enlace"
+    if fuente:
+        titulo += f"  —  distancia: {fuente}"
+    fig.suptitle(titulo, x=0.125, ha="left", fontsize=14, fontweight="bold")
     fig.tight_layout(rect=(0, 0, 1, 0.97))
 
-    ruta = os.path.join(dir_salida, "dendrogramas_comparacion.png")
+    ruta = os.path.join(dir_salida, f"dendrogramas_comparacion{sufijo}.png")
     fig.savefig(ruta)
     plt.close(fig)
     generados.append(ruta)
@@ -276,21 +291,63 @@ def generar_fusiones(ruta_abstracts: str, ruta_json: str) -> None:
     print(f"  fusiones generadas: {ruta_json}")
 
 
+# Fuentes de distancia disponibles, en orden de preferencia.
+#
+# Los dendrogramas deben dibujarse con la MISMA distancia que se evalúa en el
+# Requerimiento 2. Evaluar con embeddings y dibujar con Jaccard produce dos
+# clusterings distintos presentados como si fueran uno, y los CPCC de la
+# memoria no corresponderían a las figuras.
+#
+# Las fusiones de embeddings las exporta src/similarity/ai/demo_corpus20.py.
+REPRESENTACIONES = (
+    ("minilm", "coseno sobre embeddings MiniLM",
+     ("tests", "fixtures", "daniel", "corpus20", "fusiones_minilm.json")),
+    ("glove", "coseno sobre embeddings GloVe promediados",
+     ("tests", "fixtures", "daniel", "corpus20", "fusiones_glove.json")),
+    ("glove_centrado", "coseno sobre GloVe centrado",
+     ("tests", "fixtures", "daniel", "corpus20", "fusiones_glove_centrado.json")),
+    ("jaccard", "1 − coeficiente de Jaccard",
+     ("data", "processed", "fusiones.json")),
+)
+
+
+def fuentes_disponibles(raiz: str) -> list[tuple[str, str, str]]:
+    """(clave, descripción, ruta) de las representaciones presentes en disco."""
+    encontradas = []
+    for clave, descripcion, partes in REPRESENTACIONES:
+        ruta = os.path.join(raiz, *partes)
+        if os.path.exists(ruta):
+            encontradas.append((clave, descripcion, ruta))
+    return encontradas
+
+
 def main() -> None:
     raiz = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ruta_json = os.path.join(raiz, "data", "processed", "fusiones.json")
     ruta_abstracts = os.path.join(raiz, "data", "processed", "abstracts.json")
+    ruta_jaccard = os.path.join(raiz, "data", "processed", "fusiones.json")
     dir_salida = os.path.join(raiz, "data", "figuras")
 
-    if not os.path.exists(ruta_json):
-        if not os.path.exists(ruta_abstracts):
-            print(f"No se encontro {ruta_abstracts}")
-            print("Ejecuta primero: python -m src.preprocessing.extractor")
-            return
-        generar_fusiones(ruta_abstracts, ruta_json)
+    # Jaccard se genera si falta: sirve de contraste frente a los embeddings.
+    if not os.path.exists(ruta_jaccard) and os.path.exists(ruta_abstracts):
+        generar_fusiones(ruta_abstracts, ruta_jaccard)
 
-    for ruta in renderizar(ruta_json, dir_salida):
-        print(f"  generado: {ruta}")
+    fuentes = fuentes_disponibles(raiz)
+    if not fuentes:
+        print("No se encontraron fusiones que renderizar.")
+        print("Genera las de embeddings con:")
+        print("    python -m src.similarity.ai.demo_corpus20")
+        print("o las de Jaccard ejecutando antes el extractor de abstracts.")
+        return
+
+    for clave, descripcion, ruta in fuentes:
+        # La representación principal conserva los nombres sin sufijo, para no
+        # romper las referencias que ya existan en la memoria del proyecto.
+        sufijo = "" if clave == fuentes[0][0] else f"_{clave}"
+        print(f"\n{clave}  ({descripcion})")
+        for generado in renderizar(ruta, dir_salida, sufijo, descripcion):
+            print(f"  generado: {generado}")
+
+    print(f"\nRepresentacion principal: {fuentes[0][0]} — {fuentes[0][1]}")
 
 
 if __name__ == "__main__":

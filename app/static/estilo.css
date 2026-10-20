@@ -1,0 +1,447 @@
+/* =========================================================================
+   Análisis de algoritmos en el contexto de la bibliometría
+   -------------------------------------------------------------------------
+   La página se trata como una ficha técnica, no como una presentación: los
+   valores medidos mandan sobre la decoración.
+
+   Paleta: papel frío azulado, tinta azul-negra, azul profundo para la
+   estructura y un ámbar reservado EXCLUSIVAMENTE a los valores que se
+   acaban de calcular. Si el ámbar apareciera también en bordes o títulos
+   dejaría de señalar nada.
+   ========================================================================= */
+
+:root {
+  --papel:        #f7f8fa;
+  --papel-hondo:  #eceff4;
+  --tinta:        #16202e;
+  --tinta-media:  #4a5768;
+  --tinta-tenue:  #7c8795;
+  --azul:         #1f4e79;
+  --azul-claro:   #e3ecf5;
+  --ambar:        #c77d0a;
+  --ambar-fondo:  #fdf4e3;
+  --linea:        #d8dee6;
+  --blanco:       #ffffff;
+
+  --serif: "Spectral", Georgia, serif;
+  --mono:  "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { font-weight: 600; line-height: 1.25; margin: 0; }
+p { margin: 0 0 1rem; max-width: 68ch; }
+
+/* ---------- Ficha de cabecera ------------------------------------------ */
+
+/* El fondo de la ficha cubre todo el ancho; solo el contenido se centra.
+   Si el blanco se limitara al contenedor, en pantallas anchas aparecerían
+   franjas grises a los lados y parecería un fallo de maquetación. */
+.ficha {
+  border-bottom: 1px solid var(--linea);
+  background: var(--blanco);
+}
+
+.ficha__interior {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 2rem;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 900px) {
+  .ficha__interior {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    padding: 4rem 3rem 2.5rem;
+  }
+}
+
+.ficha h1 {
+  font-size: clamp(1.9rem, 4vw, 2.9rem);
+  letter-spacing: -0.015em;
+  max-width: 20ch;
+}
+
+.ficha__sub {
+  color: var(--tinta-media);
+  margin: 1rem 0 0;
+  font-size: 1.05rem;
+  max-width: 58ch;
+}
+
+.ficha__datos {
+  display: flex;
+  gap: 2.5rem;
+  margin: 0;
+  font-family: var(--mono);
+}
+.ficha__datos div { display: flex; flex-direction: column; gap: .15rem; }
+.ficha__datos dt {
+  font-size: .78rem;
+  color: var(--tinta-tenue);
+  letter-spacing: .02em;
+}
+.ficha__datos dd {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--azul);
+}
+
+/* ---------- Índice ----------------------------------------------------- */
+
+.indice {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(247, 248, 250, .94);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--linea);
+  display: flex;
+  gap: 1.75rem;
+  padding: .85rem 1.5rem;
+  overflow-x: auto;
+}
+@media (min-width: 900px) { .indice { padding-inline: 3rem; } }
+
+.indice a {
+  color: var(--tinta-media);
+  text-decoration: none;
+  font-size: .95rem;
+  white-space: nowrap;
+  padding-bottom: 2px;
+  border-bottom: 2px solid transparent;
+}
+.indice a:hover, .indice a:focus-visible {
+  color: var(--azul);
+  border-bottom-color: var(--azul);
+}
+
+/* ---------- Bloques ----------------------------------------------------- */
+
+main { max-width: 1180px; margin: 0 auto; padding: 0 1.5rem 4rem; }
+@media (min-width: 900px) { main { padding-inline: 3rem; } }
+
+.bloque { padding: 3.5rem 0; border-bottom: 1px solid var(--linea); }
+.bloque:last-child { border-bottom: none; }
+
+.bloque__encabezado { margin-bottom: 2rem; }
+.bloque__encabezado h2 {
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  margin: .35rem 0 .75rem;
+}
+.bloque__encabezado p { color: var(--tinta-media); }
+
+/* Marcador de requerimiento: estructura, no adorno — dice a qué
+   entregable del enunciado corresponde cada bloque. */
+.req {
+  font-family: var(--mono);
+  font-size: .8rem;
+  color: var(--azul);
+  background: var(--azul-claro);
+  padding: .2rem .6rem;
+  border-radius: 2px;
+}
+
+/* ---------- Zona de trabajo: controles + resultados --------------------- */
+
+.trabajo { display: grid; gap: 2rem; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1000px) {
+  .trabajo { grid-template-columns: 340px minmax(0, 1fr); align-items: start; }
+}
+
+.controles {
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 3px;
+}
+.controles__cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 1rem 1.1rem .7rem;
+  border-bottom: 1px solid var(--linea);
+}
+.controles__cabecera h3 { font-size: 1rem; }
+
+.lista-articulos {
+  list-style: none;
+  margin: 0;
+  padding: .4rem;
+  max-height: 430px;
+  overflow-y: auto;
+}
+.lista-articulos li { margin: 0; }
+
+.articulo {
+  display: flex;
+  gap: .7rem;
+  align-items: flex-start;
+  padding: .55rem .7rem;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: .9rem;
+  line-height: 1.4;
+}
+.articulo:hover { background: var(--papel-hondo); }
+.articulo input { margin: .25rem 0 0; accent-color: var(--azul); flex: none; }
+.articulo__id {
+  font-family: var(--mono);
+  font-size: .8rem;
+  color: var(--tinta-tenue);
+  flex: none;
+  padding-top: .1rem;
+  min-width: 2.2em;
+}
+.articulo__titulo { color: var(--tinta-media); }
+.articulo input:checked ~ .articulo__titulo { color: var(--tinta); }
+
+.controles__pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: .85rem 1.1rem;
+  border-top: 1px solid var(--linea);
+}
+.contador { margin: 0; font-family: var(--mono); font-size: .85rem; color: var(--tinta-tenue); }
+.contador span { color: var(--tinta); font-weight: 500; }
+
+/* ---------- Botones ------------------------------------------------------ */
+
+.boton {
+  font-family: var(--serif);
+  font-size: .95rem;
+  font-weight: 500;
+  color: var(--blanco);
+  background: var(--azul);
+  border: 1px solid var(--azul);
+  border-radius: 2px;
+  padding: .5rem 1.1rem;
+  cursor: pointer;
+}
+.boton:hover:not(:disabled) { background: #163a5c; }
+.boton:disabled { background: var(--tinta-tenue); border-color: var(--tinta-tenue); cursor: not-allowed; }
+
+.enlace-boton {
+  font-family: var(--serif);
+  font-size: .85rem;
+  color: var(--tinta-tenue);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.enlace-boton:hover { color: var(--azul); }
+
+.chip {
+  font-family: var(--mono);
+  font-size: .82rem;
+  color: var(--azul);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 2px;
+  padding: .15rem .55rem;
+  cursor: pointer;
+  margin-right: .3rem;
+}
+.chip:hover { border-color: var(--azul); background: var(--azul-claro); }
+
+:focus-visible { outline: 2px solid var(--ambar); outline-offset: 2px; }
+
+/* ---------- Resultados --------------------------------------------------- */
+
+.resultados { min-height: 120px; }
+.vacio, .error {
+  color: var(--tinta-tenue);
+  background: var(--blanco);
+  border: 1px dashed var(--linea);
+  border-radius: 3px;
+  padding: 1.5rem;
+  margin: 0;
+  font-size: .95rem;
+}
+.error { color: #8c2f1d; border-color: #e0b4aa; border-style: solid; background: #fdf1ee; }
+
+.cargando { color: var(--tinta-tenue); font-family: var(--mono); font-size: .9rem; }
+
+.par-titulo {
+  font-size: .9rem;
+  color: var(--tinta-media);
+  margin-bottom: 1.1rem;
+  font-family: var(--mono);
+}
+
+/* Tabla de medidas: los números son el contenido, van en mono y tabulares */
+.medidas { width: 100%; border-collapse: collapse; background: var(--blanco); }
+.medidas th, .medidas td {
+  text-align: left;
+  padding: .7rem .9rem;
+  border-bottom: 1px solid var(--linea);
+  font-size: .92rem;
+}
+.medidas thead th {
+  font-weight: 500;
+  font-size: .82rem;
+  color: var(--tinta-tenue);
+  border-bottom: 1px solid var(--tinta-media);
+}
+.medidas tbody tr:last-child td { border-bottom: none; }
+.medidas .num {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+/* El ámbar aparece solo aquí: el valor recién calculado. */
+.medidas .valor { color: var(--ambar); font-weight: 600; font-size: 1rem; }
+.medidas .detalle { color: var(--tinta-tenue); font-size: .84rem; }
+.medidas .familia { color: var(--tinta-tenue); font-size: .84rem; font-family: var(--mono); }
+.medidas .ausente { color: var(--tinta-tenue); font-style: italic; }
+
+/* Barra proporcional dentro de la celda: lee la magnitud sin leer el número */
+.barra { display: block; height: 3px; background: var(--ambar); margin-top: .3rem; border-radius: 1px; }
+
+/* ---------- Matriz de similitud (el elemento característico) ------------- */
+
+.matriz-envoltura { overflow-x: auto; background: var(--blanco); border: 1px solid var(--linea); border-radius: 3px; padding: 1.2rem; }
+.matriz { border-collapse: collapse; font-family: var(--mono); font-size: .8rem; }
+.matriz th {
+  font-weight: 500;
+  color: var(--tinta-tenue);
+  padding: .3rem .5rem;
+  font-size: .78rem;
+}
+.matriz td {
+  width: 52px; height: 42px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  border: 2px solid var(--blanco);
+  color: var(--tinta);
+}
+.matriz td.diagonal { color: var(--tinta-tenue); }
+
+/* ---------- Dendrogramas -------------------------------------------------- */
+
+.selector-repr { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.5rem; }
+
+.repr {
+  font-family: var(--serif);
+  font-size: .9rem;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 2px;
+  padding: .5rem .9rem;
+  cursor: pointer;
+  color: var(--tinta-media);
+  text-align: left;
+}
+.repr:hover { border-color: var(--azul); }
+.repr[aria-pressed="true"] { border-color: var(--azul); background: var(--azul-claro); color: var(--azul); font-weight: 500; }
+.repr small { display: block; font-family: var(--mono); font-size: .75rem; color: var(--tinta-tenue); }
+.repr[aria-pressed="true"] small { color: var(--azul); }
+
+.dendro__cpcc { display: flex; flex-wrap: wrap; gap: 1.75rem; margin-bottom: 1.25rem; font-family: var(--mono); font-size: .88rem; }
+.dendro__cpcc div { display: flex; flex-direction: column; }
+.dendro__cpcc span:first-child { color: var(--tinta-tenue); font-size: .78rem; }
+.dendro__cpcc span:last-child { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.dendro__cpcc .mejor span:last-child { color: var(--ambar); font-weight: 600; }
+
+.figura { background: var(--blanco); border: 1px solid var(--linea); border-radius: 3px; padding: 1rem; margin-bottom: 1.25rem; }
+.figura img { width: 100%; height: auto; display: block; }
+.figura figcaption { font-size: .85rem; color: var(--tinta-tenue); margin-top: .7rem; }
+
+/* ---------- Buscador ------------------------------------------------------ */
+
+.buscador { margin-bottom: 1.75rem; }
+.buscador label { display: block; font-size: .88rem; color: var(--tinta-media); margin-bottom: .4rem; }
+.buscador__campo { display: flex; gap: .5rem; max-width: 560px; }
+.buscador input {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: .95rem;
+  padding: .5rem .75rem;
+  border: 1px solid var(--linea);
+  border-radius: 2px;
+  background: var(--blanco);
+  color: var(--tinta);
+  min-width: 0;
+}
+.buscador input:focus { border-color: var(--azul); }
+.sugerencias { font-size: .85rem; color: var(--tinta-tenue); margin: .8rem 0 0; }
+
+.veredicto {
+  font-family: var(--mono);
+  font-size: .88rem;
+  padding: .7rem 1rem;
+  border-radius: 2px;
+  margin-bottom: 1.25rem;
+  background: var(--ambar-fondo);
+  border-left: 3px solid var(--ambar);
+}
+.veredicto.discrepan { background: #fdf1ee; border-left-color: #8c2f1d; color: #8c2f1d; }
+
+.coincidencias { margin-top: 2rem; }
+.coincidencias h3 { font-size: 1rem; margin-bottom: .9rem; }
+
+.hallazgo { background: var(--blanco); border: 1px solid var(--linea); border-radius: 3px; padding: 1rem 1.1rem; margin-bottom: .8rem; }
+.hallazgo__cabecera { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; margin-bottom: .6rem; }
+.hallazgo__titulo { font-size: .95rem; font-weight: 500; }
+.hallazgo__id { font-family: var(--mono); font-size: .8rem; color: var(--tinta-tenue); white-space: nowrap; }
+.contexto { font-size: .87rem; color: var(--tinta-media); margin: 0 0 .4rem; max-width: none; line-height: 1.55; }
+.contexto:last-child { margin-bottom: 0; }
+.contexto mark { background: var(--ambar-fondo); color: var(--ambar); font-weight: 600; padding: 0 2px; border-radius: 2px; }
+
+/* ---------- Pie ----------------------------------------------------------- */
+
+footer {
+  border-top: 1px solid var(--linea);
+  padding: 2rem 1.5rem 3rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  color: var(--tinta-tenue);
+  font-size: .87rem;
+}
+@media (min-width: 900px) { footer { padding-inline: 3rem; } }
+footer p { margin: 0 0 .3rem; }
+footer .nota { font-size: .82rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* Leyenda de la escala de color de la matriz. La escala se normaliza al
+   rango de cada selección, así que hay que decir cuál es ese rango. */
+.escala {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin: 1.1rem 0 0;
+  font-family: var(--mono);
+  font-size: .76rem;
+  color: var(--tinta-tenue);
+  flex-wrap: wrap;
+}
+.escala__barra {
+  width: 110px;
+  height: 9px;
+  border-radius: 1px;
+  border: 1px solid var(--linea);
+}
+.escala__rango { margin-left: auto; font-variant-numeric: tabular-nums; }
