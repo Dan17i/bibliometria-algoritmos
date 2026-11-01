@@ -220,4 +220,4 @@ Los valores son el CPCC (correlación cofenética). **Average** es el enlace má
 
 ## Uso de IA generativa
 
-El enunciado permite la IA generativa solo como apoyo y exige declararla. Durante el desarrollo se usó **Claude Code** (Anthropic) como asistente de programación en el módulo de IA, las métricas, el clustering y sus pruebas, y para redactar parte de la documentación. La IA no reemplaza el diseño algorítmico ni el análisis formal, que son del equipo. La declaración formal completa irá en el documento de diseño final.
+El enunciado permite la IA generativa solo como apoyo y exige declararla. Durante el desarrollo se usó **Claude** (Anthropic) como asistente de programación en el módulo de IA, las métricas, el clustering y sus pruebas. La IA no reemplaza el diseño algorítmico ni el análisis formal, que son del equipo. La declaración formal completa irá en el documento de diseño final.
