@@ -1,0 +1,31 @@
+# Configuración del despliegue en Render.
+#
+#
+#
+# El puerto NO se fija aquí. El servicio lo asigna al arrancar y lo pasa en la
+# variable PORT; por eso el comando de arranque la lee en vez de usar un
+# número fijo. Y el host es 0.0.0.0 y no 127.0.0.1: esta última solo acepta
+# conexiones de la propia máquina, que es exactamente lo contrario de lo que
+# se busca al publicar.
+
+services:
+  - type: web
+    name: bibliometria-algoritmos
+    runtime: python
+    plan: free
+    region: oregon
+
+    buildCommand: pip install -r requirements-web.txt
+
+    # waitress y no el servidor de Flask. El de Flask avisa en cada arranque
+    # de que es «a development server» y no debe usarse en producción, y tiene
+    # razón: atiende una petición a la vez y no está endurecido. waitress es
+    # un servidor WSGI de verdad y funciona igual en Windows y en Linux, así
+    # que la misma orden sirve para probar en local antes de publicar.
+    startCommand: python -m waitress --port=$PORT --host=0.0.0.0 app.servidor:app
+
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+
+    healthCheckPath: /api/corpus

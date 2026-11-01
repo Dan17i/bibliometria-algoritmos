@@ -1,0 +1,15 @@
+# Dependencias para publicar la aplicación web.
+#
+# Solo dos. La aplicación no necesita matplotlib ni pdfplumber en ejecución:
+# las figuras de los dendrogramas se sirven como PNG ya generados y guardados
+# en data/figuras/, y pdfplumber solo lo usa el extractor de abstracts, que se
+# ejecuta aparte y no forma parte del servidor.
+#
+# Mantener esta lista corta no es cosmético: el servicio de hosting instala
+# estas dependencias en cada despliegue, y matplotlib tarda varios minutos en
+# compilar. Con estas dos, el despliegue termina en segundos.
+#
+# Para desarrollo local sigue usándose requirements.txt, que incluye todo.
+
+flask
+waitress

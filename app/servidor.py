@@ -9,10 +9,7 @@ QUÉ SE CALCULA EN VIVO Y QUÉ NO
 Los cuatro algoritmos clásicos y los tres de búsqueda de patrones son código
 puro sin dependencias: se ejecutan en cada petición sobre los textos elegidos.
 
-Los dos enfoques de IA necesitan cargar modelos preentrenados que ocupan
-varios GB. La aplicación los usa si están instalados (`requirements-ai.txt`)
-y, si no, lo dice en la respuesta en vez de fallar o de mostrar un valor
-inventado.
+
 
 Los dendrogramas se sirven como imágenes ya renderizadas: el clustering de 20
 abstracts con tres enlaces no cambia entre peticiones, así que recalcularlo en
@@ -413,6 +410,14 @@ def corpus_info():
 
 
 if __name__ == "__main__":
+    # Puerto y host por variable de entorno. Un servicio de hosting asigna el
+    # puerto al arrancar y lo pasa en PORT, así que fijarlo en 5000 haría que
+    # la aplicación escuchara donde nadie la busca. Y HOST tiene que ser
+    # 0.0.0.0 fuera de la máquina propia: 127.0.0.1 solo acepta conexiones del
+    # mismo equipo, que es justo lo que no queremos al publicarla.
+    puerto = int(os.environ.get("PORT", "5000"))
+    host = os.environ.get("HOST", "127.0.0.1")
+
     print("Corpus cargado:", len(CORPUS), "abstracts")
-    print("Abre http://127.0.0.1:5000")
-    app.run(debug=False, port=5000)
+    print(f"Abre http://{host}:{puerto}")
+    app.run(host=host, port=puerto, debug=False)
