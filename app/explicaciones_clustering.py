@@ -256,15 +256,24 @@ def demostracion(clave: str, enlace: str, vectores: dict, textos: list[str], ids
         "subtitulo": f"{REPRESENTACIONES[clave]}, {n} abstracts",
         "ms": (time.perf_counter() - inicio) * 1000,
         "acepta_textos": False,
+        "que_es": "Es un algoritmo que organiza los 20 artículos en grupos según qué tanto se parecen, sin que nadie le diga cuáles son los grupos. "
+                  "Empieza con cada artículo solo y va juntando los dos grupos más parecidos, hasta que todos quedan en uno. El resultado es un árbol, "
+                  "llamado dendrograma, que muestra qué se unió con qué y en qué orden.",
+        "que_significa": "Este número, llamado CPCC, es la nota del árbol: va de −1 a 1, y entre más cerca de 1, mejor respeta el dibujo los parecidos reales entre los artículos.",
+        "formula_simple": {
+            "single": "En palabras: D(A, B) es la distancia entre dos grupos, y d(x, y) la distancia entre dos artículos. Single mira todas las parejas posibles entre los dos grupos y se queda con la más cercana (min).",
+            "complete": "En palabras: D(A, B) es la distancia entre dos grupos, y d(x, y) la distancia entre dos artículos. Complete mira todas las parejas posibles entre los dos grupos y se queda con la más lejana (max).",
+            "average": "En palabras: D(A, B) es la distancia entre dos grupos, y d(x, y) la distancia entre dos artículos. Average suma las distancias de todas las parejas posibles entre los dos grupos y saca el promedio.",
+        }[enlace] + " La segunda fórmula es la nota del árbol: compara la distancia real entre cada par de artículos, d(x, y), con la distancia a la que el árbol los une, C(x, y). Si las dos listas se parecen, el árbol es fiel.",
         "idea": {
             "single": "Va uniendo, de a dos, los grupos más cercanos, y mide la cercanía entre grupos por sus dos miembros más próximos. Es como unir amigos de amigos: basta una persona en común para juntar dos círculos.",
             "complete": "Va uniendo los grupos más cercanos, pero mide la cercanía entre grupos por sus dos miembros más lejanos. Solo junta dos grupos si todos sus miembros están razonablemente cerca.",
             "average": "Va uniendo los grupos más cercanos y mide la cercanía entre grupos por el promedio de todas las distancias entre sus miembros. Es el punto medio entre Single y Complete.",
         }[enlace],
-        "en_una_frase": f"El árbol conserva las distancias originales con una correlación de {_n(mia['cpcc']['cpcc'])}, "
-                        + ("la más alta de los tres enlaces con esta representación."
+        "en_una_frase": f"Este árbol obtuvo una nota de {_n(mia['cpcc']['cpcc'])}, "
+                        + ("la más alta de los tres enlaces con esta forma de medir el parecido."
                            if mia["cpcc"]["cpcc"] >= max(corridas[e]["cpcc"]["cpcc"] for e in ENLACES)
-                           else f"frente a {_n(max(corridas[e]['cpcc']['cpcc'] for e in ENLACES))} del mejor enlace con esta representación."),
+                           else f"frente a {_n(max(corridas[e]['cpcc']['cpcc'] for e in ENLACES))} del mejor enlace con esta forma de medir el parecido."),
         "formulas": [
             {
                 "single": r"D(A, B) = \min_{x \in A,\, y \in B} d(x, y)",
@@ -278,11 +287,11 @@ def demostracion(clave: str, enlace: str, vectores: dict, textos: list[str], ids
             {"tipo": "tabla", "titulo": "Los tres enlaces con esta representación",
              "columnas": ["Enlace", "CPCC", "Altura de la última fusión", "Silueta del mejor corte"], "filas": comparacion},
             {"tipo": "tabla", "titulo": f"Silueta de {NOMBRE_ENLACE[enlace]} según el número de grupos",
-             "columnas": ["k", "Silueta"], "filas": filas_k},
+             "columnas": ["Número de grupos (k)", "Silueta"], "filas": filas_k},
         ],
-        "interpretacion": "El CPCC va de −1 a 1 y mide fidelidad: cerca de 1, el árbol casi no deforma las distancias entre abstracts. "
-                          "No mide si los grupos tienen sentido temático, solo si el dibujo es honesto con los datos. La silueta mira "
-                          "un solo corte del árbol: cerca de 1 hay grupos bien separados, de 0.25 a 0.5 la estructura es débil, y por "
+        "interpretacion": "El CPCC mide fidelidad: cerca de 1, el árbol casi no deforma las distancias entre abstracts. "
+                          "No mide si los grupos tienen sentido temático, solo si el dibujo es honesto con los datos. La silueta es otra nota: "
+                          "si el árbol se corta en cierto número de grupos, dice qué tan separados quedan. Cerca de 1 hay grupos bien separados, de 0.25 a 0.5 la estructura es débil, y por "
                           "debajo de 0.25 no hay una estructura sustancial. "
                           "Las alturas del dendrograma son distancias reales: cuanto más abajo se unen dos abstracts, más se parecen.",
         "conclusiones": _conclusiones(clave, enlace, corridas),

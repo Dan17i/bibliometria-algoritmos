@@ -123,6 +123,10 @@ def _kmp(texto: str, patron: str) -> dict:
 
     resultado = kmp.buscar_con_metricas(texto, patron)
     return {
+        "que_es": "Es un algoritmo que busca una palabra o frase dentro de un texto largo. Se encarga de recorrer el texto de izquierda a derecha sin devolverse nunca, "
+                  "y aprovecha lo que ya leyó para no comparar dos veces lo mismo. A lo que se busca se le llama patrón.",
+        "formula_simple": "En palabras: i marca por dónde va el texto, T, y j por dónde va el patrón, P. La tabla lps guarda, para cada posición del patrón, cuántas letras de su inicio se repiten justo "
+                          "al final de lo que lleva hasta ahí. Cuando una letra falla, j retrocede a lo que dice esa tabla, e i se queda donde está.",
         "idea": "Cuando falla, KMP ya sabe qué parte del patrón coincidió, y usa eso para seguir sin volver atrás en el texto. "
                 "La búsqueda ingenua retrocede y vuelve a comparar lo que ya conocía; KMP no.",
         "formulas": [
@@ -162,8 +166,8 @@ def _kmp(texto: str, patron: str) -> dict:
             "tiempo": "O(n + m)", "espacio": "O(m)",
             "porque": "el puntero del texto nunca retrocede y el del patrón solo baja tantas veces como subió",
         },
-        "interpretacion": "KMP siempre hace del orden de n comparaciones, sin importar el patrón: su tiempo casi no cambia. No tiene un "
-                          "caso malo, pero tampoco puede saltarse texto.",
+        "interpretacion": "KMP trabaja más o menos lo mismo sin importar qué se busque: alrededor de una comparación por cada carácter del texto, y nunca más del doble. "
+                          "No tiene un caso malo, pero tampoco puede saltarse texto.",
     }
 
 
@@ -211,6 +215,10 @@ def _boyer_moore(texto: str, patron: str) -> dict:
     resultado = boyer_moore.buscar_con_metricas(texto, patron)
     primer_fallo = next((v for v in visual_pasos if "no" in v["estados"]), None)
     return {
+        "que_es": "Es un algoritmo que busca una palabra o frase dentro de un texto largo, pero empieza a comparar por el final de lo que busca. Se encarga de saltarse "
+                  "pedazos enteros del texto cuando ve que ahí no puede estar, así que no necesita leerlo todo. A lo que se busca se le llama patrón.",
+        "formula_simple": "En palabras: cada vez que algo falla, el patrón se mueve a la derecha. La fórmula calcula dos saltos posibles y toma el mayor: uno según la letra que falló, c, y su última "
+                          "posición en el patrón; y otro, bueno, según el pedazo que sí coincidió. j es la posición donde ocurrió el fallo. Ninguno de los dos saltos se pasa de largo una aparición.",
         "idea": "Compara el patrón de derecha a izquierda. Si el carácter del texto que falló no está en el patrón, ninguna alineación que lo "
                 "incluya puede funcionar y el patrón salta completo. Por eso puede terminar sin leer todo el texto.",
         "formulas": [
@@ -253,8 +261,8 @@ def _boyer_moore(texto: str, patron: str) -> dict:
             "tiempo": "O(n / m) en el mejor caso y O(n · m) en el peor", "espacio": "O(m + σ)",
             "porque": "cada alineación compara hasta m caracteres y salta hasta m posiciones. El peor caso aparece cuando el patrón se repite muchas veces",
         },
-        "interpretacion": "Entre más largo el patrón, más salta, porque sus saltos no pueden superar m. En texto natural suele ser el más rápido, "
-                          "aunque su cota en el peor caso es peor que la de KMP: con «aaa» sobre «aaaaaa…» compara m caracteres en cada alineación.",
+        "interpretacion": "Entre más largo es lo que se busca, más puede saltar, porque cada salto llega como máximo al largo del patrón. Por eso en texto normal, con patrones de varias letras, "
+                          "suele ser el más rápido. Su punto débil es un texto muy repetitivo: buscando «aaa» en «aaaaaa…» compara el patrón completo en cada posición.",
     }
 
 
@@ -345,8 +353,12 @@ def _rabin_karp(texto: str, patron: str) -> dict:
         },
     ]
     return {
+        "que_es": "Es un algoritmo que busca una palabra o frase dentro de un texto largo convirtiendo las letras en números. Se encarga de calcular un número para lo que se busca "
+                  "y otro para cada pedazo del texto del mismo tamaño. Solo cuando los dos números coinciden revisa letra por letra si de verdad es lo que se busca. A lo que se busca se le llama patrón.",
+        "formula_simple": "En palabras: la primera fórmula convierte un pedazo de texto en un número, como si sus letras fueran las cifras de un número en base b. Con mod q se queda solo con el residuo de dividir "
+                          "entre q, para que el número no crezca demasiado. La segunda calcula el número del pedazo siguiente a partir del anterior: quita la letra que sale y agrega la que entra.",
         "idea": "En vez de comparar letras, convierte cada pedazo de texto en un número y compara números. El número se actualiza al deslizar "
-                "la ventana, sin recalcularlo. Es como una huella: si no coincide, las cadenas son distintas; si coincide, hay que confirmar.",
+                "la ventana (el pedazo del texto que se está mirando), sin recalcularlo. Es como una huella: si no coincide, las cadenas son distintas; si coincide, hay que confirmar.",
         "formulas": [
             r"\text{hash}(s) = \left(s_0 b^{m-1} + s_1 b^{m-2} + \dots + s_{m-1}\right) \bmod q",
             r"h_{i+1} = \big((h_i - T[i] \cdot b^{m-1}) \cdot b + T[i + m]\big) \bmod q",
@@ -356,7 +368,7 @@ def _rabin_karp(texto: str, patron: str) -> dict:
             {"tipo": "tabla", "titulo": "Hash del patrón, paso a paso", "columnas": ["Carácter", "Código", "h · b + código", "mod q"], "filas": filas_hash},
             {"tipo": "busqueda", "texto": texto, "patron": patron, "pasos": visual_pasos,
              "inicial": ocurrencias[0] if ocurrencias else 0,
-             "aviso": "Cada paso es una ventana. Solo se comparan caracteres cuando el hash coincide."},
+             "aviso": "Cada paso es una ventana, y su hash es el número que la representa. Solo se comparan las letras cuando ese número es igual al del patrón."},
         ],
         "ocurrencias": ocurrencias,
         "comparaciones": resultado["comparaciones"],
@@ -366,8 +378,8 @@ def _rabin_karp(texto: str, patron: str) -> dict:
             "tiempo": "O(n + m) en promedio y O(n · m) en el peor caso", "espacio": "O(1)",
             "porque": "el rolling hash es constante por ventana, pero cada coincidencia de hash verifica hasta m caracteres",
         },
-        "interpretacion": "Hace una operación aritmética por ventana, y esa aritmética cuesta más que comparar dos letras, por eso en la práctica es el "
-                          "más lento de los tres. Su ventaja real está en buscar varios patrones a la vez con el mismo recorrido.",
+        "interpretacion": "En cada ventana hace una operación aritmética, y eso cuesta más que comparar dos letras, por eso en la práctica es el "
+                          "más lento de los tres. Su ventaja real está en buscar varios patrones a la vez, porque el mismo recorrido sirve para todos.",
     }
 
 
@@ -438,6 +450,7 @@ def demostracion(clave: str, texto: str, patron: str) -> dict:
         "familia": "Búsqueda de patrones",
         "valor_texto": str(n_oc),
         "etiqueta_valor": "ocurrencia" if n_oc == 1 else "ocurrencias",
+        "que_significa": "Es el número de veces que aparece lo que se busca en este texto.",
         "en_una_frase": frase,
         "patron": patron,
         "texto_usado": texto,

@@ -114,11 +114,13 @@ const Demostracion = (() => {
         <span class="dem-valor">${d.valor_texto ?? d.similitud.toFixed(4)}</span>${d.etiqueta_valor ? `<span class="dem-par">${d.etiqueta_valor}</span>` : ""}
         <span class="dem-par">${quienes}${d.ms ? ` · ${d.ms.toFixed(d.ms < 10 ? 2 : 0)} ms` : ""}</span>
       </div>
-      <p class="dem-frase">${seguro(d.en_una_frase)}</p>`;
+      <p class="dem-frase">${seguro(d.en_una_frase)}</p>
+      ${d.que_significa ? `<p class="dem-guia">${seguro(d.que_significa)}</p>` : ""}`;
   }
 
-  function seccion(nombre, contenido) {
-    return `<section class="dem-seccion"><h3>${nombre}</h3>${contenido}</section>`;
+  /** Una parte de la demostración; `guia` dice en una frase qué se va a encontrar en ella. */
+  function seccion(nombre, contenido, guia = "") {
+    return `<section class="dem-seccion"><h3>${nombre}</h3>${guia ? `<p class="dem-guia">${guia}</p>` : ""}${contenido}</section>`;
   }
 
   function pasos(lista) {
@@ -226,9 +228,12 @@ const Demostracion = (() => {
 
   function visualMatriz(v) {
     const total = v.celdas.length * v.celdas[0].length;
-    const aviso = v.completa
-      ? "La matriz completa. Mueve el control o toca una celda."
-      : "Las primeras celdas de la matriz, con los primeros caracteres de cada texto. Mueve el control o toca una celda.";
+    const pregunta = v.operacion === "min"
+      ? "¿cuántos cambios hacen falta para convertir el pedazo del primer texto que llega hasta esa fila en el pedazo del segundo que llega hasta esa columna?"
+      : "¿cuál es el mejor puntaje al alinear el pedazo del primer texto que llega hasta esa fila con el pedazo del segundo que llega hasta esa columna?";
+    const aviso = `Cada casilla responde: ${pregunta}
+      ${v.completa ? "Aquí está la tabla completa." : "Aquí están solo las primeras casillas, porque la tabla de dos abstracts es enorme."}
+      Mueve el control o toca una casilla: la azul es la que se calcula, las claras son sus vecinas y la del borde es la opción elegida. ε significa «texto vacío» y ␣ un espacio.`;
     return `
       <div class="dem-tarjeta" data-matriz>
         <p style="margin-top:0;color:var(--tinta-media);font-size:.9375rem">${aviso}</p>
@@ -239,7 +244,7 @@ const Demostracion = (() => {
         </div>
         <div class="pd-explica" aria-live="polite"></div>
         ${v.final ? `
-          <p class="dem-subtitulo">Las últimas celdas. La esquina inferior derecha es el resultado.</p>
+          <p class="dem-subtitulo">Las últimas casillas. La de la esquina inferior derecha es el resultado final.</p>
           ${matrizHtml(v.final, false)}` : ""}
       </div>`;
   }
@@ -272,7 +277,7 @@ const Demostracion = (() => {
       </tr>`).join("");
     return `
       <div class="dem-tarjeta">
-        <p style="margin-top:0;color:var(--tinta-media);font-size:.9375rem">Las palabras que más aportan al producto punto.</p>
+        <p style="margin-top:0;color:var(--tinta-media);font-size:.9375rem">Las palabras que más ayudan a que los dos textos se parezcan. tf: cuántas veces aparece en cada texto. idf: qué tan poco común es en los 20 abstracts. w: su peso final (tf × idf). La última columna es lo que aporta esa palabra.</p>
         <div style="overflow-x:auto"><table class="tabla-dem">
           <thead><tr><th>Palabra</th><th>tf A</th><th>tf B</th><th>idf</th><th>w A</th><th>w B</th><th>w A · w B</th><th></th></tr></thead>
           <tbody>${filas}</tbody>
@@ -281,11 +286,11 @@ const Demostracion = (() => {
   }
 
   function visualPalabras(v) {
-    const fuera = (lista) => (lista.length ? ` Sin vector: ${seguro([...new Set(lista)].join(", "))}.` : "");
+    const fuera = (lista) => (lista.length ? ` No están en el diccionario de GloVe: ${seguro([...new Set(lista)].join(", "))}.` : "");
     return `
       <div class="dem-tarjeta conjuntos" style="grid-template-columns:repeat(auto-fit,minmax(14rem,1fr))">
-        <div class="conjunto"><h4>Primer abstract · k = ${v.total_a}</h4>${fichas(v.a)}<p style="font-size:.8125rem;color:var(--tinta-tenue);margin:.5rem 0 0">${v.a.length < v.total_a ? `Primeras ${v.a.length} de ${v.total_a} palabras.` : ""}${fuera(v.fuera_a)}</p></div>
-        <div class="conjunto"><h4>Segundo abstract · k = ${v.total_b}</h4>${fichas(v.b)}<p style="font-size:.8125rem;color:var(--tinta-tenue);margin:.5rem 0 0">${v.b.length < v.total_b ? `Primeras ${v.b.length} de ${v.total_b} palabras.` : ""}${fuera(v.fuera_b)}</p></div>
+        <div class="conjunto"><h4>Primer abstract · ${v.total_a} palabras</h4>${fichas(v.a)}<p style="font-size:.8125rem;color:var(--tinta-tenue);margin:.5rem 0 0">${v.a.length < v.total_a ? `Primeras ${v.a.length} de ${v.total_a} palabras.` : ""}${fuera(v.fuera_a)}</p></div>
+        <div class="conjunto"><h4>Segundo abstract · ${v.total_b} palabras</h4>${fichas(v.b)}<p style="font-size:.8125rem;color:var(--tinta-tenue);margin:.5rem 0 0">${v.b.length < v.total_b ? `Primeras ${v.b.length} de ${v.total_b} palabras.` : ""}${fuera(v.fuera_b)}</p></div>
       </div>`;
   }
 
@@ -324,7 +329,7 @@ const Demostracion = (() => {
           <line class="angulo__a" x1="${cx}" y1="${cy}" x2="${cx + largo}" y2="${cy}"/>
           <line class="angulo__b" x1="${cx}" y1="${cy}" x2="${bx}" y2="${by}"/>
         </svg>
-        <p><strong>θ = ${v.grados.toFixed(2)}°.</strong> ${lectura} A 0° el coseno vale 1; a 90° vale 0.</p>
+        <p>Imagina cada texto como una flecha. <strong>θ = ${v.grados.toFixed(2)}°</strong> es el ángulo entre las dos. ${lectura} A 0° apuntan igual y el coseno vale 1; a 90° no tienen nada en común y vale 0.</p>
       </div>`;
   }
 
@@ -337,7 +342,7 @@ const Demostracion = (() => {
     const celdasPatron = [...v.patron].map((c, j) => `<span class="bq__celda" data-p="${j}">${caracter(c)}</span>`).join("");
     return `
       <div class="dem-tarjeta" data-busqueda>
-        <p style="margin-top:0;color:var(--tinta-media);font-size:.9375rem">${seguro(v.aviso)}</p>
+        <p style="margin-top:0;color:var(--tinta-media);font-size:.9375rem">Arriba está el texto y debajo el patrón, es decir, lo que se busca. Verde: la letra coincide. Rojo: no coincide. Gris: no se ha comparado. La casilla azul del texto es donde está mirando el algoritmo, y ␣ es un espacio. ${seguro(v.aviso)}</p>
         <div class="bq" tabindex="0" aria-label="Texto y patrón alineado">
           <div class="bq__pista" style="width:calc(${n} * var(--bq-celda))">
             <div class="bq__fila">${reglas}</div>
@@ -420,7 +425,8 @@ const Demostracion = (() => {
           <div class="reparto-extremos"><span>mínimo ${minimo.toFixed(4)}</span><span>máximo ${maximo.toFixed(4)}</span></div>
         </div>`;
     }
-    return seccion("Cómo se interpreta", `${contexto}<p>${seguro(d.interpretacion)}</p>`);
+    return seccion("Cómo se interpreta", `${contexto}<p>${seguro(d.interpretacion)}</p>`,
+      "Qué quiere decir este resultado y, sobre todo, qué no quiere decir.");
   }
 
   function codigo(c) {
@@ -431,7 +437,7 @@ const Demostracion = (() => {
           ${c.funciones.map(([f, que]) => `<li><code>${seguro(f)}</code>${seguro(que)}</li>`).join("")}
         </ul>
         <p style="margin:.75rem 0 0;font-size:.9375rem"><strong>Complejidad:</strong> ${seguro(c.tiempo)} en tiempo y ${seguro(c.espacio)} en espacio. ${seguro(c.porque)}.</p>
-      </div>`);
+      </div>`, "Para quien quiera revisar la implementación: el archivo y las funciones que hacen este cálculo. La complejidad dice cuánto crece el trabajo y la memoria cuando los datos crecen.");
   }
 
   function tusPalabras(d) {
@@ -439,7 +445,7 @@ const Demostracion = (() => {
     if (d.tipo === "patron") {
       return seccion("Prueba con tus palabras", `
         <div class="dem-tarjeta">
-          <p style="margin-top:0;color:var(--tinta-media);font-size:.9375rem">Escribe un texto y un patrón, y compara con lo que hagas en papel. Se distinguen mayúsculas de minúsculas.</p>
+          <p style="margin-top:0;color:var(--tinta-media);font-size:.9375rem">En el primer campo va el texto y en el segundo lo que quieres buscar. Puedes hacerlo en papel y comparar. Se distinguen mayúsculas de minúsculas.</p>
           <form class="palabras-form" id="form-palabras">
             <input class="campo-texto" name="a" maxlength="300" value="${seguro(d.textos ? d.textos[0] : "ABABDABACDABABCABAB")}" aria-label="Texto" autocomplete="off" spellcheck="false" required>
             <input class="campo-texto" name="b" maxlength="120" value="${seguro(d.textos ? d.textos[1] : "ABABCABAB")}" aria-label="Patrón" autocomplete="off" spellcheck="false" required>
@@ -452,7 +458,7 @@ const Demostracion = (() => {
     const inicial = d.textos || (dp ? ["gato", "pato"] : ["the cat sat", "the cat ran"]);
     return seccion("Prueba con tus palabras", `
       <div class="dem-tarjeta">
-        <p style="margin-top:0;color:var(--tinta-media);font-size:.9375rem">Escribe dos textos cortos y compara con lo que calcules en papel.${dp ? " La matriz sale completa." : ""}</p>
+        <p style="margin-top:0;color:var(--tinta-media);font-size:.9375rem">Escribe dos textos cortos y mira qué da. Puedes hacer el cálculo en papel y comparar.${dp ? " Como son cortos, la tabla sale completa." : ""}</p>
         <form class="palabras-form" id="form-palabras">
           <input class="campo-texto" name="a" maxlength="${limite}" value="${seguro(inicial[0])}" aria-label="Primer texto" autocomplete="off" spellcheck="false" required>
           <input class="campo-texto" name="b" maxlength="${limite}" value="${seguro(inicial[1])}" aria-label="Segundo texto" autocomplete="off" spellcheck="false" required>
@@ -482,15 +488,17 @@ const Demostracion = (() => {
     cuerpo.innerHTML = `
       ${avisoPalabras}
       ${cabecera(d)}
-      ${seccion("La idea", `<p>${seguro(d.idea)}</p>`)}
-      ${seccion("La fórmula", `<div class="dem-tarjeta">${d.formulas.map(formula).join("")}</div>`)}
-      ${seccion("Paso a paso, con estos valores", pasos(d.pasos))}
-      ${seccion("Para verlo", d.visual.map((v) => VISUALES[v.tipo](v)).join(""))}
+      ${seccion("La idea", `<p>${seguro(d.que_es)}</p><p>${seguro(d.idea)}</p>
+        <p class="dem-guia">Más abajo está la fórmula, el cálculo paso a paso con estos datos, un dibujo para seguirlo y qué significa el resultado.</p>`)}
+      ${seccion("La fórmula", `<div class="dem-tarjeta">${d.formulas.map(formula).join("")}<p class="dem-guia" style="margin-bottom:0">${seguro(d.formula_simple)}</p></div>`,
+        "Es la idea anterior escrita en símbolos. Si prefieres, sáltala: el paso a paso hace lo mismo con números reales.")}
+      ${seccion("Paso a paso, con estos valores", pasos(d.pasos), "Aquí se hace el cálculo de verdad, en orden. Cada tarjeta es un paso, y los números son los de estos datos.")}
+      ${seccion("Para verlo", d.visual.map((v) => VISUALES[v.tipo](v)).join(""), "Lo mismo en tablas y dibujos, para seguirlo con los ojos.")}
       ${lectura(d)}
-      ${d.conclusiones ? seccion("Conclusiones", `<div class="dem-tarjeta">${d.conclusiones.map((c) => `<p>${seguro(c)}</p>`).join("")}</div>`) : ""}
+      ${d.conclusiones ? seccion("Conclusiones", `<div class="dem-tarjeta">${d.conclusiones.map((c) => `<p>${seguro(c)}</p>`).join("")}</div>`, "Lo que se concluye con estos números. Se escribe a partir de los resultados de esta consulta.") : ""}
       ${tusPalabras(d)}
       ${codigo(d.codigo)}
-      ${abstracts ? seccion("Los textos comparados", abstracts) : ""}`;
+      ${abstracts ? seccion("Los textos comparados", abstracts, "Los dos abstracts completos, por si quieres leerlos.") : ""}`;
 
     d.visual.forEach((v) => {
       if (v.tipo === "matriz") activarMatriz(cuerpo.querySelector("[data-matriz]"), v);

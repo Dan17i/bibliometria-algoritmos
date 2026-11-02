@@ -132,7 +132,7 @@ function actualizarContador() {
 function filaMedida(m) {
   const porcentaje = Math.max(0, Math.min(1, m.similitud)) * 100;
   return `<tr>
-    <td>${m.algoritmo}<div class="detalle">${m.detalle}</div></td>
+    <td>${m.algoritmo}<div class="que-mide">${m.que_mide}</div><div class="detalle">${m.detalle}</div></td>
     <td class="familia">${m.familia}<div class="detalle">${m.complejidad}</div></td>
     <td class="num">
       <span class="valor">${m.similitud.toFixed(4)}</span>
@@ -159,7 +159,8 @@ function bloqueAbstracts(articulos) {
 function dibujarPar(d, contenedor) {
   const [a, b] = d.articulos;
   contenedor.innerHTML = `
-    <p class="par-titulo">${a.id} · ${b.id}. Cada demostración se calcula solo cuando se abre.</p>
+    <p class="par-titulo">${a.id} · ${b.id}</p>
+    <p class="nota-resultado">Cada fila mide el parecido de una forma distinta. El número va de 0 a 1: entre más cerca de 1, más se parecen. No compares números entre algoritmos, porque cada uno mide algo diferente; por ejemplo, GloVe casi siempre da más de 0.9. Abre una demostración para ver cómo salió el número y si es alto o bajo frente a los demás pares.</p>
     <div class="tarjeta-tabla" data-par="${d.ids.join(",")}">
       <table class="medidas">
         <thead>
@@ -184,6 +185,7 @@ function tablaDePares(d) {
   }
   return `
     <h3 class="subtitulo-resultados">Todos los pares</h3>
+    <p class="nota-resultado">Los mismos resultados en forma de lista: una fila por cada pareja de artículos y una columna por algoritmo.</p>
     <div class="tabla-pares">
       <table class="medidas">
         <thead><tr><th>Par</th>${encabezado}</tr></thead>
@@ -251,13 +253,14 @@ function dibujarMatrizDe(d, algoritmo) {
       </p>
     </div>
     <p class="nota-matriz">
-      Toca una casilla para ver la demostración de ese par.
-      ${algoritmo.algoritmo}: ${algoritmo.complejidad} por par,
+      Cada casilla compara el artículo de su fila con el de su columna. Toca una para ver su demostración.
+      ${algoritmo.algoritmo} mide esto: ${algoritmo.que_mide}
+      Complejidad: ${algoritmo.complejidad} por par,
       ${algoritmo.origen === "en vivo"
         ? "calculado en el momento."
         : "leído de los 190 pares calculados una vez, porque cada par tarda varios segundos en el servidor."}
-      El color se escala al rango real de esta selección, no a 0–1: los valores
-      suelen caer en una franja estrecha y una escala absoluta no mostraría diferencias.
+      Los colores se ajustan a los valores de esta selección, para que se noten las diferencias
+      aunque los números sean parecidos.
     </p>`;
 }
 
@@ -321,6 +324,7 @@ async function cargarClustering() {
 function dibujarDendro(indice) {
   const r = representaciones[indice];
   const enlaces = Object.keys(r.cpcc);
+  texto($("#repr-explicacion"), r.que_es);
 
   const cpcc = enlaces.map((e) => `
     <div class="${e === r.mejor_enlace ? "mejor" : ""}">
@@ -337,12 +341,13 @@ function dibujarDendro(indice) {
     <button type="button" class="boton-suave" data-agrupar="${e}">Ver demostración de ${e[0].toUpperCase() + e.slice(1)}</button>`).join(" ");
 
   $("#dendro").innerHTML = `
+    <p class="nota-resultado">La nota (CPCC) de cada árbol con esta forma de medir. Se resalta la más alta.</p>
     <div class="dendro__cpcc">${cpcc}</div>
     <p class="acciones-dendro">${botones}</p>
     <figure class="figura">
       <img src="${r.comparacion}" alt="Comparación de los tres criterios de enlace" loading="lazy">
-      <figcaption>Los tres enlaces en la misma escala. Cada panel rotula sus propias hojas:
-        cada criterio ordena los artículos de forma distinta.</figcaption>
+      <figcaption>Los tres árboles con la misma escala, para compararlos. Cada uno ordena los artículos
+        a su manera, por eso P1 a P20 no aparecen en el mismo orden.</figcaption>
     </figure>
     ${figuras}`;
 
@@ -402,6 +407,7 @@ async function buscarPatron(patron) {
 
     contenedor.innerHTML = `
       <p class="veredicto ${d.coinciden ? "" : "discrepan"}">${veredicto}</p>
+      <p class="nota-resultado">Ocurrencias: cuántas veces aparece. Comparaciones: cuántas veces el algoritmo tuvo que comparar algo para encontrarlo; entre menos, menos esfuerzo. Tiempo: lo que tardó en esta ejecución, y puede variar un poco de una vez a otra.</p>
       <div class="tarjeta-tabla"><table class="medidas">
         <thead>
           <tr><th>Algoritmo</th><th class="num">Ocurrencias</th>
@@ -414,7 +420,7 @@ async function buscarPatron(patron) {
           <h3>Dónde aparece</h3>
           ${hallazgos}
         </div>` : `<p class="vacio" style="margin-top:1.5rem">
-          El patrón no aparece en ningún abstract del corpus.</p>`}`;
+          Lo que buscaste no aparece en ninguno de los 20 abstracts. Revisa las mayúsculas: la búsqueda es exacta.</p>`}`;
   } catch (error) {
     mostrarError(contenedor, error.message);
   }

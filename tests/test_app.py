@@ -314,3 +314,26 @@ def test_demostracion_patron_invalida(cliente, cuerpo):
 def test_las_filas_de_la_busqueda_traen_su_clave(cliente):
     filas = _buscar(cliente, "AI")["algoritmos"]
     assert [f["clave"] for f in filas] == PATRONES
+
+
+# --- Explicaciones en palabras sencillas ----------------------------------------
+
+@pytest.mark.parametrize("ruta, cuerpo", [
+    *[("/api/demostracion", {"algoritmo": c, "ids": ["P6", "P9"]})
+      for c in ("levenshtein", "needleman_wunsch", "jaccard", "coseno_tfidf", "glove", "minilm")],
+    *[("/api/demostracion-agrupamiento", {"representacion": "minilm", "enlace": e})
+      for e in ("single", "complete", "average")],
+    *[("/api/demostracion-patron", {"algoritmo": c, "patron": "learning"}) for c in PATRONES],
+])
+def test_cada_demostracion_se_explica_sin_matematicas(cliente, ruta, cuerpo):
+    d = cliente.post(ruta, json=cuerpo).get_json()
+    assert d["que_es"].startswith("Es un")
+    assert d["que_significa"] and d["formula_simple"].startswith("En palabras:")
+    for tecnicismo in ("vector", "matriz", "embedding", "hash", "O(", "normaliz", "algoritmo de programación"):
+        assert tecnicismo not in d["que_es"].lower(), tecnicismo
+
+
+def test_cada_algoritmo_y_representacion_dicen_que_miden(cliente):
+    d = cliente.post("/api/similitud", json={"ids": ["P6", "P9"]}).get_json()
+    assert all(a["que_mide"] for a in d["algoritmos"])
+    assert all(r["que_es"] for r in cliente.get("/api/clustering").get_json()["representaciones"])

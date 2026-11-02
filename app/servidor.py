@@ -73,18 +73,32 @@ IDF = compute_idf(TEXTOS)
 
 ALGORITMOS = (
     {"clave": "levenshtein", "algoritmo": "Levenshtein",
-     "familia": "Programación dinámica", "complejidad": "O(m·n)", "origen": "precalculado"},
+     "familia": "Programación dinámica", "complejidad": "O(m·n)", "origen": "precalculado",
+     "que_mide": "Cuántas letras hay que cambiar para convertir un texto en el otro."},
     {"clave": "needleman_wunsch", "algoritmo": "Needleman-Wunsch",
-     "familia": "Programación dinámica", "complejidad": "O(m·n)", "origen": "precalculado"},
+     "familia": "Programación dinámica", "complejidad": "O(m·n)", "origen": "precalculado",
+     "que_mide": "Qué tan bien encajan los dos textos, letra por letra, al ponerlos uno sobre el otro."},
     {"clave": "jaccard", "algoritmo": "Jaccard",
-     "familia": "Conjuntos", "complejidad": "O(T)", "origen": "en vivo"},
+     "familia": "Conjuntos", "complejidad": "O(T)", "origen": "en vivo",
+     "que_mide": "Qué proporción de palabras comparten, sin importar el orden."},
     {"clave": "coseno_tfidf", "algoritmo": "Coseno (TF-IDF)",
-     "familia": "Espacio vectorial", "complejidad": "O(T + V)", "origen": "en vivo"},
+     "familia": "Espacio vectorial", "complejidad": "O(T + V)", "origen": "en vivo",
+     "que_mide": "Qué tanto comparten palabras especializadas, sin contar las muy comunes."},
     {"clave": "glove", "algoritmo": "GloVe promediado",
-     "familia": "Embeddings", "complejidad": "O(p)", "origen": "en vivo"},
+     "familia": "Embeddings", "complejidad": "O(p)", "origen": "en vivo",
+     "que_mide": "Qué tan parecido es el significado promedio de sus palabras."},
     {"clave": "minilm", "algoritmo": "MiniLM",
-     "familia": "Embeddings", "complejidad": "O(p)", "origen": "en vivo"},
+     "familia": "Embeddings", "complejidad": "O(p)", "origen": "en vivo",
+     "que_mide": "Qué tan parecido es el tema de los dos textos completos, según un modelo de lenguaje."},
 )
+
+# Cómo se explica cada forma de medir el parecido entre artículos
+QUE_ES_REPRESENTACION = {
+    "minilm": "Un modelo de lenguaje lee cada abstract completo y juzga qué tan parecido es su tema. Es la forma principal de este trabajo.",
+    "glove": "Se compara el significado promedio de las palabras de cada abstract.",
+    "glove_centrado": "Igual que GloVe, pero quitando lo que todos los abstracts tienen en común, para resaltar sus diferencias.",
+    "jaccard": "Se comparan las palabras que comparten los abstracts, sin tener en cuenta su significado.",
+}
 
 REPRESENTACIONES = {
     "minilm": ("Embeddings MiniLM", "fusiones_minilm.json", ""),
@@ -462,6 +476,8 @@ def demostracion_patron():
     resultado["visual"].append(comparacion["visual"])
     resultado["conclusiones"] = comparacion["conclusiones"]
     resultado["subtitulo"] = f"«{patron}» en {nota}, de {id_articulo}"
+    resultado["que_significa"] += (" El paso a paso usa este pedazo corto para que se pueda seguir; "
+                                   "más abajo están los tres algoritmos sobre los 20 abstracts completos.")
     return jsonify(resultado)
 
 
@@ -479,6 +495,7 @@ def clustering():
         disponibles.append({
             "clave": clave,
             "etiqueta": etiqueta,
+            "que_es": QUE_ES_REPRESENTACION[clave],
             "cpcc": enlaces,
             "mejor_enlace": max(enlaces, key=enlaces.get),
             "figuras": {
