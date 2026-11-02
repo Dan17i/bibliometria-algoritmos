@@ -115,14 +115,13 @@ def similitudes_clasicas(texto_a: str, texto_b: str) -> list[dict]:
     })
 
     # --- Jaccard ----------------------------------------------------------
-    (valor, conj_a, conj_b), ms = _cronometrar(jaccard_similarity, texto_a, texto_b)
-    comunes = len(conj_a & conj_b)
+    (valor, interseccion, union), ms = _cronometrar(jaccard_similarity, texto_a, texto_b)
     resultados.append({
         "algoritmo": "Jaccard",
         "familia": "Conjuntos",
         "similitud": valor,
-        "detalle": f"{comunes} términos comunes de "
-                   f"{len(conj_a | conj_b)} en la unión",
+        "detalle": f"{len(interseccion)} términos comunes de "
+                   f"{len(union)} en la unión",
         "ms": ms,
         "complejidad": "O(m+n)",
     })

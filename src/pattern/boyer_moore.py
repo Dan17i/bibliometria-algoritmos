@@ -70,6 +70,11 @@ mayor de los dos saltos, que es lo que hace el algoritmo original.
 from __future__ import annotations
 
 
+def _mayor(a: int, b: int) -> int:
+    """El mayor de dos saltos."""
+    return a if a > b else b
+
+
 def tabla_caracter_malo(patron: str) -> dict[str, int]:
     """
     Última posición de cada carácter dentro del patrón.
@@ -169,11 +174,11 @@ def buscar(texto: str, patron: str) -> list[int]:
         else:
             caracter_malo = texto[desplazado + j]
             ultima = malo.get(caracter_malo, -1)
-            # max(1, ...) evita retroceder cuando la última aparición del
+            # El mínimo de 1 evita retroceder cuando la última aparición del
             # carácter queda a la derecha del punto de fallo.
-            salto_malo = max(1, j - ultima)
+            salto_malo = _mayor(1, j - ultima)
             salto_bueno = bueno[j + 1]
-            desplazado += max(salto_malo, salto_bueno)
+            desplazado += _mayor(salto_malo, salto_bueno)
 
     return ocurrencias
 
@@ -222,9 +227,9 @@ def buscar_con_pasos(texto: str, patron: str, max_pasos: int = 12
             comparaciones += 1
             c = texto[desplazado + j]
             ultima = malo.get(c, -1)
-            salto_malo = max(1, j - ultima)
+            salto_malo = _mayor(1, j - ultima)
             salto_bueno = bueno[j + 1]
-            salto = max(salto_malo, salto_bueno)
+            salto = _mayor(salto_malo, salto_bueno)
             registro = {
                 "posicion": desplazado,
                 "ventana": texto[desplazado:desplazado + m],
@@ -269,13 +274,13 @@ def buscar_con_metricas(texto: str, patron: str) -> dict:
         else:
             comparaciones += 1
             ultima = malo.get(texto[desplazado + j], -1)
-            desplazado += max(max(1, j - ultima), bueno[j + 1])
+            desplazado += _mayor(_mayor(1, j - ultima), bueno[j + 1])
 
     return {
         "ocurrencias": ocurrencias,
         "comparaciones": comparaciones,
         "alineaciones": alineaciones,
         # Cuántos caracteres del texto NUNCA se miraron: la ventaja del método
-        "caracteres_saltados": max(0, n - comparaciones),
+        "caracteres_saltados": _mayor(0, n - comparaciones),
         "preprocesamiento": m + len(malo),
     }

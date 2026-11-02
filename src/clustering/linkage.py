@@ -32,6 +32,11 @@ Desempates: ante igual distancia mínima se fusiona el par con ids menores
 LINKAGES = ("single", "complete", "average")
 
 
+def _es_casi_cero(valor: float) -> bool:
+    """Tolerancia para el error de punto flotante."""
+    return -1e-9 <= valor <= 1e-9
+
+
 def _validate_matrix(dist: list[list[float]]) -> int:
     """Comprueba que la matriz sea cuadrada, simétrica y con diagonal cero."""
     n = len(dist)
@@ -41,10 +46,10 @@ def _validate_matrix(dist: list[list[float]]) -> int:
         if len(dist[i]) != n:
             raise ValueError("La matriz de distancias debe ser cuadrada")
     for i in range(n):
-        if abs(dist[i][i]) > 1e-9:
+        if not _es_casi_cero(dist[i][i]):
             raise ValueError(f"La diagonal debe ser 0 (dist[{i}][{i}] = {dist[i][i]})")
         for j in range(i + 1, n):
-            if abs(dist[i][j] - dist[j][i]) > 1e-9:
+            if not _es_casi_cero(dist[i][j] - dist[j][i]):
                 raise ValueError(f"La matriz no es simétrica en ({i}, {j})")
     return n
 

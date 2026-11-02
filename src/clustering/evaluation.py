@@ -116,18 +116,28 @@ def cut_tree(merges: list[tuple], n: int, k: int) -> list[int]:
     n - k fusiones. Devuelve una etiqueta 0..k-1 por elemento (numeradas por
     el menor índice de elemento de cada cluster).
 
-    Complejidad temporal: O(n log n) por el ordenamiento de los clusters finales;
-    la aplicación de las n-k fusiones cuesta O(n^2) en el peor caso por la
-    concatenación de listas de miembros. Espacial: O(n).
+    Complejidad temporal: O(n^2) en el peor caso, por la concatenación de listas
+    de miembros al aplicar las n-k fusiones; numerar los clusters cuesta O(n).
+    Espacial: O(n).
     """
     if not 1 <= k <= n:
         raise ValueError(f"k debe estar entre 1 y {n}")
     members = _members_after_merges(merges, n, n - k)
-    groups = sorted(members.values(), key=lambda g: min(g))
+
+    cluster_de = [0] * n
+    for cluster in members:
+        for x in members[cluster]:
+            cluster_de[x] = cluster
+
+    # Al recorrer los elementos en orden, cada cluster recibe su etiqueta cuando
+    # aparece su menor elemento.
+    etiquetas = {}
     labels = [0] * n
-    for label, group in enumerate(groups):
-        for x in group:
-            labels[x] = label
+    for x in range(n):
+        cluster = cluster_de[x]
+        if cluster not in etiquetas:
+            etiquetas[cluster] = len(etiquetas)
+        labels[x] = etiquetas[cluster]
     return labels
 
 
@@ -151,13 +161,15 @@ def silhouette(dist: list[list[float]], labels: list[int]) -> dict:
     n = len(dist)
     if len(labels) != n:
         raise ValueError("labels debe tener un valor por elemento")
-    cluster_ids = sorted(set(labels))
+    sizes = {}
+    for lab in labels:
+        if lab in sizes:
+            sizes[lab] += 1
+        else:
+            sizes[lab] = 1
+    cluster_ids = list(sizes)
     if len(cluster_ids) < 2:
         raise ValueError("La silueta requiere al menos 2 clusters")
-
-    sizes = {c: 0 for c in cluster_ids}
-    for lab in labels:
-        sizes[lab] += 1
 
     per_item = []
     for i in range(n):

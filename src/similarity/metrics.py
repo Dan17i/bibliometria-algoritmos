@@ -236,6 +236,40 @@ def center_vectors(vectors: list[list[float]]) -> tuple[list[list[float]], list[
     return centered, m
 
 
+def natural_log(x: float) -> float:
+    """
+    Logaritmo natural a mano, para x > 0. Se usa en el IDF.
+
+    Se reduce x a m en [0.75, 1.5) dividiendo o multiplicando por 2, de modo que
+    ln(x) = k * ln(2) + ln(m), y ln(m) se obtiene con la serie
+        ln(m) = 2 * sum_{i>=0} y^(2i+1) / (2i+1),   y = (m - 1) / (m + 1)
+    que con |y| <= 1/5 converge en pocos términos.
+
+    Complejidad temporal: O(log x) por la reducción, más 30 términos fijos.
+    Complejidad espacial: O(1).
+    """
+    if x <= 0:
+        raise ValueError("El logaritmo solo está definido para x > 0")
+
+    ln2 = 0.6931471805599453
+    k = 0
+    m = x
+    while m >= 1.5:
+        m /= 2
+        k += 1
+    while m < 0.75:
+        m *= 2
+        k -= 1
+
+    y = (m - 1) / (m + 1)
+    potencia = y
+    total = 0.0
+    for i in range(30):
+        total += potencia / (2 * i + 1)
+        potencia *= y * y
+    return k * ln2 + 2 * total
+
+
 def angle_degrees(cosine: float) -> float:
     """
     Ángulo en grados a partir de un coseno: θ = arccos(cos) * 180 / π.
