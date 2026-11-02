@@ -4,39 +4,36 @@ Caso de estudio P1-P3: clásicos de Samuel vs. enfoques de IA (Req. 1).
 Compara un par de abstracts con:
     - los 4 clásicos de Samuel (más el coseno TF), importados SIN modificarlos:
       Levenshtein, Needleman-Wunsch, Jaccard, coseno TF y coseno TF-IDF;
-    - los 2 enfoques de IA: promedio de vectores GloVe (con y sin stopwords) y
-      embeddings de oración all-MiniLM-L6-v2.
+    - los 2 enfoques de IA: promedio de vectores GloVe (con stopwords, solo como
+      referencia, y sobre el abstract transformado) y embeddings de oración
+      all-MiniLM-L6-v2 sobre el abstract transformado.
 El IDF del coseno TF-IDF se calcula sobre los 20 abstracts de
 data/processed/abstracts.json (con solo 2 textos toda palabra compartida tendría
 idf = 0).
 
     .venv\\Scripts\\python.exe -m src.similarity.ai.caso_estudio
 
-Genera dos archivos en tests/fixtures/daniel/:
+Genera dos archivos en data/resultados/:
     - matrices_p1_p4.json: matrices de similitud coseno de los 4 abstracts con
-      cada enfoque de IA (GloVe con stopwords, GloVe sin stopwords y MiniLM).
+      cada enfoque de IA.
     - caso_estudio_p1_p3.json: la tabla comparativa del par elegido.
 """
 import json
-from pathlib import Path
 
 from src.similarity.ai.demo_modelos import (
-    FIXTURE,
+    ABSTRACTS,
+    RESULTADOS as SALIDA,
     format_matrix,
     glove_embeddings,
     load_abstracts,
-    sentence_embeddings,
+    vectores_del_corpus,
 )
-from src.similarity.ai.stopwords import STOPWORDS
 from src.similarity.classic.cosine import cosine_similarity as classic_cosine
 from src.similarity.classic.cosine import tfidf_cosine_similarity
 from src.similarity.classic.jaccard import jaccard_similarity
 from src.similarity.classic.levenshtein import levenshtein_distance
 from src.similarity.classic.needleman_wunsch import needleman_wunsch, normalized_needleman_wunsch
 from src.similarity.metrics import cosine_steps, euclidean_distance, pairwise_matrix
-
-SALIDA = FIXTURE.parent
-ABSTRACTS = Path(__file__).resolve().parents[3] / "data" / "processed" / "abstracts.json"
 
 
 def classic_scores(texto_a: str, texto_b: str, corpus: list[str] | None = None) -> list[dict]:
@@ -149,10 +146,12 @@ def main(par: tuple[str, str] = ("P1", "P3")) -> None:
     ids, textos = load_abstracts()
     corpus = [r["texto"] for r in json.loads(ABSTRACTS.read_text(encoding="utf-8"))]
     glove_con = glove_embeddings(textos)["vectors"]
-    glove_sin = glove_embeddings(textos, stopwords=STOPWORDS)["vectors"]
-    minilm = sentence_embeddings(textos)
+    vectores = vectores_del_corpus(textos)
+    glove_sin = vectores["glove"]
+    minilm = vectores["minilm"]
 
     # 1. matrices de los 4 abstracts, con y sin stopwords
+    SALIDA.mkdir(parents=True, exist_ok=True)
     matrices = {
         "ids": ids,
         "glove_con_stopwords": pairwise_matrix(glove_con, lambda a, b: cosine_steps(a, b)["cosine"]),

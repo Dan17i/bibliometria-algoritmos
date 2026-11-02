@@ -267,17 +267,19 @@ def generar_fusiones(ruta_abstracts: str, ruta_json: str) -> None:
     Produce el JSON de fusiones a partir de los abstracts del corpus.
 
     Es solo el pegamento entre módulos existentes —no reimplementa nada—:
-    calcula la matriz de distancias con el Jaccard de similarity/classic y la
-    pasa al export de clustering. Sirve para que la figura sea reproducible de
-    punta a punta sin depender de un paso manual intermedio.
+    calcula la matriz de distancias con el Jaccard de similarity/classic sobre
+    los abstracts transformados y la pasa al export de clustering. Sirve para
+    que la figura sea reproducible de punta a punta sin depender de un paso
+    manual intermedio.
     """
     from src.clustering.export import export_merges_json
+    from src.preprocessing.transformacion import transformar_abstract
     from src.similarity.classic.jaccard import jaccard_similarity
 
     with open(ruta_abstracts, encoding="utf-8") as fh:
         registros = json.load(fh)
 
-    textos = [r["texto"] for r in registros]
+    textos = [transformar_abstract(r["texto"]) for r in registros]
     labels = [r["id"] for r in registros]
     n = len(textos)
 
@@ -301,13 +303,13 @@ def generar_fusiones(ruta_abstracts: str, ruta_json: str) -> None:
 # Las fusiones de embeddings las exporta src/similarity/ai/demo_corpus20.py.
 REPRESENTACIONES = (
     ("minilm", "coseno sobre embeddings MiniLM",
-     ("tests", "fixtures", "daniel", "corpus20", "fusiones_minilm.json")),
+     ("data", "resultados", "fusiones_minilm.json")),
     ("glove", "coseno sobre embeddings GloVe promediados",
-     ("tests", "fixtures", "daniel", "corpus20", "fusiones_glove.json")),
+     ("data", "resultados", "fusiones_glove.json")),
     ("glove_centrado", "coseno sobre GloVe centrado",
-     ("tests", "fixtures", "daniel", "corpus20", "fusiones_glove_centrado.json")),
+     ("data", "resultados", "fusiones_glove_centrado.json")),
     ("jaccard", "1 − coeficiente de Jaccard",
-     ("data", "processed", "fusiones.json")),
+     ("data", "resultados", "fusiones_jaccard.json")),
 )
 
 
@@ -324,7 +326,7 @@ def fuentes_disponibles(raiz: str) -> list[tuple[str, str, str]]:
 def main() -> None:
     raiz = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     ruta_abstracts = os.path.join(raiz, "data", "processed", "abstracts.json")
-    ruta_jaccard = os.path.join(raiz, "data", "processed", "fusiones.json")
+    ruta_jaccard = os.path.join(raiz, "data", "resultados", "fusiones_jaccard.json")
     dir_salida = os.path.join(raiz, "data", "figuras")
 
     # Jaccard se genera si falta: sirve de contraste frente a los embeddings.

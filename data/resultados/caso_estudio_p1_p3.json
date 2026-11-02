@@ -14,15 +14,15 @@
     {
       "algoritmo": "Jaccard (palabras)",
       "tipo": "clásico, conjuntos",
-      "valor": "|∩| = 35, |∪| = 221",
-      "similitud": 0.1583710407239819,
+      "valor": "|∩| = 35, |∪| = 224",
+      "similitud": 0.15625,
       "nota": "sin stopwords removidas"
     },
     {
       "algoritmo": "Coseno TF (frecuencias)",
       "tipo": "clásico, espacio vectorial",
-      "valor": "221 dimensiones",
-      "similitud": 0.7359907858690117,
+      "valor": "224 dimensiones",
+      "similitud": 0.731457572712843,
       "nota": "solo TF, sin IDF"
     },
     {
@@ -35,8 +35,8 @@
     {
       "algoritmo": "Coseno TF-IDF",
       "tipo": "clásico, espacio vectorial",
-      "valor": "221 dimensiones, ángulo 87.0°",
-      "similitud": 0.05207208955912569,
+      "valor": "224 dimensiones, ángulo 87.3°",
+      "similitud": 0.047822117629507895,
       "nota": "IDF = ln(N/df) sobre el corpus"
     },
     {
@@ -49,15 +49,15 @@
     {
       "algoritmo": "GloVe-100 promedio",
       "tipo": "IA, vectores de palabras",
-      "valor": "ángulo 11.2°, euclidiana 0.606",
-      "similitud": 0.9809621190243191,
+      "valor": "ángulo 10.8°, euclidiana 0.615",
+      "similitud": 0.9822456598557775,
       "nota": "sin stopwords"
     },
     {
       "algoritmo": "all-MiniLM-L6-v2",
       "tipo": "IA, embedding de oración",
-      "valor": "ángulo 42.7°, euclidiana 0.728",
-      "similitud": 0.7352568558388004,
+      "valor": "ángulo 41.6°, euclidiana 0.710",
+      "similitud": 0.7481346132229695,
       "nota": "384 dimensiones"
     }
   ]

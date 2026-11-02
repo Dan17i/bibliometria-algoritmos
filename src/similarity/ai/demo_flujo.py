@@ -5,7 +5,7 @@ Genera los datos del documento para P1-P3 y el flujo completo:
 
     .venv\\Scripts\\python.exe -m src.similarity.ai.demo_flujo
 
-Salidas (en tests/fixtures/daniel/):
+Salidas (en data/resultados/):
     - experimento_centrado.json : rangos de GloVe con/sin stopwords, con/sin centrar.
     - fusiones_p1_p4.json       : fusiones de los 3 enlaces con MiniLM (formato de export.py).
 Imprime en pantalla la demostración paso a paso (markdown) y el resumen del clustering.
@@ -20,6 +20,7 @@ from src.clustering.evaluation import (
 )
 from src.clustering.export import export_merges_json, load_export
 from src.clustering.linkage import LINKAGES, hierarchical_clustering
+from src.preprocessing.transformacion import transformar_abstract
 from src.similarity.ai.caso_estudio import SALIDA
 from src.similarity.ai.demo_modelos import (
     glove_embeddings,
@@ -111,7 +112,8 @@ def flujo_clustering(ids: list[str], textos: list[str]) -> dict:
 
 
 def main() -> None:
-    ids, textos = load_abstracts()
+    ids, originales = load_abstracts()
+    textos = [transformar_abstract(t) for t in originales]
     i, j = ids.index("P1"), ids.index("P3")
 
     # 1. demostración paso a paso

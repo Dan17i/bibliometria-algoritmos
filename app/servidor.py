@@ -47,7 +47,7 @@ from src.similarity.metrics import cosine_steps, euclidean_distance
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIR_DATOS = os.path.join(RAIZ, "data", "processed")
 DIR_FIGURAS = os.path.join(RAIZ, "data", "figuras")
-DIR_FUSIONES = os.path.join(RAIZ, "tests", "fixtures", "daniel", "corpus20")
+DIR_FUSIONES = os.path.join(RAIZ, "data", "resultados")
 
 app = Flask(__name__, static_folder=None)
 
@@ -92,7 +92,7 @@ REPRESENTACIONES = {
     "glove": ("Embeddings GloVe", "fusiones_glove.json", "_glove"),
     "glove_centrado": ("GloVe centrado", "fusiones_glove_centrado.json",
                        "_glove_centrado"),
-    "jaccard": ("Coeficiente de Jaccard", None, "_jaccard"),
+    "jaccard": ("Coeficiente de Jaccard", "fusiones_jaccard.json", "_jaccard"),
 }
 
 
@@ -400,10 +400,7 @@ def clustering():
     """Representaciones disponibles con su CPCC por enlace."""
     disponibles = []
     for clave, (etiqueta, archivo, sufijo) in REPRESENTACIONES.items():
-        if archivo:
-            ruta = os.path.join(DIR_FUSIONES, archivo)
-        else:
-            ruta = os.path.join(DIR_DATOS, "fusiones.json")
+        ruta = os.path.join(DIR_FUSIONES, archivo)
         if not os.path.exists(ruta):
             continue
         with open(ruta, encoding="utf-8") as fh:

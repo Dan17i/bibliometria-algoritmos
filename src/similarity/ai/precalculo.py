@@ -13,7 +13,7 @@ El corpus es estático, así que hay dos cálculos que se pueden hacer una sola 
     .venv\\Scripts\\python.exe -m src.similarity.ai.precalculo
 
 Salidas (en data/processed/):
-    - vectores.json      : un vector por abstract con GloVe (sin stopwords) y MiniLM.
+    - vectores.json      : un vector por abstract transformado, con GloVe y MiniLM.
     - similitudes_pd.json: matrices n x n de similitud normalizada de los dos
                            algoritmos de programación dinámica.
 """
@@ -21,8 +21,7 @@ import json
 import time
 from pathlib import Path
 
-from src.similarity.ai.demo_modelos import glove_embeddings, sentence_embeddings
-from src.similarity.ai.stopwords import STOPWORDS
+from src.similarity.ai.demo_modelos import vectores_del_corpus
 from src.similarity.classic.levenshtein import levenshtein_distance
 from src.similarity.classic.needleman_wunsch import normalized_needleman_wunsch
 
@@ -57,19 +56,20 @@ def matrices_programacion_dinamica(textos: list[str]) -> dict[str, list[list[flo
     return {"levenshtein": levenshtein, "needleman_wunsch": needleman}
 
 
-def main() -> None:
+def _corpus() -> tuple[list[str], list[str]]:
     registros = json.loads((DATOS / "abstracts.json").read_text(encoding="utf-8"))
-    ids = [r["id"] for r in registros]
-    textos = [r["texto"] for r in registros]
+    return [r["id"] for r in registros], [r["texto"] for r in registros]
 
-    vectores = {
-        "ids": ids,
-        "glove": glove_embeddings(textos, stopwords=STOPWORDS)["vectors"],
-        "minilm": sentence_embeddings(textos),
-    }
+
+def guardar_vectores() -> None:
+    ids, textos = _corpus()
+    vectores = {"ids": ids, **vectores_del_corpus(textos)}
     (DATOS / "vectores.json").write_text(json.dumps(vectores), encoding="utf-8")
     print(f"vectores: {len(vectores['glove'][0])} y {len(vectores['minilm'][0])} dimensiones", flush=True)
 
+
+def guardar_similitudes_pd() -> None:
+    ids, textos = _corpus()
     inicio = time.perf_counter()
     matrices = matrices_programacion_dinamica(textos)
     (DATOS / "similitudes_pd.json").write_text(
@@ -79,4 +79,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    guardar_vectores()
+    guardar_similitudes_pd()

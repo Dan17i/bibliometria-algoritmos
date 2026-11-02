@@ -27,6 +27,7 @@ NUCLEO = sorted(
     list((RAIZ / "similarity" / "classic").glob("*.py"))
     + [RAIZ / "similarity" / "metrics.py",
        RAIZ / "similarity" / "ai" / "embeddings.py",
+       RAIZ / "preprocessing" / "transformacion.py",
        RAIZ / "clustering" / "linkage.py",
        RAIZ / "clustering" / "evaluation.py"]
     + BUSQUEDA
