@@ -3,11 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>Análisis de algoritmos en el contexto de la bibliometría</title>
 <link rel="icon" href="data:,">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/vendor/katex/katex.min.css">
 <link rel="stylesheet" href="/static/estilo.css">
 </head>
 <body>
@@ -16,7 +15,7 @@
   <div class="ficha__interior">
     <div class="ficha__titulo">
       <h1>Análisis de algoritmos en el contexto de la bibliometría</h1>
-      <p class="ficha__sub">Veinte artículos sobre inteligencia artificial en educación, medidos con algoritmos implementados desde cero.</p>
+      <p class="ficha__sub">Veinte artículos sobre inteligencia artificial en educación, medidos con algoritmos implementados desde cero. Cada resultado se puede abrir para ver cómo se calculó.</p>
     </div>
     <dl class="ficha__datos" id="ficha-datos">
       <div><dt>Artículos</dt><dd id="d-articulos">—</dd></div>
@@ -26,7 +25,7 @@
   </div>
 </header>
 
-<nav class="indice">
+<nav class="indice" aria-label="Secciones">
   <a href="#similitud">Similitud textual</a>
   <a href="#clustering">Agrupamiento</a>
   <a href="#patrones">Búsqueda de patrones</a>
@@ -39,7 +38,7 @@
   <div class="bloque__encabezado">
     <span class="req">Requerimiento 1</span>
     <h2>Similitud textual</h2>
-    <p>Elige dos o más artículos y compáralos con los cuatro algoritmos clásicos y los dos de inteligencia artificial. Con dos se ve el detalle de cada algoritmo; con más, una matriz por algoritmo y una tabla con todos los pares.</p>
+    <p>Elige dos o más artículos y compáralos con los cuatro algoritmos clásicos y los dos de inteligencia artificial. Después, abre la demostración del algoritmo que quieras ver: se calcula en ese momento, con los valores reemplazados en cada fórmula.</p>
   </div>
 
   <div class="trabajo">
@@ -51,7 +50,7 @@
       <ul class="lista-articulos" id="lista-articulos"></ul>
       <div class="controles__pie">
         <p class="contador"><span id="n-elegidos">0</span> elegidos</p>
-        <button type="button" id="calcular" class="boton" disabled>Calcular similitud</button>
+        <button type="button" id="calcular" class="boton" disabled>Comparar</button>
       </div>
     </div>
 
@@ -107,6 +106,20 @@
   <p class="nota">Los algoritmos están implementados sin funciones de alto nivel del lenguaje ni librerías que los resuelvan.</p>
 </footer>
 
+<!-- Hoja de la demostración -->
+<dialog class="hoja" id="hoja" aria-labelledby="hoja-titulo">
+  <div class="hoja__barra">
+    <div>
+      <p class="hoja__familia" id="hoja-familia"></p>
+      <h2 id="hoja-titulo"></h2>
+    </div>
+    <button type="button" class="hoja__cerrar" id="hoja-cerrar" aria-label="Cerrar la demostración">×</button>
+  </div>
+  <div class="hoja__cuerpo" id="hoja-cuerpo"></div>
+</dialog>
+
+<script src="/static/vendor/katex/katex.min.js"></script>
+<script src="/static/demostraciones.js"></script>
 <script src="/static/app.js"></script>
 </body>
 </html>

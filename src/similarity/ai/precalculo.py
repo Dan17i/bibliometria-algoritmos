@@ -14,6 +14,8 @@ El corpus es estático, así que hay dos cálculos que se pueden hacer una sola 
 
 Salidas (en data/processed/):
     - vectores.json      : un vector por abstract transformado, con GloVe y MiniLM.
+    - glove_palabras.json: el vector GloVe de cada palabra del corpus transformado. Con
+                           esto la aplicación repite el promedio a mano, sin el modelo.
     - similitudes_pd.json: matrices n x n de similitud normalizada de los dos
                            algoritmos de programación dinámica.
 """
@@ -21,7 +23,9 @@ import json
 import time
 from pathlib import Path
 
+from src.preprocessing.transformacion import transformar_abstract
 from src.similarity.ai.demo_modelos import vectores_del_corpus
+from src.similarity.ai.embeddings import load_gensim_vectors, tokenize
 from src.similarity.classic.levenshtein import levenshtein_distance
 from src.similarity.classic.needleman_wunsch import normalized_needleman_wunsch
 
@@ -68,6 +72,19 @@ def guardar_vectores() -> None:
     print(f"vectores: {len(vectores['glove'][0])} y {len(vectores['minilm'][0])} dimensiones", flush=True)
 
 
+def guardar_palabras_glove() -> None:
+    _, textos = _corpus()
+    vocabulario = {}
+    for texto in textos:
+        for token in tokenize(transformar_abstract(texto)):
+            vocabulario[token] = True
+    palabras = load_gensim_vectors("glove-wiki-gigaword-100", list(vocabulario))
+    # Seis decimales: es la precisión real de los vectores, y reduce el archivo a la mitad
+    reducidas = {p: [round(x, 6) for x in v] for p, v in palabras.items()}
+    (DATOS / "glove_palabras.json").write_text(json.dumps(reducidas), encoding="utf-8")
+    print(f"palabras con vector: {len(reducidas)} de {len(vocabulario)}", flush=True)
+
+
 def guardar_similitudes_pd() -> None:
     ids, textos = _corpus()
     inicio = time.perf_counter()
@@ -80,4 +97,5 @@ def guardar_similitudes_pd() -> None:
 
 if __name__ == "__main__":
     guardar_vectores()
+    guardar_palabras_glove()
     guardar_similitudes_pd()

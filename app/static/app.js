@@ -48,24 +48,22 @@ function mostrarError(contenedor, mensaje) {
 }
 
 /**
- * Escala de azules para la matriz: más oscuro = más similar.
+ * Intensidad del color de la matriz: más oscuro = más similar.
  *
- * La intensidad se normaliza al rango REAL de la matriz, no al teórico 0–1.
- * Dos abstracts distintos comparten pocas palabras, así que Jaccard devuelve
- * valores entre 0,10 y 0,16: mapeados sobre 0–1 todas las celdas saldrían
- * del mismo tono y la matriz no mostraría ninguna estructura.
+ * Se normaliza al rango REAL de la matriz, no al teórico 0–1. Dos abstracts
+ * distintos comparten pocas palabras, así que Jaccard devuelve valores entre
+ * 0,10 y 0,16: mapeados sobre 0–1 todas las celdas saldrían del mismo tono y
+ * la matriz no mostraría ninguna estructura.
  */
 function tonoSimilitud(valor, minimo, maximo) {
   const rango = maximo - minimo;
   const intensidad = rango > 1e-9
     ? Math.max(0, Math.min(1, (valor - minimo) / rango))
     : 0.5;
-  // Se mezcla el azul contra el papel en vez de usar opacidad: así el texto
-  // encima conserva su contraste.
-  const r = Math.round(247 - (247 - 31) * intensidad);
-  const g = Math.round(248 - (248 - 78) * intensidad);
-  const b = Math.round(250 - (250 - 121) * intensidad);
-  return { fondo: `rgb(${r},${g},${b})`, texto: intensidad > 0.6 ? "#ffffff" : "#16202e" };
+  return {
+    fondo: `rgba(var(--acento-rgb), ${(0.08 + intensidad * 0.87).toFixed(3)})`,
+    texto: intensidad > 0.6 ? "#ffffff" : "var(--tinta)",
+  };
 }
 
 /** Mínimo y máximo de la matriz, ignorando la diagonal (siempre 1). */
@@ -130,12 +128,15 @@ function filaMedida(m) {
   const porcentaje = Math.max(0, Math.min(1, m.similitud)) * 100;
   return `<tr>
     <td>${m.algoritmo}<div class="detalle">${m.detalle}</div></td>
-    <td class="familia">${m.familia}</td>
+    <td class="familia">${m.familia}<div class="detalle">${m.complejidad}</div></td>
     <td class="num">
       <span class="valor">${m.similitud.toFixed(4)}</span>
-      <span class="barra" style="width:${porcentaje}%"></span>
+      <span class="barra-pista"><span class="barra" style="width:${porcentaje}%"></span></span>
     </td>
-    <td class="num">${m.ms.toFixed(2)} ms<div class="detalle">${m.complejidad}</div></td>
+    <td class="num">
+      <button type="button" class="boton-suave" data-demostrar="${m.clave}"
+              data-nombre="${m.algoritmo}" data-familia="${m.familia}">Ver demostración</button>
+    </td>
   </tr>`;
 }
 
@@ -153,13 +154,15 @@ function bloqueAbstracts(articulos) {
 function dibujarPar(d, contenedor) {
   const [a, b] = d.articulos;
   contenedor.innerHTML = `
-    <p class="par-titulo">${a.id} · ${b.id} — calculado en ${d.ms_total.toFixed(0)} ms</p>
-    <table class="medidas">
-      <thead>
-        <tr><th>Algoritmo</th><th>Enfoque</th><th class="num">Similitud</th><th class="num">Tiempo</th></tr>
-      </thead>
-      <tbody>${d.algoritmos.map(filaMedida).join("")}</tbody>
-    </table>
+    <p class="par-titulo">${a.id} · ${b.id}. Cada demostración se calcula solo cuando se abre.</p>
+    <div class="tarjeta-tabla" data-par="${d.ids.join(",")}">
+      <table class="medidas">
+        <thead>
+          <tr><th>Algoritmo</th><th>Enfoque</th><th class="num">Similitud</th><th></th></tr>
+        </thead>
+        <tbody>${d.algoritmos.map(filaMedida).join("")}</tbody>
+      </table>
+    </div>
     ${bloqueAbstracts(d.articulos)}`;
 }
 
@@ -217,10 +220,13 @@ function dibujarMatrizDe(d, algoritmo) {
 
   const filas = matriz.map((fila, i) => {
     const celdas = fila.map((v, j) => {
-      if (i === j) return `<td class="diagonal" style="background:var(--papel-hondo)">—</td>`;
+      if (i === j) return `<td class="diagonal">—</td>`;
       const { fondo, texto: color } = tonoSimilitud(v, minimo, maximo);
-      return `<td style="background:${fondo};color:${color}"
-                  title="${d.ids[i]} vs ${d.ids[j]}: ${v.toFixed(4)}">${v.toFixed(2)}</td>`;
+      return `<td><button type="button" class="matriz__celda" style="background:${fondo};color:${color}"
+                  data-demostrar="${algoritmo.clave}" data-nombre="${algoritmo.algoritmo}"
+                  data-familia="${algoritmo.familia}" data-ids="${d.ids[i]},${d.ids[j]}"
+                  title="${d.ids[i]} y ${d.ids[j]}: ${v.toFixed(4)}. Ver la demostración"
+                  aria-label="${d.ids[i]} y ${d.ids[j]}: ${v.toFixed(4)}. Ver la demostración">${v.toFixed(2)}</button></td>`;
     }).join("");
     return `<tr><th>${d.ids[i]}</th>${celdas}</tr>`;
   }).join("");
@@ -234,12 +240,13 @@ function dibujarMatrizDe(d, algoritmo) {
       <p class="escala">
         <span>menos similar</span>
         <span class="escala__barra"
-              style="background:linear-gradient(90deg, rgb(247,248,250), rgb(31,78,121))"></span>
+              style="background:linear-gradient(90deg, rgba(var(--acento-rgb),.08), rgba(var(--acento-rgb),.95))"></span>
         <span>más similar</span>
         <span class="escala__rango">${minimo.toFixed(3)} – ${maximo.toFixed(3)}</span>
       </p>
     </div>
-    <p class="detalle" style="margin-top:1rem;color:var(--tinta-tenue);font-size:.87rem;max-width:68ch">
+    <p class="nota-matriz">
+      Toca una casilla para ver la demostración de ese par.
       ${algoritmo.algoritmo}: ${algoritmo.complejidad} por par,
       ${algoritmo.origen === "en vivo"
         ? "calculado en el momento."
@@ -252,7 +259,7 @@ function dibujarMatrizDe(d, algoritmo) {
 async function calcularSimilitud() {
   const contenedor = $("#resultado-similitud");
   const boton = $("#calcular");
-  contenedor.innerHTML = `<p class="cargando">Calculando sobre los abstracts completos…</p>`;
+  contenedor.innerHTML = `<p class="cargando">Comparando…</p>`;
   boton.disabled = true;
 
   try {
@@ -373,13 +380,13 @@ async function buscarPatron(patron) {
 
     contenedor.innerHTML = `
       <p class="veredicto ${d.coinciden ? "" : "discrepan"}">${veredicto}</p>
-      <table class="medidas">
+      <div class="tarjeta-tabla"><table class="medidas">
         <thead>
           <tr><th>Algoritmo</th><th class="num">Ocurrencias</th>
               <th class="num">Comparaciones</th><th class="num">Tiempo</th></tr>
         </thead>
         <tbody>${filas}</tbody>
-      </table>
+      </table></div>
       ${d.por_articulo.length ? `
         <div class="coincidencias">
           <h3>Dónde aparece</h3>
@@ -396,6 +403,15 @@ async function buscarPatron(patron) {
 /* --------------------------------------------------------------------- */
 
 $("#calcular").addEventListener("click", calcularSimilitud);
+
+// La demostración se calcula solo al oprimirla: un botón por algoritmo o una casilla de la matriz
+$("#resultado-similitud").addEventListener("click", (evento) => {
+  const boton = evento.target.closest("[data-demostrar]");
+  if (!boton) return;
+  const envoltura = boton.closest("[data-par]");
+  const ids = (boton.dataset.ids || envoltura.dataset.par).split(",");
+  Demostracion.mostrar(boton.dataset.demostrar, ids, boton.dataset.nombre, boton.dataset.familia, boton);
+});
 
 $("#limpiar").addEventListener("click", () => {
   elegidos.clear();

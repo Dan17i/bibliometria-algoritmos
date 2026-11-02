@@ -2,11 +2,15 @@
 Pruebas de la aplicación web sobre el corpus real. Se saltan si Flask no está
 instalado, porque el resto de la suite no lo necesita.
 """
+import subprocess
+import sys
+from pathlib import Path
+
 import pytest
 
 pytest.importorskip("flask")
 
-from app.servidor import CORPUS, MATRICES_PD, POSICION, app
+from app.servidor import CORPUS, app
 from src.pattern import kmp
 
 
@@ -54,6 +58,10 @@ def _comparar(cliente, ids):
     return cliente.post("/api/similitud", json={"ids": ids})
 
 
+def _demostrar(cliente, clave, ids):
+    return cliente.post("/api/demostracion", json={"algoritmo": clave, "ids": ids})
+
+
 def test_dos_articulos_con_los_seis_algoritmos(cliente):
     datos = _comparar(cliente, ["P1", "P3"]).get_json()
     assert datos["modo"] == "par"
@@ -63,11 +71,11 @@ def test_dos_articulos_con_los_seis_algoritmos(cliente):
     assert datos["articulos"][0]["texto"] and datos["articulos"][0]["autores"]
 
 
-def test_lo_guardado_coincide_con_el_calculo_en_vivo(cliente):
+def test_lo_guardado_coincide_con_la_demostracion_en_vivo(cliente):
     filas = _comparar(cliente, ["P1", "P3"]).get_json()["algoritmos"]
-    i, j = POSICION["P1"], POSICION["P3"]
-    assert filas[0]["similitud"] == pytest.approx(MATRICES_PD["levenshtein"][i][j])
-    assert filas[1]["similitud"] == pytest.approx(MATRICES_PD["needleman_wunsch"][i][j])
+    for fila in filas:
+        en_vivo = _demostrar(cliente, fila["clave"], ["P1", "P3"]).get_json()
+        assert en_vivo["similitud"] == pytest.approx(fila["similitud"], abs=1e-5), fila["clave"]
 
 
 @pytest.mark.parametrize("ids", [["P1", "P3", "P4"], [f"P{i}" for i in range(1, 21)]])
@@ -96,3 +104,84 @@ def test_el_par_da_lo_mismo_solo_o_dentro_de_una_seleccion(cliente):
 @pytest.mark.parametrize("ids", [[], ["P1"], ["P1", "P99"], ["P1", "P1"], "P1"])
 def test_seleccion_invalida_da_error(cliente, ids):
     assert _comparar(cliente, ids).status_code == 400
+
+
+# --- Demostraciones -----------------------------------------------------------
+
+CLAVES = ["levenshtein", "needleman_wunsch", "jaccard", "coseno_tfidf", "glove", "minilm"]
+
+
+@pytest.mark.parametrize("clave", CLAVES)
+def test_demostracion_trae_todas_sus_partes(cliente, clave):
+    d = _demostrar(cliente, clave, ["P6", "P9"]).get_json()
+    assert d["clave"] == clave and 0.0 <= d["similitud"] <= 1.0
+    assert d["idea"] and d["en_una_frase"] and d["interpretacion"]
+    assert d["formulas"] and d["pasos"] and d["visual"]
+    assert d["codigo"]["archivo"].startswith("src/")
+    assert d["corpus"]["total"] == 190 and 1 <= d["corpus"]["puesto"] <= 190
+    assert d["corpus"]["minimo"] <= d["similitud"] <= d["corpus"]["maximo"]
+
+
+def test_p6_p9_es_el_par_mas_parecido_segun_minilm(cliente):
+    assert _demostrar(cliente, "minilm", ["P6", "P9"]).get_json()["corpus"]["puesto"] == 1
+
+
+def test_los_valores_coinciden_con_el_documento(cliente):
+    esperado = {"levenshtein": 0.2454, "needleman_wunsch": 0.3146, "jaccard": 0.1552,
+                "coseno_tfidf": 0.1600, "glove": 0.9792, "minilm": 0.8500}
+    for clave, valor in esperado.items():
+        d = _demostrar(cliente, clave, ["P6", "P9"]).get_json()
+        assert round(d["similitud"], 4) == valor, clave
+
+
+def test_tus_palabras_matriz_completa_a_mano(cliente):
+    d = cliente.post("/api/demostracion", json={"algoritmo": "levenshtein", "textos": ["gato", "pato"]}).get_json()
+    assert d["similitud"] == pytest.approx(0.75)
+    assert d["visual"][0]["completa"] is True
+    assert d["visual"][0]["celdas"][4][4] == 1
+    assert "corpus" not in d
+
+
+def test_needleman_tus_palabras_a_mano(cliente):
+    d = cliente.post("/api/demostracion", json={"algoritmo": "needleman_wunsch", "textos": ["ATCG", "ACG"]}).get_json()
+    assert d["visual"][0]["celdas"][-1][-1] == 2
+    assert d["similitud"] == pytest.approx(0.75)
+
+
+@pytest.mark.parametrize("cuerpo", [
+    {"algoritmo": "nada", "ids": ["P1", "P2"]},
+    {"algoritmo": "jaccard", "ids": ["P1"]},
+    {"algoritmo": "jaccard", "ids": ["P1", "P1"]},
+    {"algoritmo": "jaccard", "ids": ["P1", "P99"]},
+    {"algoritmo": "glove", "textos": ["a", "b"]},
+    {"algoritmo": "levenshtein", "textos": ["a", ""]},
+    {"algoritmo": "levenshtein", "textos": ["a" * 41, "b"]},
+])
+def test_peticion_invalida_da_error(cliente, cuerpo):
+    assert cliente.post("/api/demostracion", json=cuerpo).status_code == 400
+
+
+def test_el_servidor_publicado_no_necesita_los_modelos():
+    """requirements-web.txt solo trae Flask y waitress: las seis demostraciones deben funcionar así."""
+    codigo = (
+        "import sys\n"
+        "from app.servidor import app\n"
+        "c = app.test_client()\n"
+        "for clave in ('levenshtein', 'needleman_wunsch', 'jaccard', 'coseno_tfidf', 'glove', 'minilm'):\n"
+        "    assert c.post('/api/demostracion', json={'algoritmo': clave, 'ids': ['P6', 'P9']}).status_code == 200\n"
+        "pesadas = [m for m in ('numpy', 'torch', 'gensim', 'sentence_transformers', 'fitz', 'matplotlib') if m in sys.modules]\n"
+        "assert pesadas == [], pesadas\n"
+    )
+    raiz = Path(__file__).resolve().parent.parent
+    resultado = subprocess.run([sys.executable, "-c", codigo], cwd=raiz, capture_output=True, text=True)
+    assert resultado.returncode == 0, resultado.stderr
+
+
+def test_tus_palabras_redacta_bien_una_sola_edicion(cliente):
+    d = cliente.post("/api/demostracion", json={"algoritmo": "levenshtein", "textos": ["gato", "pato"]}).get_json()
+    assert d["en_una_frase"].startswith("Se necesita 1 edición")
+
+
+def test_las_formulas_de_la_pagina_estan_en_el_proyecto(cliente):
+    assert cliente.get("/static/vendor/katex/katex.min.js").status_code == 200
+    assert cliente.get("/static/demostraciones.js").status_code == 200

@@ -36,6 +36,7 @@ from src.similarity.classic.cosine import tfidf_cosine_similarity
 from src.similarity.classic.jaccard import jaccard_similarity
 from src.similarity.classic.levenshtein import levenshtein_distance
 from src.similarity.classic.needleman_wunsch import needleman_wunsch, normalized_needleman_wunsch
+from src.similarity.traza_clasicos import operaciones_levenshtein, operaciones_needleman, traza_clasicos  # noqa: F401
 from src.similarity.metrics import cosine_steps, euclidean_distance
 
 
@@ -131,124 +132,6 @@ def ai_scores(glove_con: tuple, glove_sin: tuple, minilm: tuple) -> list[dict]:
             }
         )
     return filas
-
-
-def operaciones_levenshtein(a: str, b: str, matriz: list[list[int]]) -> dict:
-    """
-    Recorre la matriz desde D(m, n) hacia atrás y cuenta las operaciones de un
-    camino óptimo. Complejidad temporal: O(m + n). Espacial: O(1).
-    """
-    i, j = len(a), len(b)
-    conteo = {"coincidencias": 0, "sustituciones": 0, "eliminaciones": 0, "inserciones": 0}
-    while i > 0 or j > 0:
-        if i > 0 and j > 0 and a[i - 1] == b[j - 1] and matriz[i][j] == matriz[i - 1][j - 1]:
-            conteo["coincidencias"] += 1
-            i, j = i - 1, j - 1
-        elif i > 0 and j > 0 and matriz[i][j] == matriz[i - 1][j - 1] + 1:
-            conteo["sustituciones"] += 1
-            i, j = i - 1, j - 1
-        elif i > 0 and matriz[i][j] == matriz[i - 1][j] + 1:
-            conteo["eliminaciones"] += 1
-            i -= 1
-        else:
-            conteo["inserciones"] += 1
-            j -= 1
-    return conteo
-
-
-def operaciones_needleman(a: str, b: str, matriz: list[list[int]], gap: int = -1,
-                          match: int = 1, mismatch: int = -1) -> dict:
-    """Igual que `operaciones_levenshtein`, para el alineamiento de puntaje máximo."""
-    i, j = len(a), len(b)
-    conteo = {"coincidencias": 0, "discrepancias": 0, "huecos": 0}
-    while i > 0 or j > 0:
-        if i > 0 and j > 0:
-            s = match if a[i - 1] == b[j - 1] else mismatch
-            if matriz[i][j] == matriz[i - 1][j - 1] + s:
-                conteo["coincidencias" if s == match else "discrepancias"] += 1
-                i, j = i - 1, j - 1
-                continue
-        if i > 0 and matriz[i][j] == matriz[i - 1][j] + gap:
-            i -= 1
-        else:
-            j -= 1
-        conteo["huecos"] += 1
-    return conteo
-
-
-def _esquina(matriz: list[list[int]], filas: range, columnas: range) -> list[list[int]]:
-    return [[matriz[i][j] for j in columnas] for i in filas]
-
-
-def traza_clasicos(texto_a: str, texto_b: str, corpus: list[str], lado: int = 8) -> dict:
-    """
-    Todos los números intermedios de los cuatro clásicos sobre el par.
-
-    Las matrices tienen más de un millón de celdas: se guardan la esquina inicial
-    y la final, de `lado` x `lado`, y las operaciones del camino óptimo.
-    """
-    m, n = len(texto_a), len(texto_b)
-    distancia, matriz_lev = levenshtein_distance(texto_a, texto_b)
-    puntaje, matriz_nw = needleman_wunsch(texto_a, texto_b)
-    jaccard, interseccion, union = jaccard_similarity(texto_a, texto_b)
-    tfidf = tfidf_cosine_similarity(texto_a, texto_b, corpus)
-
-    terminos = []
-    for i in range(len(tfidf["vocabulario"])):
-        terminos.append({
-            "termino": tfidf["vocabulario"][i],
-            "tf_a": tfidf["tf_a"][i],
-            "tf_b": tfidf["tf_b"][i],
-            "idf": tfidf["idf"][i],
-            "peso_a": tfidf["pesos_a"][i],
-            "peso_b": tfidf["pesos_b"][i],
-            "producto": tfidf["pesos_a"][i] * tfidf["pesos_b"][i],
-        })
-    terminos.sort(key=lambda t: t["producto"], reverse=True)
-
-    inicio = range(lado)
-    return {
-        "m": m,
-        "n": n,
-        "celdas": (m + 1) * (n + 1),
-        "levenshtein": {
-            "distancia": distancia,
-            "similitud": 1.0 - distancia / max(m, n),
-            "inicio_a": texto_a[:lado - 1],
-            "inicio_b": texto_b[:lado - 1],
-            "esquina_inicial": _esquina(matriz_lev, inicio, inicio),
-            "fin_a": texto_a[m - lado + 1:],
-            "fin_b": texto_b[n - lado + 1:],
-            "esquina_final": _esquina(matriz_lev, range(m - lado + 1, m + 1),
-                                      range(n - lado + 1, n + 1)),
-            "operaciones": operaciones_levenshtein(texto_a, texto_b, matriz_lev),
-        },
-        "needleman_wunsch": {
-            "puntaje": puntaje,
-            "similitud": normalized_needleman_wunsch(texto_a, texto_b),
-            "esquina_inicial": _esquina(matriz_nw, inicio, inicio),
-            "esquina_final": _esquina(matriz_nw, range(m - lado + 1, m + 1),
-                                      range(n - lado + 1, n + 1)),
-            "operaciones": operaciones_needleman(texto_a, texto_b, matriz_nw),
-        },
-        "jaccard": {
-            "similitud": jaccard,
-            "tam_interseccion": len(interseccion),
-            "tam_union": len(union),
-            "interseccion": interseccion,
-        },
-        "coseno_tfidf": {
-            "n_documentos": len(corpus),
-            "dimensiones": len(tfidf["vocabulario"]),
-            "producto_punto": tfidf["producto_punto"],
-            "norma_a": tfidf["norma_a"],
-            "norma_b": tfidf["norma_b"],
-            "coseno": tfidf["coseno"],
-            "angulo_grados": tfidf["angulo_grados"],
-            "terminos_que_mas_aportan": terminos[:12],
-            "terminos_con_idf_cero": [t["termino"] for t in terminos if t["idf"] == 0.0],
-        },
-    }
 
 
 def traza_ia(texto_a: str, texto_b: str, dims: int = 6) -> dict:
