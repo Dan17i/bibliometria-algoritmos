@@ -169,6 +169,8 @@ def test_el_servidor_publicado_no_necesita_los_modelos():
         "c = app.test_client()\n"
         "for clave in ('levenshtein', 'needleman_wunsch', 'jaccard', 'coseno_tfidf', 'glove', 'minilm'):\n"
         "    assert c.post('/api/demostracion', json={'algoritmo': clave, 'ids': ['P6', 'P9']}).status_code == 200\n"
+        "assert c.post('/api/demostracion-agrupamiento', json={'representacion': 'minilm', 'enlace': 'average'}).status_code == 200\n"
+        "assert c.post('/api/demostracion-patron', json={'algoritmo': 'kmp', 'patron': 'learning'}).status_code == 200\n"
         "pesadas = [m for m in ('numpy', 'torch', 'gensim', 'sentence_transformers', 'fitz', 'matplotlib') if m in sys.modules]\n"
         "assert pesadas == [], pesadas\n"
     )
@@ -200,3 +202,115 @@ def test_demostracion_del_agrupamiento_coincide_con_el_dendrograma(cliente, repr
 
 def test_agrupamiento_peticion_invalida(cliente):
     assert cliente.post("/api/demostracion-agrupamiento", json={"representacion": "x", "enlace": "single"}).status_code == 400
+
+
+def test_agrupamiento_nombra_los_grupos_por_sus_miembros(cliente):
+    d = cliente.post("/api/demostracion-agrupamiento", json={"representacion": "minilm", "enlace": "average"}).get_json()
+    titulos = [p["titulo"] for p in d["pasos"]]
+    assert "Fusión 1: se unen P6 y P9" in titulos
+    assert any("{P6, P9}" in t for t in titulos)
+    assert not any("grupo 2" in t for t in titulos)
+
+
+def test_agrupamiento_la_tabla_de_silueta_incluye_el_mejor_corte(cliente):
+    d = cliente.post("/api/demostracion-agrupamiento", json={"representacion": "glove_centrado", "enlace": "single"}).get_json()
+    assert 13 in [f[0] for f in d["visual"][1]["filas"]]
+
+
+def test_agrupamiento_usa_la_escala_de_la_silueta(cliente):
+    d = cliente.post("/api/demostracion-agrupamiento", json={"representacion": "glove", "enlace": "single"}).get_json()
+    assert "una estructura débil" in d["conclusiones"][2]     # 0.291
+    d = cliente.post("/api/demostracion-agrupamiento", json={"representacion": "minilm", "enlace": "average"}).get_json()
+    assert "sin estructura sustancial" in d["conclusiones"][2]   # 0.220
+
+
+@pytest.mark.parametrize("ruta, cuerpo", [
+    ("/api/similitud", {"ids": [["P1"], "P2"]}),
+    ("/api/demostracion", {"algoritmo": ["jaccard"], "ids": ["P1", "P2"]}),
+    ("/api/demostracion", {"algoritmo": "jaccard", "ids": [["P1"], "P2"]}),
+    ("/api/demostracion-agrupamiento", {"representacion": ["minilm"], "enlace": "single"}),
+    ("/api/demostracion-patron", {"algoritmo": ["kmp"], "patron": "AI"}),
+    ("/api/buscar", {"patron": ["AI"]}),
+])
+def test_entradas_de_otro_tipo_dan_error_y_no_una_pagina_html(cliente, ruta, cuerpo):
+    respuesta = cliente.post(ruta, json=cuerpo)
+    assert respuesta.status_code == 400 and respuesta.is_json
+
+
+# --- Demostración de la búsqueda de patrones ------------------------------------
+
+PATRONES = ["kmp", "boyer_moore", "rabin_karp"]
+
+
+def _patron(cliente, clave, **datos):
+    return cliente.post("/api/demostracion-patron", json={"algoritmo": clave, **datos})
+
+
+@pytest.mark.parametrize("clave, comparaciones", [("kmp", 126), ("boyer_moore", 31), ("rabin_karp", 133)])
+def test_caso_del_documento(cliente, clave, comparaciones):
+    d = _patron(cliente, clave, patron="learning").get_json()
+    assert d["ocurrencias"] == [49, 104]
+    assert d["comparaciones"] == comparaciones
+    assert d["texto_usado"].startswith("Trend Two posits")
+    assert d["conclusiones"] and d["pasos"] and d["formulas"]
+    assert d["codigo"]["archivo"].startswith("src/pattern/")
+
+
+@pytest.mark.parametrize("clave", PATRONES)
+def test_cada_paso_alinea_el_patron_dentro_del_texto(cliente, clave):
+    d = _patron(cliente, clave, patron="learning").get_json()
+    busqueda = [v for v in d["visual"] if v["tipo"] == "busqueda"][0]
+    m, n = len(d["patron"]), len(d["texto_usado"])
+    assert 0 <= busqueda["inicial"] < len(busqueda["pasos"])
+    # KMP compara hasta el último carácter del texto, aunque el patrón ya no quepa
+    tope = n - 1 if clave == "kmp" else n - m
+    for paso in busqueda["pasos"]:
+        assert 0 <= paso["alineacion"] <= tope
+        assert len(paso["estados"]) == m
+        assert paso["latex"] and paso["texto"]
+
+
+@pytest.mark.parametrize("clave", PATRONES)
+def test_patron_con_bordes_en_texto_propio(cliente, clave):
+    d = _patron(cliente, clave, patron="ABABCABAB", texto="ABABDABACDABABCABAB").get_json()
+    assert d["ocurrencias"] == [10]
+    assert d["textos"] == ["ABABDABACDABABCABAB", "ABABCABAB"]
+    assert "conclusiones" not in d
+
+
+def test_lps_con_bordes(cliente):
+    d = _patron(cliente, "kmp", patron="ABABC", texto="ABABABC").get_json()
+    assert d["ocurrencias"] == [2]
+    assert "[0, 0, 1, 2, 0]".replace(" ", "") in d["pasos"][0]["latex"][0].replace(" ", "")
+
+
+@pytest.mark.parametrize("patron", ["ChatGPT", "AI", "systematic review", "zzzzzz", "100%", "a_b{c}"])
+@pytest.mark.parametrize("clave", PATRONES)
+def test_cualquier_patron_del_corpus(cliente, clave, patron):
+    respuesta = _patron(cliente, clave, patron=patron)
+    assert respuesta.status_code == 200
+    d = respuesta.get_json()
+    assert isinstance(d["en_una_frase"], str) and d["visual"]
+
+
+def test_la_busqueda_es_exacta_en_la_demostracion(cliente):
+    assert _patron(cliente, "kmp", patron="chatgpt").get_json()["ocurrencias"] == []
+    assert len(_patron(cliente, "kmp", patron="ChatGPT").get_json()["ocurrencias"]) >= 1
+
+
+@pytest.mark.parametrize("cuerpo", [
+    {"algoritmo": "nada", "patron": "a"},
+    {"algoritmo": "kmp", "patron": ""},
+    {"algoritmo": "kmp", "patron": "a" * 121},
+    {"algoritmo": "kmp", "patron": "abc", "texto": "ab"},
+    {"algoritmo": "kmp", "patron": "a", "texto": ""},
+    {"algoritmo": "kmp", "patron": "a", "texto": "b" * 301},
+])
+def test_demostracion_patron_invalida(cliente, cuerpo):
+    respuesta = cliente.post("/api/demostracion-patron", json=cuerpo)
+    assert respuesta.status_code == 400 and respuesta.is_json
+
+
+def test_las_filas_de_la_busqueda_traen_su_clave(cliente):
+    filas = _buscar(cliente, "AI")["algoritmos"]
+    assert [f["clave"] for f in filas] == PATRONES

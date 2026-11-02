@@ -334,7 +334,7 @@ function dibujarDendro(indice) {
     </figure>`).join("");
 
   const botones = enlaces.map((e) => `
-    <button type="button" class="boton-suave" data-agrupar="${e}">Ver demostración · ${e}</button>`).join(" ");
+    <button type="button" class="boton-suave" data-agrupar="${e}">Ver demostración de ${e[0].toUpperCase() + e.slice(1)}</button>`).join(" ");
 
   $("#dendro").innerHTML = `
     <div class="dendro__cpcc">${cpcc}</div>
@@ -348,7 +348,8 @@ function dibujarDendro(indice) {
 
   $("#dendro").querySelectorAll("[data-agrupar]").forEach((boton) => {
     boton.addEventListener("click", () => {
-      const nombre = `Enlace ${boton.dataset.agrupar}`;
+      const e = boton.dataset.agrupar;
+      const nombre = `Enlace ${e[0].toUpperCase() + e.slice(1)}`;
       Demostracion.mostrarAgrupamiento(r.clave, boton.dataset.agrupar, nombre, `Agrupamiento jerárquico · ${r.etiqueta}`, boton);
     });
   });
@@ -359,10 +360,13 @@ function dibujarDendro(indice) {
 /* --------------------------------------------------------------------- */
 
 function resaltar(c) {
-  return `<p class="contexto">${c.antes}<mark>${c.coincidencia}</mark>${c.despues}</p>`;
+  return `<p class="contexto">${escapar(c.antes)}<mark>${escapar(c.coincidencia)}</mark>${escapar(c.despues)}</p>`;
 }
 
+let ultimoPatron = "";
+
 async function buscarPatron(patron) {
+  ultimoPatron = patron;
   const contenedor = $("#resultado-patrones");
   contenedor.innerHTML = `<p class="cargando">Recorriendo los veinte abstracts…</p>`;
 
@@ -383,12 +387,14 @@ async function buscarPatron(patron) {
         <td class="num">${a.ocurrencias}</td>
         <td class="num">${miles(a.comparaciones)}</td>
         <td class="num"><span class="valor">${a.ms.toFixed(3)} ms</span></td>
+        <td class="num"><button type="button" class="boton-suave" data-patron-demo="${a.clave}"
+            data-nombre="${a.algoritmo}">Ver demostración</button></td>
       </tr>`).join("");
 
     const hallazgos = d.por_articulo.map((a) => `
       <article class="hallazgo">
         <div class="hallazgo__cabecera">
-          <span class="hallazgo__titulo">${a.titulo}</span>
+          <span class="hallazgo__titulo">${escapar(a.titulo)}</span>
           <span class="hallazgo__id">${a.id} · ${a.ocurrencias}</span>
         </div>
         ${a.contextos.map(resaltar).join("")}
@@ -399,7 +405,7 @@ async function buscarPatron(patron) {
       <div class="tarjeta-tabla"><table class="medidas">
         <thead>
           <tr><th>Algoritmo</th><th class="num">Ocurrencias</th>
-              <th class="num">Comparaciones</th><th class="num">Tiempo</th></tr>
+              <th class="num">Comparaciones</th><th class="num">Tiempo</th><th></th></tr>
         </thead>
         <tbody>${filas}</tbody>
       </table></div>
@@ -427,6 +433,12 @@ $("#resultado-similitud").addEventListener("click", (evento) => {
   const envoltura = boton.closest("[data-par]");
   const ids = (boton.dataset.ids || envoltura.dataset.par).split(",");
   Demostracion.mostrar(boton.dataset.demostrar, ids, boton.dataset.nombre, boton.dataset.familia, boton);
+});
+
+$("#resultado-patrones").addEventListener("click", (evento) => {
+  const boton = evento.target.closest("[data-patron-demo]");
+  if (!boton) return;
+  Demostracion.mostrarPatron(boton.dataset.patronDemo, ultimoPatron, boton.dataset.nombre, boton);
 });
 
 $("#limpiar").addEventListener("click", () => {

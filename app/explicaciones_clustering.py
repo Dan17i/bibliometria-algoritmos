@@ -61,8 +61,8 @@ def _corrida(dist: list[list[float]], enlace: str) -> dict:
 
 def _pearson_a_mano(xs: list[float], ys: list[float]) -> dict:
     m = len(xs)
-    media_x = sum_(xs) / m
-    media_y = sum_(ys) / m
+    media_x = _suma(xs) / m
+    media_y = _suma(ys) / m
     cov = var_x = var_y = 0.0
     for i in range(m):
         dx, dy = xs[i] - media_x, ys[i] - media_y
@@ -72,7 +72,7 @@ def _pearson_a_mano(xs: list[float], ys: list[float]) -> dict:
     return {"m": m, "media_x": media_x, "media_y": media_y, "cov": cov, "var_x": var_x, "var_y": var_y}
 
 
-def sum_(valores: list[float]) -> float:
+def _suma(valores: list[float]) -> float:
     total = 0.0
     for v in valores:
         total += v
@@ -113,12 +113,14 @@ def _conclusiones(clave: str, enlace: str, corridas: dict) -> list[str]:
 
     k = corridas[enlace]["silueta"]["best_k"]
     s = corridas[enlace]["silueta"]["best_silhouette"]
-    fuerza = "débil" if s < 0.25 else "moderada" if s < 0.5 else "fuerte"
+    # Escala de Kaufman y Rousseeuw para la silueta
+    fuerza = ("sin estructura sustancial" if s <= 0.25 else "una estructura débil" if s <= 0.5
+              else "una estructura razonable" if s <= 0.7 else "una estructura fuerte")
     texto.append(
-        f"La silueta de {NOMBRE_ENLACE[enlace]} es mejor con k = {k} grupos ({_n(s, 3)}), una estructura {fuerza}. "
+        f"La silueta de {NOMBRE_ENLACE[enlace]} es mejor con k = {k} grupos ({_n(s, 3)}): {fuerza}. "
         + ("Todo el corpus trata de inteligencia artificial en educación, así que no hay grupos bien separados y la silueta, "
            "que mira un solo corte, aporta poca información. Por eso el CPCC, que evalúa el árbol completo, es la métrica principal."
-           if s < 0.25 else "Hay estructura de grupos, aunque el CPCC sigue siendo la métrica que evalúa el árbol completo.")
+           if s <= 0.5 else "Hay estructura de grupos, aunque el CPCC sigue siendo la métrica que evalúa el árbol completo.")
     )
 
     if mejor == "average":
@@ -143,6 +145,15 @@ def demostracion(clave: str, enlace: str, vectores: dict, textos: list[str], ids
     originales, cofeneticas = mia["cpcc"]["original"], mia["cpcc"]["cophenetic"]
     momentos = _pearson_a_mano(originales, cofeneticas)
 
+    # Un grupo se nombra por sus miembros: su número interno no le dice nada a quien lee
+    miembros = {i: [ids[i]] for i in range(n)}
+    for p in mia["pasos"]:
+        a, b = p["merged"]
+        miembros[p["new_id"]] = miembros[a] + miembros[b]
+
+    def nombre_grupo(i: int) -> str:
+        return ids[i] if i < n else "{" + ", ".join(miembros[i]) + "}"
+
     primeras = mia["pasos"][:3]
     pasos = [
         {
@@ -154,9 +165,8 @@ def demostracion(clave: str, enlace: str, vectores: dict, textos: list[str], ids
     ]
     for p in primeras:
         a, b = p["merged"]
-        etiqueta = lambda i: ids[i] if i < n else f"grupo {i}"
         pasos.append({
-            "titulo": f"Fusión {p['step']}: se unen {etiqueta(a)} y {etiqueta(b)}",
+            "titulo": f"Fusión {p['step']}: se unen {nombre_grupo(a)} y {nombre_grupo(b)}",
             "texto": f"Es el par de grupos con menor distancia entre los {len(p['active_before'])} que quedaban. "
                      f"El grupo nuevo tiene {p['size']} abstracts.",
             "latex": [rf"D = {_n(p['distance'])}"],
@@ -198,8 +208,8 @@ def demostracion(clave: str, enlace: str, vectores: dict, textos: list[str], ids
             "latex": [rf"C({ids[mi]}, {ids[mj]}) = {_n(cof[mi][mj])} \qquad d({ids[mi]}, {ids[mj]}) = {_n(dist[mi][mj])}"],
         },
         {
-            "titulo": f"Se comparan las {pares} parejas",
-            "texto": f"Es el par donde más se distorsiona: el árbol los reúne a {_n(cof[mi][mj])} cuando en realidad están a {_n(dist[mi][mj])}. "
+            "titulo": f"Se repite para los {pares} pares",
+            "texto": f"El par anterior es el más distorsionado: el árbol reúne a {ids[mi]} y {ids[mj]} a {_n(cof[mi][mj])}, cuando en realidad están a {_n(dist[mi][mj])}. "
                      f"Las medias de las {pares} distancias son {_n(momentos['media_x'])} (originales) y {_n(momentos['media_y'])} (cofenéticas).",
             "latex": [rf"\bar d = {_n(momentos['media_x'])} \qquad \bar C = {_n(momentos['media_y'])}"],
         },
@@ -229,7 +239,9 @@ def demostracion(clave: str, enlace: str, vectores: dict, textos: list[str], ids
         },
     ]
 
-    filas_k = [[k, _n(v, 4)] for k, v in sorted(por_k.items()) if k <= 8]
+    # Hasta k = 8, y además el mejor corte si queda por fuera
+    mejor_k = mia["silueta"]["best_k"]
+    filas_k = [[k, _n(v, 4)] for k, v in sorted(por_k.items()) if k <= 8 or k == mejor_k]
     comparacion = [[NOMBRE_ENLACE[e], _n(corridas[e]["cpcc"]["cpcc"]),
                     _n(corridas[e]["fusiones"][-1][2], 3),
                     f"{_n(corridas[e]['silueta']['best_silhouette'], 3)} (k = {corridas[e]['silueta']['best_k']})"]
@@ -249,7 +261,10 @@ def demostracion(clave: str, enlace: str, vectores: dict, textos: list[str], ids
             "complete": "Va uniendo los grupos más cercanos, pero mide la cercanía entre grupos por sus dos miembros más lejanos. Solo junta dos grupos si todos sus miembros están razonablemente cerca.",
             "average": "Va uniendo los grupos más cercanos y mide la cercanía entre grupos por el promedio de todas las distancias entre sus miembros. Es el punto medio entre Single y Complete.",
         }[enlace],
-        "en_una_frase": f"El árbol conserva las distancias originales con una correlación de {_n(mia['cpcc']['cpcc'])}, la {'mejor' if mia['cpcc']['cpcc'] >= max(corridas[e]['cpcc']['cpcc'] for e in ENLACES) else 'de este enlace'} entre los tres enlaces con esta representación.",
+        "en_una_frase": f"El árbol conserva las distancias originales con una correlación de {_n(mia['cpcc']['cpcc'])}, "
+                        + ("la más alta de los tres enlaces con esta representación."
+                           if mia["cpcc"]["cpcc"] >= max(corridas[e]["cpcc"]["cpcc"] for e in ENLACES)
+                           else f"frente a {_n(max(corridas[e]['cpcc']['cpcc'] for e in ENLACES))} del mejor enlace con esta representación."),
         "formulas": [
             {
                 "single": r"D(A, B) = \min_{x \in A,\, y \in B} d(x, y)",
@@ -267,7 +282,8 @@ def demostracion(clave: str, enlace: str, vectores: dict, textos: list[str], ids
         ],
         "interpretacion": "El CPCC va de −1 a 1 y mide fidelidad: cerca de 1, el árbol casi no deforma las distancias entre abstracts. "
                           "No mide si los grupos tienen sentido temático, solo si el dibujo es honesto con los datos. La silueta mira "
-                          "un solo corte del árbol: cerca de 1 hay grupos bien separados, y por debajo de 0.25 la estructura es débil. "
+                          "un solo corte del árbol: cerca de 1 hay grupos bien separados, de 0.25 a 0.5 la estructura es débil, y por "
+                          "debajo de 0.25 no hay una estructura sustancial. "
                           "Las alturas del dendrograma son distancias reales: cuanto más abajo se unen dos abstracts, más se parecen.",
         "conclusiones": _conclusiones(clave, enlace, corridas),
         "codigo": {

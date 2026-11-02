@@ -249,7 +249,7 @@ def benchmark_clustering_sintetico(
     return filas
 
 
-def _fases_de_busqueda(texto: str, patron: str) -> dict[str, tuple[Callable, Callable]]:
+def fases_de_busqueda(texto: str, patron: str) -> dict[str, tuple[Callable, Callable]]:
     """Por algoritmo, la función de preprocesamiento y la de búsqueda ya preparada."""
     lps = kmp.construir_lps(patron)
     malo = boyer_moore.tabla_caracter_malo(patron)
@@ -283,7 +283,7 @@ def benchmark_fases_patrones(
     """Preprocesamiento frente a búsqueda, por algoritmo y patrón, sobre el corpus."""
     filas: list[dict] = []
     for patron in patrones:
-        for nombre, (preparar, buscar) in _fases_de_busqueda(texto, patron).items():
+        for nombre, (preparar, buscar) in fases_de_busqueda(texto, patron).items():
             pre = medir(preparar, repeticiones)
             bus = medir(buscar, repeticiones)
             metricas = MODULOS_DE_BUSQUEDA[nombre].buscar_con_metricas(texto, patron)
@@ -320,7 +320,7 @@ def benchmark_busqueda_texto(
     filas: list[dict] = []
     for tam in tamanos:
         prefijo = texto[:tam]
-        for nombre, (_, buscar) in _fases_de_busqueda(prefijo, patron).items():
+        for nombre, (_, buscar) in fases_de_busqueda(prefijo, patron).items():
             filas.append(_fila(nombre, "texto_corpus", tam, medir(buscar, repeticiones), "car."))
     return filas
 
@@ -340,7 +340,7 @@ def benchmark_peor_caso(
     texto = "a" * n
     filas: list[dict] = []
     for m in longitudes:
-        for nombre, (_, buscar) in _fases_de_busqueda(texto, "a" * m).items():
+        for nombre, (_, buscar) in fases_de_busqueda(texto, "a" * m).items():
             filas.append(_fila(nombre, "patron_peor_caso", m, medir(buscar, repeticiones), "m"))
     return filas
 

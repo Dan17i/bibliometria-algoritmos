@@ -11,7 +11,7 @@ const Demostracion = (() => {
   const titulo = document.querySelector("#hoja-titulo");
   const familia = document.querySelector("#hoja-familia");
   let solicitud = null;     // para cancelar la petición si se cierra antes de que llegue
-  let paresVigentes = null; // el par de artículos abierto, para volver desde "tus palabras"
+  let retorno = null;       // cómo volver a la demostración original desde "tus palabras"
 
   const seguro = (valor) => {
     const nodo = document.createElement("span");
@@ -90,7 +90,7 @@ const Demostracion = (() => {
     titulo.textContent = nombre;
     familia.textContent = grupo;
     cuerpo.innerHTML = `<p class="hoja__espera" role="status">Ejecutando ${seguro(nombre)} sobre ${ids.join(" y ")}…</p>`;
-    paresVigentes = { clave, ids, nombre, grupo };
+    retorno = { etiqueta: `Volver a ${ids.join(" y ")}`, accion: () => mostrar(clave, ids, nombre, grupo, null) };
     abrir(disparador);
     try {
       dibujar(await pedir({ algoritmo: clave, ids }));
@@ -111,8 +111,8 @@ const Demostracion = (() => {
       : d.articulos.map((a) => a.id).join(" y ");
     return `
       <div class="dem-resultado">
-        <span class="dem-valor">${d.similitud.toFixed(4)}</span>${d.etiqueta_valor ? `<span class="dem-par">${d.etiqueta_valor}</span>` : ""}
-        <span class="dem-par">${quienes} · ${d.ms.toFixed(d.ms < 10 ? 2 : 0)} ms</span>
+        <span class="dem-valor">${d.valor_texto ?? d.similitud.toFixed(4)}</span>${d.etiqueta_valor ? `<span class="dem-par">${d.etiqueta_valor}</span>` : ""}
+        <span class="dem-par">${quienes}${d.ms ? ` · ${d.ms.toFixed(d.ms < 10 ? 2 : 0)} ms` : ""}</span>
       </div>
       <p class="dem-frase">${seguro(d.en_una_frase)}</p>`;
   }
@@ -328,7 +328,74 @@ const Demostracion = (() => {
       </div>`;
   }
 
+  /* --- búsqueda de patrones: el patrón se desplaza sobre el texto ----------- */
+
+  function visualBusqueda(v) {
+    const n = v.texto.length;
+    const celdasTexto = [...v.texto].map((c, i) => `<span class="bq__celda" data-t="${i}">${caracter(c)}</span>`).join("");
+    const reglas = [...v.texto].map((_, i) => `<span class="bq__regla">${i % 10 === 0 ? i : ""}</span>`).join("");
+    const celdasPatron = [...v.patron].map((c, j) => `<span class="bq__celda" data-p="${j}">${caracter(c)}</span>`).join("");
+    return `
+      <div class="dem-tarjeta" data-busqueda>
+        <p style="margin-top:0;color:var(--tinta-media);font-size:.9375rem">${seguro(v.aviso)}</p>
+        <div class="bq" tabindex="0" aria-label="Texto y patrón alineado">
+          <div class="bq__pista" style="width:calc(${n} * var(--bq-celda))">
+            <div class="bq__fila">${reglas}</div>
+            <div class="bq__fila bq__fila--texto">${celdasTexto}</div>
+            <div class="bq__fila bq__fila--patron">${celdasPatron}</div>
+          </div>
+        </div>
+        <div class="pd-control">
+          <button type="button" class="boton-suave" data-mover="-1" aria-label="Paso anterior">‹</button>
+          <input type="range" min="0" max="${v.pasos.length - 1}" value="0" aria-label="Avanzar paso a paso">
+          <button type="button" class="boton-suave" data-mover="1" aria-label="Paso siguiente">›</button>
+          <span></span>
+        </div>
+        <div class="pd-explica" aria-live="polite"></div>
+      </div>`;
+  }
+
+  function activarBusqueda(raiz, v) {
+    const pista = raiz.querySelector(".bq");
+    const filaPatron = raiz.querySelector(".bq__fila--patron");
+    const celdasP = raiz.querySelectorAll("[data-p]");
+    const celdasT = raiz.querySelectorAll("[data-t]");
+    const rango = raiz.querySelector("input[type=range]");
+    const contador = raiz.querySelector(".pd-control span");
+    const explica = raiz.querySelector(".pd-explica");
+    const ancho = () => celdasT[0].getBoundingClientRect().width;
+
+    function pintar(k) {
+      const paso = v.pasos[k];
+      filaPatron.style.transform = `translateX(${paso.alineacion * ancho()}px)`;
+      celdasP.forEach((celda, j) => {
+        const e = paso.estados[j];
+        celda.className = `bq__celda${e === "si" ? " si" : e === "no" ? " no" : ""}`;
+      });
+      celdasT.forEach((celda, i) => {
+        celda.className = `bq__celda${i === paso.cursor ? " cursor" : ""}`;
+      });
+      // El patrón queda a la vista sin animar el desplazamiento: sigue al control 1:1
+      const objetivo = paso.alineacion * ancho() + (v.patron.length * ancho()) / 2 - pista.clientWidth / 2;
+      pista.scrollLeft = Math.max(0, objetivo);
+      explica.innerHTML = `${formula(paso.latex)}<p>${seguro(paso.texto)}</p>`;
+      contador.textContent = `paso ${k + 1} de ${v.pasos.length}`;
+    }
+
+    rango.addEventListener("input", () => pintar(Number(rango.value)));
+    raiz.querySelectorAll("[data-mover]").forEach((boton) => {
+      boton.addEventListener("click", () => {
+        const k = Math.max(0, Math.min(v.pasos.length - 1, Number(rango.value) + Number(boton.dataset.mover)));
+        rango.value = k;
+        pintar(k);
+      });
+    });
+    rango.value = v.inicial;
+    pintar(v.inicial);
+  }
+
   const VISUALES = {
+    busqueda: visualBusqueda,
     matriz: visualMatriz,
     conjuntos: visualConjuntos,
     terminos: visualTerminos,
@@ -369,6 +436,17 @@ const Demostracion = (() => {
 
   function tusPalabras(d) {
     if (!d.acepta_textos) return "";
+    if (d.tipo === "patron") {
+      return seccion("Prueba con tus palabras", `
+        <div class="dem-tarjeta">
+          <p style="margin-top:0;color:var(--tinta-media);font-size:.9375rem">Escribe un texto y un patrón, y compara con lo que hagas en papel. Se distinguen mayúsculas de minúsculas.</p>
+          <form class="palabras-form" id="form-palabras">
+            <input class="campo-texto" name="a" maxlength="300" value="${seguro(d.textos ? d.textos[0] : "ABABDABACDABABCABAB")}" aria-label="Texto" autocomplete="off" spellcheck="false" required>
+            <input class="campo-texto" name="b" maxlength="120" value="${seguro(d.textos ? d.textos[1] : "ABABCABAB")}" aria-label="Patrón" autocomplete="off" spellcheck="false" required>
+            <button type="submit" class="boton">Calcular</button>
+          </form>
+        </div>`);
+    }
     const dp = d.clave === "levenshtein" || d.clave === "needleman_wunsch";
     const limite = dp ? 40 : 300;
     const inicial = d.textos || (dp ? ["gato", "pato"] : ["the cat sat", "the cat ran"]);
@@ -391,7 +469,7 @@ const Demostracion = (() => {
     const avisoPalabras = d.textos ? `
       <div class="aviso-palabras">
         <p>Estás viendo tus palabras, no los abstracts.</p>
-        ${paresVigentes ? `<button type="button" class="boton-suave" id="volver-par">Volver a ${paresVigentes.ids.join(" y ")}</button>` : ""}
+        ${retorno ? `<button type="button" class="boton-suave" id="volver-par">${seguro(retorno.etiqueta)}</button>` : ""}
       </div>` : "";
 
     const abstracts = d.articulos ? d.articulos.map((a) => `
@@ -416,6 +494,7 @@ const Demostracion = (() => {
 
     d.visual.forEach((v) => {
       if (v.tipo === "matriz") activarMatriz(cuerpo.querySelector("[data-matriz]"), v);
+      if (v.tipo === "busqueda") activarBusqueda(cuerpo.querySelector("[data-busqueda]"), v);
     });
 
     const form = cuerpo.querySelector("#form-palabras");
@@ -424,7 +503,9 @@ const Demostracion = (() => {
         evento.preventDefault();
         const textos = [form.elements.a.value, form.elements.b.value];
         try {
-          const resultado = await pedir({ algoritmo: d.clave, textos });
+          const resultado = d.tipo === "patron"
+            ? await pedir({ algoritmo: d.clave, texto: textos[0], patron: textos[1] }, "/api/demostracion-patron")
+            : await pedir({ algoritmo: d.clave, textos });
           dibujar(resultado);
           cuerpo.scrollTop = 0;
         } catch (error) {
@@ -437,10 +518,7 @@ const Demostracion = (() => {
 
     const volver = cuerpo.querySelector("#volver-par");
     if (volver) {
-      volver.addEventListener("click", () => {
-        const { clave, ids, nombre, grupo } = paresVigentes;
-        mostrar(clave, ids, nombre, grupo, null);
-      });
+      volver.addEventListener("click", () => retorno.accion());
     }
   }
 
@@ -448,7 +526,7 @@ const Demostracion = (() => {
     titulo.textContent = nombre;
     familia.textContent = grupo;
     cuerpo.innerHTML = `<p class="hoja__espera" role="status">Agrupando los abstracts…</p>`;
-    paresVigentes = null;
+    retorno = null;
     abrir(disparador);
     try {
       dibujar(await pedir({ representacion, enlace }, "/api/demostracion-agrupamiento"));
@@ -457,5 +535,18 @@ const Demostracion = (() => {
     }
   }
 
-  return { mostrar, mostrarAgrupamiento };
+  async function mostrarPatron(clave, patron, nombre, disparador) {
+    titulo.textContent = nombre;
+    familia.textContent = "Búsqueda de patrones";
+    cuerpo.innerHTML = `<p class="hoja__espera" role="status">Ejecutando ${seguro(nombre)}…</p>`;
+    retorno = { etiqueta: "Volver al corpus", accion: () => mostrarPatron(clave, patron, nombre, null) };
+    abrir(disparador);
+    try {
+      dibujar(await pedir({ algoritmo: clave, patron }, "/api/demostracion-patron"));
+    } catch (error) {
+      if (error.name !== "AbortError") cuerpo.innerHTML = `<p class="error">${seguro(error.message)}</p>`;
+    }
+  }
+
+  return { mostrar, mostrarAgrupamiento, mostrarPatron };
 })();

@@ -36,7 +36,7 @@ import time
 
 from flask import Flask, jsonify, request, send_from_directory
 
-from app import explicaciones_clustering
+from app import explicaciones_clustering, explicaciones_patrones
 from app.explicaciones import ACEPTAN_TEXTOS, LADO_CORPUS, LADO_TEXTOS, NOMBRES, demostracion
 from src.pattern import boyer_moore, kmp, rabin_karp
 from src.similarity.classic.cosine import compute_idf, tfidf_cosine_similarity
@@ -212,6 +212,8 @@ def similitud():
 
     if not isinstance(ids, list) or len(ids) < 2:
         return jsonify({"error": "Elige al menos dos artículos."}), 400
+    if not _todos_son_texto(ids):
+        return jsonify({"error": "Selección inválida."}), 400
     desconocidos = [i for i in ids if i not in POR_ID]
     if desconocidos:
         return jsonify({"error": f"Artículos no encontrados: {desconocidos}"}), 400
@@ -253,6 +255,13 @@ def similitud():
         "matrices": matrices,
         "ms_total": (time.perf_counter() - inicio) * 1000,
     })
+
+
+def _todos_son_texto(valores: list) -> bool:
+    for valor in valores:
+        if not isinstance(valor, str):
+            return False
+    return True
 
 
 _series: dict[str, list[float]] = {}
@@ -297,14 +306,14 @@ def ver_demostracion():
     """
     datos = request.get_json(silent=True) or {}
     clave = datos.get("algoritmo")
-    if clave not in NOMBRES:
+    if not isinstance(clave, str) or clave not in NOMBRES:
         return jsonify({"error": "Algoritmo desconocido."}), 400
 
     if "textos" in datos:
         return _demostracion_de_textos(clave, datos["textos"])
 
     ids = datos.get("ids", [])
-    if (not isinstance(ids, list) or len(ids) != 2 or ids[0] == ids[1]
+    if (not isinstance(ids, list) or len(ids) != 2 or not _todos_son_texto(ids) or ids[0] == ids[1]
             or ids[0] not in POR_ID or ids[1] not in POR_ID):
         return jsonify({"error": "La demostración compara dos artículos distintos."}), 400
 
@@ -346,7 +355,7 @@ def buscar():
     datos = request.get_json(silent=True) or {}
     patron = datos.get("patron") or ""
 
-    if not patron:
+    if not isinstance(patron, str) or not patron:
         return jsonify({"error": "Escribe un patrón para buscar."}), 400
     if len(patron) > 120:
         return jsonify({"error": "El patrón no puede superar 120 caracteres."}), 400
@@ -355,8 +364,8 @@ def buscar():
 
     algoritmos = []
     salidas = {}
-    for nombre, modulo in (("KMP", kmp), ("Boyer-Moore", boyer_moore),
-                           ("Rabin-Karp", rabin_karp)):
+    for clave, nombre, modulo in (("kmp", "KMP", kmp), ("boyer_moore", "Boyer-Moore", boyer_moore),
+                                  ("rabin_karp", "Rabin-Karp", rabin_karp)):
         posiciones, ms = _cronometrar(modulo.buscar, corpus_unido, patron)
         metricas = modulo.buscar_con_metricas(corpus_unido, patron)
         salidas[nombre] = posiciones
@@ -365,6 +374,7 @@ def buscar():
                  if nombre == "Boyer-Moore"
                  else f"{metricas['colisiones']} colisiones de hash")
         algoritmos.append({
+            "clave": clave,
             "algoritmo": nombre,
             "ms": ms,
             "comparaciones": metricas["comparaciones"],
@@ -413,6 +423,48 @@ def _contexto(texto: str, pos: int, largo: int, margen: int = 55) -> dict:
     }
 
 
+@app.post("/api/demostracion-patron")
+def demostracion_patron():
+    """
+    Ejecuta un solo algoritmo de búsqueda paso a paso.
+
+    Recibe `algoritmo` y `patron`, y opcionalmente `texto`. Sin texto, la traza se hace
+    sobre el fragmento del corpus donde aparece el patrón y se agrega la comparación de
+    los tres algoritmos sobre el corpus completo.
+    """
+    datos = request.get_json(silent=True) or {}
+    clave = datos.get("algoritmo")
+    patron = datos.get("patron")
+    if not isinstance(clave, str) or clave not in explicaciones_patrones.MODULOS:
+        return jsonify({"error": "Algoritmo desconocido."}), 400
+    if not isinstance(patron, str) or not patron:
+        return jsonify({"error": "Escribe un patrón."}), 400
+    if len(patron) > explicaciones_patrones.LIMITE_PATRON:
+        return jsonify({"error": f"El patrón puede tener hasta {explicaciones_patrones.LIMITE_PATRON} caracteres."}), 400
+
+    if "texto" in datos:
+        texto = datos["texto"]
+        if not isinstance(texto, str) or not texto:
+            return jsonify({"error": "Escribe el texto."}), 400
+        if len(texto) > explicaciones_patrones.LIMITE_TEXTO:
+            return jsonify({"error": f"El texto puede tener hasta {explicaciones_patrones.LIMITE_TEXTO} caracteres."}), 400
+        if len(patron) > len(texto):
+            return jsonify({"error": "El patrón es más largo que el texto."}), 400
+        resultado = explicaciones_patrones.demostracion(clave, texto, patron)
+        resultado["subtitulo"] = "en tu texto"
+        resultado["textos"] = [texto, patron]
+        return jsonify(resultado)
+
+    id_articulo, texto, nota = explicaciones_patrones.fragmento(CORPUS, patron)
+    resultado = explicaciones_patrones.demostracion(clave, texto, patron)
+    corpus_unido = "\n".join(r["texto"] for r in CORPUS)
+    comparacion = explicaciones_patrones.comparacion_en_corpus(corpus_unido, patron)
+    resultado["visual"].append(comparacion["visual"])
+    resultado["conclusiones"] = comparacion["conclusiones"]
+    resultado["subtitulo"] = f"«{patron}» en {nota}, de {id_articulo}"
+    return jsonify(resultado)
+
+
 @app.get("/api/clustering")
 def clustering():
     """Representaciones disponibles con su CPCC por enlace."""
@@ -445,7 +497,8 @@ def demostracion_agrupamiento():
     """La demostración de un enlace con una representación, ejecutada en el momento."""
     datos = request.get_json(silent=True) or {}
     clave, enlace = datos.get("representacion"), datos.get("enlace")
-    if clave not in explicaciones_clustering.REPRESENTACIONES or enlace not in explicaciones_clustering.ENLACES:
+    if not _todos_son_texto([clave, enlace]) or clave not in explicaciones_clustering.REPRESENTACIONES \
+            or enlace not in explicaciones_clustering.ENLACES:
         return jsonify({"error": "Representación o enlace desconocidos."}), 400
     return jsonify(explicaciones_clustering.demostracion(clave, enlace, VECTORES, TEXTOS, VECTORES["ids"]))
 
