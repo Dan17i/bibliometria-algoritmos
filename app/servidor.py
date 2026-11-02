@@ -6,10 +6,16 @@ vivo desde el navegador.
 
 QUÉ SE CALCULA EN VIVO Y QUÉ NO
 -------------------------------
-Los cuatro algoritmos clásicos y los tres de búsqueda de patrones son código
-puro sin dependencias: se ejecutan en cada petición sobre los textos elegidos.
+Al comparar artículos, Levenshtein y Needleman-Wunsch se leen de
+data/processed/similitudes_pd.json, que tiene los 190 pares del corpus: en el
+servidor publicado cada par tarda unos 10 segundos. Jaccard, el coseno TF-IDF y la
+comparación de los vectores de IA se calculan en cada consulta.
 
-
+Al oprimir "Ver demostración" se ejecuta en ese momento solo el algoritmo elegido,
+incluida la matriz completa de los dos de programación dinámica (app/explicaciones.py).
+Los vectores de MiniLM salen de data/processed/vectores.json, porque el modelo no cabe
+en la memoria del servidor publicado. El promedio de GloVe se repite a mano con los
+vectores de palabras de data/processed/glove_palabras.json.
 
 Los dendrogramas se sirven como imágenes ya renderizadas: el clustering de 20
 abstracts con tres enlaces no cambia entre peticiones, así que recalcularlo en
@@ -30,20 +36,17 @@ import time
 
 from flask import Flask, jsonify, request, send_from_directory
 
+from app import explicaciones_clustering, explicaciones_patrones
+from app.explicaciones import ACEPTAN_TEXTOS, LADO_CORPUS, LADO_TEXTOS, NOMBRES, demostracion
 from src.pattern import boyer_moore, kmp, rabin_karp
-from src.similarity.classic.cosine import (
-    compute_idf,
-    cosine_similarity,
-    tfidf_cosine_similarity,
-)
+from src.similarity.classic.cosine import compute_idf, tfidf_cosine_similarity
 from src.similarity.classic.jaccard import jaccard_similarity
-from src.similarity.classic.levenshtein import levenshtein_distance
-from src.similarity.classic.needleman_wunsch import normalized_needleman_wunsch
+from src.similarity.metrics import cosine_steps, euclidean_distance
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIR_DATOS = os.path.join(RAIZ, "data", "processed")
 DIR_FIGURAS = os.path.join(RAIZ, "data", "figuras")
-DIR_FUSIONES = os.path.join(RAIZ, "tests", "fixtures", "daniel", "corpus20")
+DIR_FUSIONES = os.path.join(RAIZ, "data", "resultados")
 
 app = Flask(__name__, static_folder=None)
 
@@ -54,16 +57,55 @@ with open(os.path.join(DIR_DATOS, "abstracts.json"), encoding="utf-8") as fh:
 POR_ID = {r["id"]: r for r in CORPUS}
 TEXTOS = [r["texto"] for r in CORPUS]
 
+with open(os.path.join(DIR_DATOS, "vectores.json"), encoding="utf-8") as fh:
+    VECTORES: dict = json.load(fh)
+
+with open(os.path.join(DIR_DATOS, "similitudes_pd.json"), encoding="utf-8") as fh:
+    MATRICES_PD: dict = json.load(fh)
+
+POSICION = {}
+for indice, identificador in enumerate(VECTORES["ids"]):
+    POSICION[identificador] = indice
+
 # El IDF se calcula sobre los 20 abstractos y es el mismo para toda consulta:
 # precalcularlo evita repetir ese recorrido en cada petición.
 IDF = compute_idf(TEXTOS)
+
+ALGORITMOS = (
+    {"clave": "levenshtein", "algoritmo": "Levenshtein",
+     "familia": "Programación dinámica", "complejidad": "O(m·n)", "origen": "precalculado",
+     "que_mide": "Cuántas letras hay que cambiar para convertir un texto en el otro."},
+    {"clave": "needleman_wunsch", "algoritmo": "Needleman-Wunsch",
+     "familia": "Programación dinámica", "complejidad": "O(m·n)", "origen": "precalculado",
+     "que_mide": "Qué tan bien encajan los dos textos, letra por letra, al ponerlos uno sobre el otro."},
+    {"clave": "jaccard", "algoritmo": "Jaccard",
+     "familia": "Conjuntos", "complejidad": "O(T)", "origen": "en vivo",
+     "que_mide": "Qué proporción de palabras comparten, sin importar el orden."},
+    {"clave": "coseno_tfidf", "algoritmo": "Coseno (TF-IDF)",
+     "familia": "Espacio vectorial", "complejidad": "O(T + V)", "origen": "en vivo",
+     "que_mide": "Qué tanto comparten palabras especializadas, sin contar las muy comunes."},
+    {"clave": "glove", "algoritmo": "GloVe promediado",
+     "familia": "Embeddings", "complejidad": "O(p)", "origen": "en vivo",
+     "que_mide": "Qué tan parecido es el significado promedio de sus palabras."},
+    {"clave": "minilm", "algoritmo": "MiniLM",
+     "familia": "Embeddings", "complejidad": "O(p)", "origen": "en vivo",
+     "que_mide": "Qué tan parecido es el tema de los dos textos completos, según un modelo de lenguaje."},
+)
+
+# Cómo se explica cada forma de medir el parecido entre artículos
+QUE_ES_REPRESENTACION = {
+    "minilm": "Un modelo de lenguaje lee cada abstract completo y juzga qué tan parecido es su tema. Es la forma principal de este trabajo.",
+    "glove": "Se compara el significado promedio de las palabras de cada abstract.",
+    "glove_centrado": "Igual que GloVe, pero quitando lo que todos los abstracts tienen en común, para resaltar sus diferencias.",
+    "jaccard": "Se comparan las palabras que comparten los abstracts, sin tener en cuenta su significado.",
+}
 
 REPRESENTACIONES = {
     "minilm": ("Embeddings MiniLM", "fusiones_minilm.json", ""),
     "glove": ("Embeddings GloVe", "fusiones_glove.json", "_glove"),
     "glove_centrado": ("GloVe centrado", "fusiones_glove_centrado.json",
                        "_glove_centrado"),
-    "jaccard": ("Coeficiente de Jaccard", None, "_jaccard"),
+    "jaccard": ("Coeficiente de Jaccard", "fusiones_jaccard.json", "_jaccard"),
 }
 
 
@@ -78,124 +120,60 @@ def _cronometrar(funcion, *args):
     return valor, (time.perf_counter() - inicio) * 1000
 
 
-def similitudes_clasicas(texto_a: str, texto_b: str) -> list[dict]:
-    """
-    Los cuatro algoritmos clásicos sobre un par de abstracts.
-
-    Levenshtein devuelve una distancia en ediciones, no una similitud. Para
-    poder comparar las cuatro medidas en la misma escala se normaliza:
-
-        similitud = 1 − distancia / longitud_del_mas_largo
-
-    Así un par idéntico da 1 y uno sin nada en común tiende a 0.
-    """
-    resultados = []
-
-    # --- Levenshtein ------------------------------------------------------
-    (distancia, _matriz), ms = _cronometrar(levenshtein_distance, texto_a, texto_b)
-    mayor = max(len(texto_a), len(texto_b)) or 1
-    resultados.append({
-        "algoritmo": "Levenshtein",
-        "familia": "Programación dinámica",
-        "similitud": 1 - distancia / mayor,
-        "detalle": f"{distancia} ediciones sobre {mayor} caracteres",
-        "ms": ms,
-        "complejidad": "O(m·n)",
-    })
-
-    # --- Needleman-Wunsch -------------------------------------------------
-    valor, ms = _cronometrar(normalized_needleman_wunsch, texto_a, texto_b)
-    resultados.append({
-        "algoritmo": "Needleman-Wunsch",
-        "familia": "Programación dinámica",
-        "similitud": valor,
-        "detalle": "alineamiento global normalizado",
-        "ms": ms,
-        "complejidad": "O(m·n)",
-    })
-
-    # --- Jaccard ----------------------------------------------------------
-    (valor, conj_a, conj_b), ms = _cronometrar(jaccard_similarity, texto_a, texto_b)
-    comunes = len(conj_a & conj_b)
-    resultados.append({
-        "algoritmo": "Jaccard",
-        "familia": "Conjuntos",
-        "similitud": valor,
-        "detalle": f"{comunes} términos comunes de "
-                   f"{len(conj_a | conj_b)} en la unión",
-        "ms": ms,
-        "complejidad": "O(m+n)",
-    })
-
-    # --- Coseno con frecuencias (TF) --------------------------------------
-    (salida, ms) = _cronometrar(cosine_similarity, texto_a, texto_b)
-    valor, _v1, _v2, vocabulario = salida
-    resultados.append({
-        "algoritmo": "Coseno (TF)",
-        "familia": "Espacio vectorial",
-        "similitud": valor,
-        "detalle": f"vocabulario unificado de {len(vocabulario)} términos",
-        "ms": ms,
-        "complejidad": "O(m+n)",
-    })
-
-    # --- Coseno con TF-IDF ------------------------------------------------
-    salida, ms = _cronometrar(tfidf_cosine_similarity, texto_a, texto_b, TEXTOS)
-    resultados.append({
-        "algoritmo": "Coseno (TF-IDF)",
-        "familia": "Espacio vectorial",
-        "similitud": salida["coseno"],
-        "detalle": f"ángulo de {salida['angulo_grados']:.1f}° entre los vectores "
-                   f"de {len(salida['vocabulario'])} términos",
-        "ms": ms,
-        "complejidad": "O(m+n)",
-    })
-
-    return resultados
+def _detalle_del_par(clave: str, id_a: str, id_b: str) -> str:
+    """Una línea sobre cómo se obtuvo el valor del par."""
+    texto_a, texto_b = POR_ID[id_a]["texto"], POR_ID[id_b]["texto"]
+    if clave == "levenshtein" or clave == "needleman_wunsch":
+        return "calculado una vez sobre los 190 pares del corpus"
+    if clave == "jaccard":
+        _, interseccion, union = jaccard_similarity(texto_a, texto_b)
+        return f"{len(interseccion)} términos comunes de {len(union)} en la unión"
+    if clave == "coseno_tfidf":
+        pasos = tfidf_cosine_similarity(texto_a, texto_b, TEXTOS, IDF)
+        return (f"ángulo de {pasos['angulo_grados']:.1f}° entre los vectores "
+                f"de {len(pasos['vocabulario'])} términos")
+    i, j = POSICION[id_a], POSICION[id_b]
+    pasos = cosine_steps(VECTORES[clave][i], VECTORES[clave][j])
+    return (f"vectores de {len(VECTORES[clave][i])} dimensiones; ángulo de "
+            f"{pasos['angle_degrees']:.1f}°, distancia euclidiana de "
+            f"{euclidean_distance(VECTORES[clave][i], VECTORES[clave][j]):.3f}")
 
 
-def similitudes_ia(texto_a: str, texto_b: str) -> list[dict]:
-    """
-    Los dos enfoques de IA, si los modelos están disponibles.
+def _similitud_del_par(clave: str, id_a: str, id_b: str) -> float:
+    """Similitud de un par con el algoritmo indicado."""
+    i, j = POSICION[id_a], POSICION[id_b]
+    if clave == "levenshtein" or clave == "needleman_wunsch":
+        return MATRICES_PD[clave][i][j]
+    if clave == "jaccard":
+        return jaccard_similarity(POR_ID[id_a]["texto"], POR_ID[id_b]["texto"])[0]
+    if clave == "coseno_tfidf":
+        return tfidf_cosine_similarity(
+            POR_ID[id_a]["texto"], POR_ID[id_b]["texto"], TEXTOS, IDF
+        )["coseno"]
+    return cosine_steps(VECTORES[clave][i], VECTORES[clave][j])["cosine"]
 
-    Se devuelve una lista vacía con un aviso cuando faltan: es preferible
-    decirlo a mostrar un número que no corresponde al método anunciado.
-    """
-    resultados = []
-    try:
-        from src.similarity.ai.demo_modelos import (
-            glove_embeddings,
-            sentence_embeddings,
-        )
-        from src.similarity.metrics import cosine_similarity as coseno_vectores
-    except ImportError:
-        return resultados
 
-    for nombre, funcion in (("GloVe promediado", glove_embeddings),
-                            ("MiniLM", sentence_embeddings)):
-        try:
-            vectores, ms = _cronometrar(funcion, [texto_a, texto_b])
-            valor = coseno_vectores(vectores[0], vectores[1])
-            resultados.append({
-                "algoritmo": nombre,
-                "familia": "Embeddings",
-                "similitud": valor,
-                "detalle": f"vectores de {len(vectores[0])} dimensiones; "
-                           "el coseno se calcula a mano",
-                "ms": ms,
-                "complejidad": "O(d) sobre los vectores",
-            })
-        except Exception as error:      # modelo ausente o sin memoria
-            resultados.append({
-                "algoritmo": nombre,
-                "familia": "Embeddings",
-                "similitud": None,
-                "detalle": f"modelo no disponible: {type(error).__name__}",
-                "ms": None,
-                "complejidad": "O(d) sobre los vectores",
-            })
+def matriz_de_similitud(clave: str, ids: list[str]) -> list[list[float]]:
+    """Matriz simétrica de los artículos elegidos: se calcula solo i < j y se copia."""
+    n = len(ids)
+    matriz = [[1.0] * n for _ in range(n)]
+    for i in range(n):
+        for j in range(i + 1, n):
+            valor = _similitud_del_par(clave, ids[i], ids[j])
+            matriz[i][j] = valor
+            matriz[j][i] = valor
+    return matriz
 
-    return resultados
+
+def _ficha(id_articulo: str) -> dict:
+    """Metadatos y abstract de un artículo, para mostrarlos junto al resultado."""
+    registro = POR_ID[id_articulo]
+    return {
+        "id": registro["id"],
+        "titulo": registro["titulo"],
+        "autores": registro["autores"],
+        "texto": registro["texto"],
+    }
 
 
 # --------------------------------------------------------------------------
@@ -237,88 +215,180 @@ def articulos():
 @app.post("/api/similitud")
 def similitud():
     """
-    Calcula las similitudes entre los artículos seleccionados.
+    Compara los artículos seleccionados con los seis algoritmos.
 
-    Con dos artículos devuelve el detalle de cada algoritmo. Con más de dos,
-    devuelve además la matriz por pares de un algoritmo rápido, porque las
-    medidas de programación dinámica sobre todos los pares de una selección
-    grande tardarían demasiado para una petición web.
+    Con dos artículos devuelve una fila por algoritmo. Con más de dos devuelve una
+    matriz por algoritmo, de modo que cada par queda medido con los seis. La
+    demostración de cada uno se pide aparte, en /api/demostracion.
     """
     datos = request.get_json(silent=True) or {}
     ids = datos.get("ids", [])
 
-    if len(ids) < 2:
+    if not isinstance(ids, list) or len(ids) < 2:
         return jsonify({"error": "Elige al menos dos artículos."}), 400
+    if not _todos_son_texto(ids):
+        return jsonify({"error": "Selección inválida."}), 400
     desconocidos = [i for i in ids if i not in POR_ID]
     if desconocidos:
         return jsonify({"error": f"Artículos no encontrados: {desconocidos}"}), 400
+    vistos = {}
+    for identificador in ids:
+        if identificador in vistos:
+            return jsonify({"error": f"Artículo repetido: {identificador}"}), 400
+        vistos[identificador] = True
 
     inicio = time.perf_counter()
+    articulos = [_ficha(i) for i in ids]
 
     if len(ids) == 2:
-        a, b = POR_ID[ids[0]], POR_ID[ids[1]]
-        algoritmos = similitudes_clasicas(a["texto"], b["texto"])
-        algoritmos += similitudes_ia(a["texto"], b["texto"])
+        algoritmos = []
+        for algoritmo in ALGORITMOS:
+            algoritmos.append({
+                **algoritmo,
+                "similitud": _similitud_del_par(algoritmo["clave"], ids[0], ids[1]),
+                "detalle": _detalle_del_par(algoritmo["clave"], ids[0], ids[1]),
+            })
         return jsonify({
             "modo": "par",
-            "articulos": [{"id": r["id"], "titulo": r["titulo"]} for r in (a, b)],
+            "ids": ids,
+            "articulos": articulos,
             "algoritmos": algoritmos,
             "ms_total": (time.perf_counter() - inicio) * 1000,
         })
 
-    # --- selección múltiple: matriz por pares -----------------------------
-    metrica = datos.get("metrica", "jaccard")
-    matriz = []
-    for i, id_a in enumerate(ids):
-        fila = []
-        for j, id_b in enumerate(ids):
-            if i == j:
-                fila.append(1.0)
-                continue
-            texto_a = POR_ID[id_a]["texto"]
-            texto_b = POR_ID[id_b]["texto"]
-            if metrica == "coseno":
-                fila.append(cosine_similarity(texto_a, texto_b)[0])
-            else:
-                fila.append(jaccard_similarity(texto_a, texto_b)[0])
-        matriz.append(fila)
+    # --- selección múltiple: una matriz por algoritmo ---------------------
+    matrices = {}
+    for algoritmo in ALGORITMOS:
+        matrices[algoritmo["clave"]] = matriz_de_similitud(algoritmo["clave"], ids)
 
     return jsonify({
         "modo": "matriz",
-        "metrica": metrica,
         "ids": ids,
-        "titulos": [POR_ID[i]["titulo"] for i in ids],
-        "matriz": matriz,
+        "articulos": articulos,
+        "algoritmos": ALGORITMOS,
+        "matrices": matrices,
         "ms_total": (time.perf_counter() - inicio) * 1000,
     })
 
 
+def _todos_son_texto(valores: list) -> bool:
+    for valor in valores:
+        if not isinstance(valor, str):
+            return False
+    return True
+
+
+_series: dict[str, list[float]] = {}
+
+
+def _serie_del_corpus(clave: str) -> list[float]:
+    """El valor de los 190 pares con un algoritmo. Se calcula una vez por algoritmo."""
+    if clave not in _series:
+        ids = VECTORES["ids"]
+        matriz = matriz_de_similitud(clave, ids)
+        valores = []
+        for i in range(len(ids)):
+            for j in range(i + 1, len(ids)):
+                valores.append(matriz[i][j])
+        _series[clave] = valores
+    return _series[clave]
+
+
+def _lectura_en_el_corpus(clave: str, valor: float) -> dict:
+    """Dónde queda el par frente a los 190 del corpus: da contexto al número."""
+    valores = _serie_del_corpus(clave)
+    puesto = 1
+    for otro in valores:
+        if otro > valor + 1e-9:
+            puesto += 1
+    return {
+        "puesto": puesto,
+        "total": len(valores),
+        "minimo": min(valores),
+        "maximo": max(valores),
+        "valores": valores,
+    }
+
+
+@app.post("/api/demostracion")
+def ver_demostracion():
+    """
+    Ejecuta un solo algoritmo y devuelve su demostración paso a paso.
+
+    Recibe `algoritmo` y, o bien `ids` con dos artículos del corpus, o bien `textos`
+    con dos textos cortos escritos por quien consulta.
+    """
+    datos = request.get_json(silent=True) or {}
+    clave = datos.get("algoritmo")
+    if not isinstance(clave, str) or clave not in NOMBRES:
+        return jsonify({"error": "Algoritmo desconocido."}), 400
+
+    if "textos" in datos:
+        return _demostracion_de_textos(clave, datos["textos"])
+
+    ids = datos.get("ids", [])
+    if (not isinstance(ids, list) or len(ids) != 2 or not _todos_son_texto(ids) or ids[0] == ids[1]
+            or ids[0] not in POR_ID or ids[1] not in POR_ID):
+        return jsonify({"error": "La demostración compara dos artículos distintos."}), 400
+
+    i, j = POSICION[ids[0]], POSICION[ids[1]]
+    resultado = demostracion(
+        clave, POR_ID[ids[0]]["texto"], POR_ID[ids[1]]["texto"], TEXTOS, IDF, LADO_CORPUS,
+        (VECTORES["minilm"][i], VECTORES["minilm"][j]),
+    )
+    resultado["articulos"] = [_ficha(ids[0]), _ficha(ids[1])]
+    resultado["corpus"] = _lectura_en_el_corpus(clave, resultado["similitud"])
+    return jsonify(resultado)
+
+
+def _demostracion_de_textos(clave: str, textos):
+    if clave not in ACEPTAN_TEXTOS:
+        return jsonify({"error": "Este algoritmo solo trabaja con los abstracts del corpus, "
+                                 "porque sus vectores salen de un modelo."}), 400
+    limite = 40 if clave in ("levenshtein", "needleman_wunsch") else 300
+    if (not isinstance(textos, list) or len(textos) != 2
+            or not isinstance(textos[0], str) or not isinstance(textos[1], str)
+            or not textos[0] or not textos[1]):
+        return jsonify({"error": "Escribe los dos textos."}), 400
+    if len(textos[0]) > limite or len(textos[1]) > limite:
+        return jsonify({"error": f"Cada texto puede tener hasta {limite} caracteres."}), 400
+
+    resultado = demostracion(clave, textos[0], textos[1], TEXTOS, None, LADO_TEXTOS)
+    resultado["textos"] = textos
+    return jsonify(resultado)
+
+
 @app.post("/api/buscar")
 def buscar():
-    """Busca un patrón en los 20 abstracts con los tres algoritmos."""
-    datos = request.get_json(silent=True) or {}
-    patron = (datos.get("patron") or "").strip()
+    """
+    Busca un patrón en los 20 abstracts con los tres algoritmos.
 
-    if not patron:
+    La coincidencia es exacta: el patrón y el texto se comparan tal cual, así
+    que "AI" y "ai" son cadenas distintas.
+    """
+    datos = request.get_json(silent=True) or {}
+    patron = datos.get("patron") or ""
+
+    if not isinstance(patron, str) or not patron:
         return jsonify({"error": "Escribe un patrón para buscar."}), 400
     if len(patron) > 120:
         return jsonify({"error": "El patrón no puede superar 120 caracteres."}), 400
 
-    objetivo = patron.lower()
-    corpus_unido = "\n".join(r["texto"].lower() for r in CORPUS)
+    corpus_unido = "\n".join(r["texto"] for r in CORPUS)
 
     algoritmos = []
     salidas = {}
-    for nombre, modulo in (("KMP", kmp), ("Boyer-Moore", boyer_moore),
-                           ("Rabin-Karp", rabin_karp)):
-        posiciones, ms = _cronometrar(modulo.buscar, corpus_unido, objetivo)
-        metricas = modulo.buscar_con_metricas(corpus_unido, objetivo)
+    for clave, nombre, modulo in (("kmp", "KMP", kmp), ("boyer_moore", "Boyer-Moore", boyer_moore),
+                                  ("rabin_karp", "Rabin-Karp", rabin_karp)):
+        posiciones, ms = _cronometrar(modulo.buscar, corpus_unido, patron)
+        metricas = modulo.buscar_con_metricas(corpus_unido, patron)
         salidas[nombre] = posiciones
         extra = (f"{metricas['saltos']} saltos" if nombre == "KMP"
                  else f"{metricas['alineaciones']} alineaciones"
                  if nombre == "Boyer-Moore"
                  else f"{metricas['colisiones']} colisiones de hash")
         algoritmos.append({
+            "clave": clave,
             "algoritmo": nombre,
             "ms": ms,
             "comparaciones": metricas["comparaciones"],
@@ -334,7 +404,7 @@ def buscar():
     por_articulo = []
     for registro in CORPUS:
         texto = registro["texto"]
-        posiciones = kmp.buscar(texto.lower(), objetivo)
+        posiciones = kmp.buscar(texto, patron)
         if not posiciones:
             continue
         por_articulo.append({
@@ -342,7 +412,7 @@ def buscar():
             "titulo": registro["titulo"],
             "ocurrencias": len(posiciones),
             "contextos": [
-                _contexto(texto, p, len(objetivo)) for p in posiciones[:3]
+                _contexto(texto, p, len(patron)) for p in posiciones[:3]
             ],
         })
 
@@ -367,15 +437,56 @@ def _contexto(texto: str, pos: int, largo: int, margen: int = 55) -> dict:
     }
 
 
+@app.post("/api/demostracion-patron")
+def demostracion_patron():
+    """
+    Ejecuta un solo algoritmo de búsqueda paso a paso.
+
+    Recibe `algoritmo` y `patron`, y opcionalmente `texto`. Sin texto, la traza se hace
+    sobre el fragmento del corpus donde aparece el patrón y se agrega la comparación de
+    los tres algoritmos sobre el corpus completo.
+    """
+    datos = request.get_json(silent=True) or {}
+    clave = datos.get("algoritmo")
+    patron = datos.get("patron")
+    if not isinstance(clave, str) or clave not in explicaciones_patrones.MODULOS:
+        return jsonify({"error": "Algoritmo desconocido."}), 400
+    if not isinstance(patron, str) or not patron:
+        return jsonify({"error": "Escribe un patrón."}), 400
+    if len(patron) > explicaciones_patrones.LIMITE_PATRON:
+        return jsonify({"error": f"El patrón puede tener hasta {explicaciones_patrones.LIMITE_PATRON} caracteres."}), 400
+
+    if "texto" in datos:
+        texto = datos["texto"]
+        if not isinstance(texto, str) or not texto:
+            return jsonify({"error": "Escribe el texto."}), 400
+        if len(texto) > explicaciones_patrones.LIMITE_TEXTO:
+            return jsonify({"error": f"El texto puede tener hasta {explicaciones_patrones.LIMITE_TEXTO} caracteres."}), 400
+        if len(patron) > len(texto):
+            return jsonify({"error": "El patrón es más largo que el texto."}), 400
+        resultado = explicaciones_patrones.demostracion(clave, texto, patron)
+        resultado["subtitulo"] = "en tu texto"
+        resultado["textos"] = [texto, patron]
+        return jsonify(resultado)
+
+    id_articulo, texto, nota = explicaciones_patrones.fragmento(CORPUS, patron)
+    resultado = explicaciones_patrones.demostracion(clave, texto, patron)
+    corpus_unido = "\n".join(r["texto"] for r in CORPUS)
+    comparacion = explicaciones_patrones.comparacion_en_corpus(corpus_unido, patron)
+    resultado["visual"].append(comparacion["visual"])
+    resultado["conclusiones"] = comparacion["conclusiones"]
+    resultado["subtitulo"] = f"«{patron}» en {nota}, de {id_articulo}"
+    resultado["que_significa"] += (" El paso a paso usa este pedazo corto para que se pueda seguir; "
+                                   "más abajo están los tres algoritmos sobre los 20 abstracts completos.")
+    return jsonify(resultado)
+
+
 @app.get("/api/clustering")
 def clustering():
     """Representaciones disponibles con su CPCC por enlace."""
     disponibles = []
     for clave, (etiqueta, archivo, sufijo) in REPRESENTACIONES.items():
-        if archivo:
-            ruta = os.path.join(DIR_FUSIONES, archivo)
-        else:
-            ruta = os.path.join(DIR_DATOS, "fusiones.json")
+        ruta = os.path.join(DIR_FUSIONES, archivo)
         if not os.path.exists(ruta):
             continue
         with open(ruta, encoding="utf-8") as fh:
@@ -384,6 +495,7 @@ def clustering():
         disponibles.append({
             "clave": clave,
             "etiqueta": etiqueta,
+            "que_es": QUE_ES_REPRESENTACION[clave],
             "cpcc": enlaces,
             "mejor_enlace": max(enlaces, key=enlaces.get),
             "figuras": {
@@ -395,6 +507,17 @@ def clustering():
 
     disponibles.sort(key=lambda d: max(d["cpcc"].values()), reverse=True)
     return jsonify({"representaciones": disponibles})
+
+
+@app.post("/api/demostracion-agrupamiento")
+def demostracion_agrupamiento():
+    """La demostración de un enlace con una representación, ejecutada en el momento."""
+    datos = request.get_json(silent=True) or {}
+    clave, enlace = datos.get("representacion"), datos.get("enlace")
+    if not _todos_son_texto([clave, enlace]) or clave not in explicaciones_clustering.REPRESENTACIONES \
+            or enlace not in explicaciones_clustering.ENLACES:
+        return jsonify({"error": "Representación o enlace desconocidos."}), 400
+    return jsonify(explicaciones_clustering.demostracion(clave, enlace, VECTORES, TEXTOS, VECTORES["ids"]))
 
 
 @app.get("/api/corpus")

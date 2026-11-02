@@ -38,12 +38,18 @@ def levenshtein_distance(str1: str, str2: str) -> tuple[int, list[list[int]]]:
             else:
                 costo_sustitucion = 1
                 
-            matriz[i][j] = min(
-                matriz[i - 1][j] + 1,               # Eliminación
-                matriz[i][j - 1] + 1,               # Inserción
-                matriz[i - 1][j - 1] + costo_sustitucion # Sustitución
-            )
-            
+            eliminacion = matriz[i - 1][j] + 1
+            insercion = matriz[i][j - 1] + 1
+            sustitucion = matriz[i - 1][j - 1] + costo_sustitucion
+
+            # La celda toma el mínimo de las tres operaciones
+            menor = eliminacion
+            if insercion < menor:
+                menor = insercion
+            if sustitucion < menor:
+                menor = sustitucion
+            matriz[i][j] = menor
+
     # La distancia final se encuentra en la esquina inferior derecha
     distancia_final = matriz[m][n]
     

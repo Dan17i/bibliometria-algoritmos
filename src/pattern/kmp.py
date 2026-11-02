@@ -126,8 +126,12 @@ def buscar(texto: str, patron: str) -> list[int]:
     n, m = len(texto), len(patron)
     if m == 0 or m > n:
         return []
+    return buscar_con_tabla(texto, patron, construir_lps(patron))
 
-    lps = construir_lps(patron)
+
+def buscar_con_tabla(texto: str, patron: str, lps: list[int]) -> list[int]:
+    """La fase de búsqueda, con la tabla ya construida. Permite medirla por separado."""
+    n, m = len(texto), len(patron)
     ocurrencias: list[int] = []
     i = j = 0
 
@@ -187,6 +191,50 @@ def construir_lps_con_pasos(patron: str) -> tuple[list[int], list[dict]]:
             i += 1
 
     return lps, pasos
+
+
+def buscar_con_pasos(texto: str, patron: str) -> tuple[list[int], list[dict]]:
+    """
+    Búsqueda que registra cada comparación y la decisión que tomó.
+
+    Sirve para graficar sobre el texto en qué alineación está el patrón y cuánto
+    baja `j` cuando falla, sin que el puntero del texto retroceda.
+    """
+    n, m = len(texto), len(patron)
+    if m == 0 or m > n:
+        return [], []
+
+    lps = construir_lps(patron)
+    ocurrencias: list[int] = []
+    pasos: list[dict] = []
+    i = j = 0
+
+    while i < n:
+        registro = {
+            "i": i,
+            "j": j,
+            "alineacion": i - j,
+            "caracter_texto": texto[i],
+            "caracter_patron": patron[j],
+            "coincide": texto[i] == patron[j],
+        }
+        if texto[i] == patron[j]:
+            i += 1
+            j += 1
+            registro["accion"] = "avanzan i y j"
+            if j == m:
+                ocurrencias.append(i - m)
+                j = lps[j - 1]
+                registro["accion"] = f"OCURRENCIA en {i - m}; j baja a {j}"
+        elif j > 0:
+            registro["accion"] = f"falla: j baja de {j} a lps[{j - 1}] = {lps[j - 1]}; i no se mueve"
+            j = lps[j - 1]
+        else:
+            i += 1
+            registro["accion"] = "falla con j = 0: avanza i"
+        pasos.append(registro)
+
+    return ocurrencias, pasos
 
 
 def buscar_con_metricas(texto: str, patron: str) -> dict:

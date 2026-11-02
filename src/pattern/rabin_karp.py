@@ -79,7 +79,7 @@ BASE = 256
 PRIMO = 1_000_003
 
 
-def calcular_hash(cadena: str, longitud: int) -> int:
+def calcular_hash(cadena: str, longitud: int, primo: int = PRIMO) -> int:
     """
     Hash polinómico de los primeros `longitud` caracteres.
 
@@ -92,7 +92,7 @@ def calcular_hash(cadena: str, longitud: int) -> int:
     """
     h = 0
     for i in range(longitud):
-        h = (h * BASE + ord(cadena[i])) % PRIMO
+        h = (h * BASE + ord(cadena[i])) % primo
     return h
 
 
@@ -109,15 +109,27 @@ def buscar(texto: str, patron: str) -> list[int]:
     n, m = len(texto), len(patron)
     if m == 0 or m > n:
         return []
+    return buscar_con_hashes(texto, patron, *preprocesar(texto, patron))
 
-    # b^(m-1) mod q: el peso del carácter que sale de la ventana
+
+def preprocesar(texto: str, patron: str) -> tuple[int, int, int]:
+    """
+    El peso del carácter que sale de la ventana, b^(m-1) mod q, y los hashes del
+    patrón y de la primera ventana.
+
+    Complejidad: O(m).
+    """
+    m = len(patron)
     factor = 1
     for _ in range(m - 1):
         factor = (factor * BASE) % PRIMO
+    return factor, calcular_hash(patron, m), calcular_hash(texto, m)
 
-    hash_patron = calcular_hash(patron, m)
-    hash_ventana = calcular_hash(texto, m)
 
+def buscar_con_hashes(texto: str, patron: str, factor: int, hash_patron: int,
+                      hash_ventana: int) -> list[int]:
+    """La fase de búsqueda, con los hashes ya calculados. Permite medirla por separado."""
+    n, m = len(texto), len(patron)
     ocurrencias: list[int] = []
 
     for i in range(n - m + 1):
@@ -150,13 +162,13 @@ def buscar(texto: str, patron: str) -> list[int]:
 # Instrumentación para el documento técnico
 # --------------------------------------------------------------------------
 
-def buscar_con_pasos(texto: str, patron: str, max_pasos: int = 12
+def buscar_con_pasos(texto: str, patron: str, max_pasos: int = 12, primo: int = PRIMO
                      ) -> tuple[list[int], list[dict]]:
     """
     Búsqueda que registra el hash de cada ventana y si hubo colisión.
 
-    Permite mostrar el cálculo numérico iterativo del hash y las colisiones,
-    que es lo que pide el análisis del requerimiento.
+    Permite mostrar el cálculo numérico iterativo del hash y las colisiones. Con
+    un primo pequeño las colisiones aparecen aun en textos cortos.
     """
     n, m = len(texto), len(patron)
     if m == 0 or m > n:
@@ -164,10 +176,10 @@ def buscar_con_pasos(texto: str, patron: str, max_pasos: int = 12
 
     factor = 1
     for _ in range(m - 1):
-        factor = (factor * BASE) % PRIMO
+        factor = (factor * BASE) % primo
 
-    hash_patron = calcular_hash(patron, m)
-    hash_ventana = calcular_hash(texto, m)
+    hash_patron = calcular_hash(patron, m, primo)
+    hash_ventana = calcular_hash(texto, m, primo)
     ocurrencias: list[int] = []
     pasos: list[dict] = []
 
@@ -202,9 +214,9 @@ def buscar_con_pasos(texto: str, patron: str, max_pasos: int = 12
             hash_ventana = (
                 (hash_ventana - ord(texto[i]) * factor) * BASE
                 + ord(texto[i + m])
-            ) % PRIMO
+            ) % primo
             if hash_ventana < 0:
-                hash_ventana += PRIMO
+                hash_ventana += primo
 
     return ocurrencias, pasos
 

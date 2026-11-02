@@ -6,16 +6,16 @@ las mismas posiciones: en una búsqueda de coincidencia exacta no hay margen
 de interpretación.
 
 La referencia se construye con una búsqueda ingenua escrita aquí mismo, no
-con `str.find`: el requerimiento prohíbe las funciones de alto nivel del
-lenguaje, y una prueba que las usara dejaría la puerta abierta a que alguien
-las copiara al código de producción.
+con `str.find`: el proyecto no usa funciones de alto nivel del lenguaje para
+buscar, y una prueba que las usara dejaría la puerta abierta a que alguien las
+copiara al código de producción.
 """
 
 from __future__ import annotations
 
 import pytest
 
-from src.pattern import boyer_moore, kmp, rabin_karp
+from src.pattern import boyer_moore, buscador, kmp, rabin_karp, traza
 
 ALGORITMOS = [
     pytest.param(kmp, id="kmp"),
@@ -121,6 +121,68 @@ def test_las_metricas_son_coherentes():
         m = modulo.buscar_con_metricas(texto, "abra")
         assert m["ocurrencias"] == modulo.buscar(texto, "abra")
         assert m["comparaciones"] > 0
+
+
+def test_las_fases_por_separado_dan_lo_mismo_que_buscar():
+    texto, patron = "abracadabra " * 40, "abra"
+    esperado = busqueda_ingenua(texto, patron)
+    assert kmp.buscar_con_tabla(texto, patron, kmp.construir_lps(patron)) == esperado
+    assert boyer_moore.buscar_con_tablas(
+        texto, patron, boyer_moore.tabla_caracter_malo(patron),
+        boyer_moore.tabla_sufijo_bueno(patron)) == esperado
+    assert rabin_karp.buscar_con_hashes(
+        texto, patron, *rabin_karp.preprocesar(texto, patron)) == esperado
+
+
+def test_kmp_con_pasos_da_lo_mismo_y_no_retrocede_en_el_texto():
+    texto, patron = "ABABDABACDABABCABAB", "ABABCABAB"
+    ocurrencias, pasos = kmp.buscar_con_pasos(texto, patron)
+    assert ocurrencias == kmp.buscar(texto, patron)
+    for anterior, siguiente in zip(pasos, pasos[1:]):
+        assert siguiente["i"] >= anterior["i"]
+    assert len(pasos) == kmp.buscar_con_metricas(texto, patron)["comparaciones"]
+
+
+def test_rabin_karp_con_primo_pequeno_detecta_colisiones_sin_falsos_positivos():
+    texto = ("Trend Two posits the role of affective states in learning trajectories "
+             "and suggests the related machine learning approaches.")
+    ocurrencias, pasos = rabin_karp.buscar_con_pasos(texto, "learning", max_pasos=len(texto), primo=101)
+    assert ocurrencias == busqueda_ingenua(texto, "learning") == [49, 104]
+    assert [p["posicion"] for p in pasos if p["colision"]] == [40]
+    for paso in pasos:
+        assert paso["ocurrencia"] == (paso["ventana"] == "learning")
+
+
+def test_traza_del_caso_de_estudio():
+    texto = "the role of learning and machine learning approaches"
+    t = traza.construir_traza(texto, "learning")
+    assert t["kmp"]["ocurrencias"] == t["boyer_moore"]["ocurrencias"] == t["rabin_karp"]["ocurrencias"]
+    assert t["kmp"]["ocurrencias"] == busqueda_ingenua(texto, "learning")
+    assert t["boyer_moore"]["comparaciones"] < t["kmp"]["comparaciones"]
+
+
+def test_boyer_moore_peor_caso_con_muchas_ocurrencias():
+    """Con ocurrencias en todas las posiciones, las comparaciones crecen como n·m."""
+    n, m = 2000, 100
+    metricas = boyer_moore.buscar_con_metricas("a" * n, "a" * m)
+    assert len(metricas["ocurrencias"]) == n - m + 1
+    assert metricas["comparaciones"] == (n - m + 1) * m
+
+
+@pytest.mark.parametrize("algoritmo", ALGORITMOS)
+def test_la_coincidencia_es_exacta(algoritmo):
+    """Mayúsculas y minúsculas son caracteres distintos: "AI" no está en "training"."""
+    texto = "AI training and ai tools"
+    assert algoritmo.buscar(texto, "AI") == [0]
+    assert algoritmo.buscar(texto, "ai") == [5, 16]
+
+
+def test_el_buscador_no_transforma_el_texto():
+    registros = [{"id": "P1", "titulo": "t", "texto": "AI and training"}]
+    assert buscador.comparar(registros, "AI")["total_ocurrencias"] == 1
+    assert buscador.comparar(registros, "ai")["total_ocurrencias"] == 1
+    assert buscador.comparar(registros, "ai")["por_articulo"][0]["posiciones"] == [9]
+    assert buscador.comparar(registros, "Training")["total_ocurrencias"] == 0
 
 
 def test_boyer_moore_salta_parte_del_texto():

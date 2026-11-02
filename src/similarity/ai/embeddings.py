@@ -18,12 +18,18 @@ vectores (enfoque 1) o a una función `encode` (enfoque 2). Así se pueden proba
 sin descargar modelos. Los cargadores `load_*` importan las librerías de forma
 perezosa y convierten todo a `list[float]` con `.tolist()`.
 """
-import re
 from typing import Callable, Collection, Mapping
 
+from src.similarity.classic.tokenizador import a_minuscula
 from src.similarity.metrics import mean_vector
 
-_TOKEN_RE = re.compile(r"[a-záéíóúüñ0-9]+(?:[-'][a-záéíóúüñ0-9]+)*")
+_ACENTUADAS = {"á": True, "é": True, "í": True, "ó": True, "ú": True, "ü": True, "ñ": True}
+_UNIONES = {"-": True, "'": True}
+
+
+def _es_de_palabra(caracter: str) -> bool:
+    """Letra minúscula o dígito."""
+    return "a" <= caracter <= "z" or "0" <= caracter <= "9" or caracter in _ACENTUADAS
 
 
 def tokenize(text: str) -> list[str]:
@@ -35,7 +41,38 @@ def tokenize(text: str) -> list[str]:
     Complejidad temporal: O(L) con L la longitud del texto en caracteres.
     Complejidad espacial: O(T) con T el número de tokens.
     """
-    return _TOKEN_RE.findall(text.lower())
+    tokens = []
+    actual = ""
+    n = len(text)
+    for i in range(n):
+        caracter = a_minuscula(text[i])
+        if _es_de_palabra(caracter):
+            actual += caracter
+        elif (caracter in _UNIONES and actual != "" and i + 1 < n
+              and _es_de_palabra(a_minuscula(text[i + 1]))):
+            actual += caracter
+        elif actual != "":
+            tokens.append(actual)
+            actual = ""
+    if actual != "":
+        tokens.append(actual)
+    return tokens
+
+
+def _partes_de_compuesta(token: str) -> list[str]:
+    """Separa un token por sus guiones y apóstrofes: "ai's" da "ai" y "s"."""
+    partes = []
+    actual = ""
+    for caracter in token:
+        if caracter in _UNIONES:
+            if actual != "":
+                partes.append(actual)
+            actual = ""
+        else:
+            actual += caracter
+    if actual != "":
+        partes.append(actual)
+    return partes
 
 
 def average_word_vectors(
@@ -85,8 +122,10 @@ def average_word_vectors(
             token_vectors.append(list(vec))
             continue
         # palabra compuesta ("problem-solving"): se prueban sus partes
-        parts = [p for p in re.split(r"[-']", tok) if p] if ("-" in tok or "'" in tok) else []
+        parts = _partes_de_compuesta(tok)
         found = [p for p in parts if p in word_vectors and not (stopwords and p in stopwords)]
+        if len(parts) == 1:
+            found = []
         if found:
             for p in found:
                 used.append(p)
@@ -166,12 +205,11 @@ def load_gensim_vectors(
     if vocabulary is None:
         return {w: kv[w].tolist() for w in kv.index_to_key}
 
-    needed = set()
+    needed = {}
     for w in vocabulary:
-        needed.add(w)
-        for part in re.split(r"[-']", w):
-            if part:
-                needed.add(part)
+        needed[w] = True
+        for part in _partes_de_compuesta(w):
+            needed[part] = True
     return {w: kv[w].tolist() for w in needed if w in kv.key_to_index}
 
 

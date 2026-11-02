@@ -3,7 +3,14 @@ import math
 
 import pytest
 
-from src.similarity.ai.caso_estudio import ai_scores, classic_scores, format_table
+from src.similarity.ai.caso_estudio import (
+    ai_scores,
+    classic_scores,
+    format_table,
+    operaciones_levenshtein,
+    operaciones_needleman,
+    traza_clasicos,
+)
 from src.similarity.ai.embeddings import average_word_vectors
 from src.similarity.ai.stopwords import STOPWORDS, remove_stopwords
 
@@ -82,6 +89,31 @@ def test_needleman_wunsch_y_tfidf_sobre_un_par_pequeno():
     assert por_nombre["Coseno TF-IDF"]["similitud"] < por_nombre["Coseno TF (frecuencias)"]["similitud"]
     assert all(f["similitud"] is not None for f in filas)
     assert "—" not in format_table(filas)
+
+
+def test_operaciones_coinciden_con_el_resultado():
+    from src.similarity.classic.levenshtein import levenshtein_distance
+    from src.similarity.classic.needleman_wunsch import needleman_wunsch
+
+    distancia, matriz = levenshtein_distance("kitten", "sitting")
+    lev = operaciones_levenshtein("kitten", "sitting", matriz)
+    assert lev["sustituciones"] + lev["inserciones"] + lev["eliminaciones"] == distancia == 3
+
+    puntaje, matriz = needleman_wunsch("ATCG", "ACG")
+    nw = operaciones_needleman("ATCG", "ACG", matriz)
+    assert nw["coincidencias"] - nw["discrepancias"] - nw["huecos"] == puntaje == 2
+
+
+def test_traza_clasicos_es_coherente():
+    corpus = ["the cat sat on the mat", "the dog ran far away", "a bird flew over it"]
+    t = traza_clasicos(corpus[0], corpus[1], corpus, lado=4)
+    assert t["celdas"] == 23 * 21
+    assert t["levenshtein"]["esquina_final"][-1][-1] == t["levenshtein"]["distancia"]
+    assert t["needleman_wunsch"]["esquina_final"][-1][-1] == t["needleman_wunsch"]["puntaje"]
+    assert t["jaccard"]["tam_interseccion"] == len(t["jaccard"]["interseccion"]) == 1
+    # "the" está en 2 de 3 documentos y aparece 2 veces en el primero y 1 en el segundo
+    primero = t["coseno_tfidf"]["terminos_que_mas_aportan"][0]
+    assert primero["termino"] == "the" and primero["tf_a"] == 2 and primero["tf_b"] == 1
 
 
 def test_ai_scores_usa_metrics():

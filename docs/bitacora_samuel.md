@@ -16,13 +16,13 @@
   - Se revisó el `Plan de Trabajo` para entender la distribución (Samuel, Cayón, Daniel).
   - Se analizó la estructura de carpetas creada por Daniel (`src/similarity/classic/` será nuestro directorio principal de trabajo).
 - **Próximo Paso:** 
-  - Definir e implementar el primer algoritmo clásico (ej. Distancia de Levenshtein) asegurando que no se usen librerías de alto nivel para su lógicas internas, respetando las restricciones absolutas del profesor.
+  - Definir e implementar el primer algoritmo clásico (ej. Distancia de Levenshtein) asegurando que no se usen librerías de alto nivel para su lógicas internas.
 
 - **Actividad:** Implementación de Distancia de Levenshtein.
 - **Detalles:** 
   - Se creó el archivo `levenshtein.py` en `src/similarity/classic/`.
   - Se implementó desde cero usando Programación Dinámica ($O(m \times n)$).
-  - La función retorna no solo la distancia, sino también la matriz generada. Esto es un diseño estratégico para facilitar la posterior "demostración matemática paso a paso" que se exige en el requerimiento.
+  - La función retorna no solo la distancia, sino también la matriz generada. Esto es un diseño estratégico para facilitar la posterior "demostración matemática paso a paso".
   - Se verificó que las carpetas `data/raw/` y `data/processed/` están vacías. No necesitamos los datos finales de los artículos para construir y probar la lógica de los algoritmos.
 
 **[2026-09-29]**
@@ -33,7 +33,7 @@
   - La matriz $F$ se inicializa con los gaps base ($F_{i,0} = i \times d$ y $F_{0,j} = j \times d$).
   - La relación de recurrencia empleada es $F(i,j) = \max(F(i-1,j-1) + S(x_i,y_j),\; F(i-1,j) + d,\; F(i,j-1) + d)$.
   - **Transparencia Algorítmica:** No se utilizó ningún paquete pre-entrenado ni abstracciones como `BioPython` o librerías de NLP. El cálculo del puntaje, los arreglos y la validación de las métricas (`Match=+1`, `Mismatch=-1`, `Gap=-1`) se codificaron secuencialmente. 
-  - **Importancia para el Documento Final:** Al igual que en Levenshtein, se retorna la `score matrix` generada. Esto significa que para la entrega del "análisis algorítmico y matemático paso a paso con 2 abstracts", solo tendremos que imprimir el estado de esta matriz y explicar cómo el algoritmo tomó las decisiones en cada celda, cumpliendo al pie de la letra con la demostración que exige el profesor.
+  - **Importancia para el Documento Final:** Al igual que en Levenshtein, se retorna la `score matrix` generada. Esto significa que para la entrega del "análisis algorítmico y matemático paso a paso con 2 abstracts", solo tendremos que imprimir el estado de esta matriz y explicar cómo el algoritmo tomó las decisiones en cada celda.
 
 - **Actividad:** Implementación explícita del Algoritmo de Similitud de Jaccard.
 - **Detalles Teóricos y Matemáticos (Documentación Ampliada):**
@@ -60,3 +60,21 @@
     - Tiempo: $O(N)$ donde $N$ es la suma total de tokens en ambos textos, dominado por la construcción del vocabulario y los vectores.
     - Espacio: $O(|V|)$ donde $V$ es el tamaño del vocabulario unificado, necesario para almacenar los vectores densos.
   - Al retornar explícitamente el vocabulario unificado, el Vector A y el Vector B, la demostración paso a paso del caso de estudio (los 2 *abstracts*) será trivial: solo se copiará la tabla de frecuencias de los vectores arrojados por la consola y se mostrará la multiplicación manual.
+
+**[2026-11-02]**
+- **Actividad:** Reescritura de los algoritmos clásicos sin funciones nativas.
+- **Detalles:**
+  - Las entradas anteriores quedan como registro de ese momento. Ya no existe `preprocess_text_to_set` ni se usa el `Set` de Python: los conjuntos de Jaccard son listas sin repetidos, y la intersección y la unión se calculan recorriéndolas con un diccionario.
+  - Se creó `src/similarity/classic/tokenizador.py` (`a_minuscula`, `es_alfanumerico`, `tokenizar`, `terminos_unicos`), que comparten Jaccard, el coseno y la transformación del abstract.
+  - **Decisión de tokenización:** se corta en todo lo que no sea letra o dígito. «problem-solving» cuenta como *problem* + *solving*, y «AI's» como *ai*.
+  - `natural_log` se agregó a `src/similarity/metrics.py` para el IDF, y `tfidf_cosine_similarity` recibe el IDF ya calculado sobre los 20 abstracts.
+- **Actividad:** Demostraciones sobre el caso de estudio P6–P9.
+- **Detalles:**
+  - El caso de estudio pasó de P1–P3 a P6–P9, el par más parecido de los 190 según MiniLM.
+  - `src/similarity/traza_clasicos.py` devuelve los pasos de cada clásico: esquinas de la matriz, operaciones de un camino óptimo, conjuntos y términos que más aportan.
+  - **Resultados:** Levenshtein 0.2454 (distancia 938 de 1243), Needleman-Wunsch 0.3146 (puntaje −461), Jaccard 0.1552 (27 de 174), coseno TF-IDF 0.1600 (80.79°).
+- **Actividad:** Auditoría final del proyecto.
+- **Detalles:**
+  - Se corrigió el extractor (ahora con PyMuPDF), se agregó la transformación del abstract para la IA y el clustering, y se midió con 101 repeticiones por punto.
+  - Las demostraciones de los 12 algoritmos y criterios quedaron en la aplicación, se agregaron los diagramas del documento técnico y se actualizaron el README y la justificación del uso de IA.
+  - Los valores vigentes están en `docs/Documento_Tecnico.docx`.

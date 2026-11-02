@@ -62,7 +62,13 @@ def needleman_wunsch(str1: str, str2: str, match_score: int = 1, mismatch_penalt
             gap_arriba = fila_anterior[j] + gap_penalty
             gap_izq = fila_actual[j - 1] + gap_penalty
 
-            fila_actual[j] = max(match_mismatch, gap_arriba, gap_izq)
+            # La celda toma el máximo de las tres opciones
+            mayor = match_mismatch
+            if gap_arriba > mayor:
+                mayor = gap_arriba
+            if gap_izq > mayor:
+                mayor = gap_izq
+            fila_actual[j] = mayor
 
     # El puntaje óptimo de alineamiento se encuentra en la esquina inferior derecha
     puntaje_final = matriz[m][n]
@@ -82,14 +88,20 @@ def normalized_needleman_wunsch(str1: str, str2: str, match_score: int = 1, mism
     pesos el resultado se recorta a [0, 1].
     """
     score, _ = needleman_wunsch(str1, str2, match_score, mismatch_penalty, gap_penalty)
-    max_score = max(len(str1), len(str2)) * match_score
+    largo = len(str1)
+    if len(str2) > largo:
+        largo = len(str2)
+    max_score = largo * match_score
     if max_score == 0:
         return 1.0
     # Mapeo lineal relativo a un score mínimo teórico
-    # min_score = max(len(str1), len(str2)) * min(mismatch_penalty, gap_penalty)
-    min_score = max(len(str1), len(str2)) * gap_penalty
+    min_score = largo * gap_penalty
     norm = (score - min_score) / (max_score - min_score)
-    return max(0.0, min(1.0, norm))
+    if norm < 0.0:
+        return 0.0
+    if norm > 1.0:
+        return 1.0
+    return norm
 
 
 if __name__ == "__main__":

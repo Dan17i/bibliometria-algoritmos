@@ -10,6 +10,7 @@ from src.similarity.classic.needleman_wunsch import (
     needleman_wunsch,
     normalized_needleman_wunsch,
 )
+from src.similarity.metrics import natural_log
 
 
 # --- Levenshtein -------------------------------------------------------------
@@ -83,9 +84,15 @@ def test_needleman_wunsch_normalizado():
 
 def test_jaccard_a_mano():
     sim, inter, union = jaccard_similarity("the cat sat", "the cat ran")
-    assert inter == {"the", "cat"}
-    assert union == {"the", "cat", "sat", "ran"}
+    assert inter == ["the", "cat"]
+    assert union == ["the", "cat", "sat", "ran"]
     assert sim == pytest.approx(2 / 4)
+
+
+def test_jaccard_separa_compuestos_y_posesivos():
+    _, inter, union = jaccard_similarity("AI's problem-solving", "ai problem solving 1993–2020")
+    assert inter == ["ai", "problem", "solving"]
+    assert union == ["ai", "problem", "solving", "1993", "2020"]
 
 
 def test_jaccard_ignora_mayusculas_y_puntuacion():
@@ -148,6 +155,17 @@ def test_tfidf_coseno_a_mano():
     assert pasos["producto_punto"] == pytest.approx(math.log(2) ** 2)
     assert pasos["coseno"] == pytest.approx(1 / 5)
     assert pasos["angulo_grados"] == pytest.approx(math.degrees(math.acos(1 / 5)))
+
+
+def test_tfidf_con_idf_ya_calculado_da_lo_mismo():
+    sin = tfidf_cosine_similarity("a b c", "a b d", CORPUS)["coseno"]
+    con = tfidf_cosine_similarity("a b c", "a b d", CORPUS, compute_idf(CORPUS))["coseno"]
+    assert con == sin
+
+
+@pytest.mark.parametrize("x", [0.001, 0.5, 1.0, 1.25, 2.0, 10.0, 20.0, 12345.678])
+def test_logaritmo_a_mano(x):
+    assert natural_log(x) == pytest.approx(math.log(x), abs=1e-12)
 
 
 def test_tfidf_baja_el_peso_de_palabras_comunes():

@@ -1,12 +1,12 @@
 """
 Módulo de Similitud del Coseno (Clásico / Frecuencias)
 ------------------------------------------------------
-Este módulo implementa la Similitud del Coseno desde cero, sin el uso de 
+Este módulo implementa la Similitud del Coseno desde cero, sin el uso de
 librerías de álgebra lineal como NumPy ni herramientas de Machine Learning.
 
 Contexto Teórico:
 La similitud del coseno evalúa qué tan "alineados" están dos vectores en un espacio
-multidimensional calculando el coseno del ángulo entre ellos. 
+multidimensional calculando el coseno del ángulo entre ellos.
 En este enfoque clásico de NLP, los vectores se construyen sobre un vocabulario
 unificado de dos formas:
     - cosine_similarity: frecuencia de términos (Term Frequency - TF).
@@ -17,56 +17,57 @@ Fórmula Matemática:
     cos(θ) = (A · B) / (||A|| * ||B||)
 """
 
-import math
-import string
+from src.similarity.classic.tokenizador import terminos_unicos, tokenizar
+from src.similarity.metrics import angle_degrees, natural_log
 
-def preprocess_and_tokenize(text: str) -> list[str]:
-    """Tokeniza el texto en minúsculas y sin puntuación."""
-    text_lower = text.lower()
-    for p in string.punctuation:
-        text_lower = text_lower.replace(p, "")
-    return text_lower.split()
+
+def _vocabulario_unificado(tokens1: list[str], tokens2: list[str]) -> tuple[list[str], dict[str, int]]:
+    """Vocabulario de los dos textos en orden de aparición y la posición de cada término."""
+    vocabulario = terminos_unicos(tokens1 + tokens2)
+    posicion = {}
+    for i in range(len(vocabulario)):
+        posicion[vocabulario[i]] = i
+    return vocabulario, posicion
+
 
 def get_frequency_vectors(text1: str, text2: str) -> tuple[list[int], list[int], list[str]]:
     """
     Convierte dos textos en vectores de frecuencias basados en un vocabulario unificado.
-    
+
     Returns:
         tuple: vector1, vector2, vocabulario_unificado
     """
-    tokens1 = preprocess_and_tokenize(text1)
-    tokens2 = preprocess_and_tokenize(text2)
-    
+    tokens1 = tokenizar(text1)
+    tokens2 = tokenizar(text2)
+
     # Construcción del vocabulario único (el espacio multidimensional)
-    vocabulario = list(set(tokens1).union(set(tokens2)))
-    # Ordenar para mantener un índice determinista
-    vocabulario.sort()
-    
+    vocabulario, posicion = _vocabulario_unificado(tokens1, tokens2)
+
     # Inicialización de vectores con ceros
     vec1 = [0] * len(vocabulario)
     vec2 = [0] * len(vocabulario)
-    
+
     # Conteo de frecuencias (Term Frequency)
     for token in tokens1:
-        idx = vocabulario.index(token)
-        vec1[idx] += 1
-        
+        vec1[posicion[token]] += 1
+
     for token in tokens2:
-        idx = vocabulario.index(token)
-        vec2[idx] += 1
-        
+        vec2[posicion[token]] += 1
+
     return vec1, vec2, vocabulario
 
 def cosine_similarity(text1: str, text2: str) -> tuple[float, list[int], list[int], list[str]]:
     """
     Calcula la Similitud del Coseno entre dos textos.
-    
+
     Pasos algorítmicos transparentes:
     1. Generar vectores de frecuencia (A y B).
     2. Calcular el Producto Punto (Suma de A[i] * B[i]).
     3. Calcular la magnitud de A y la magnitud de B (Raíz cuadrada de la suma de sus cuadrados).
     4. Dividir producto punto entre el producto de las magnitudes.
-    
+
+    Complejidad: O(T + V) en tiempo, con T tokens y V vocabulario del par; O(V) en espacio.
+
     Returns:
         tuple[float, list[int], list[int], list[str]]:
             - El valor del coseno (float entre 0.0 y 1.0).
@@ -75,31 +76,31 @@ def cosine_similarity(text1: str, text2: str) -> tuple[float, list[int], list[in
             - El vocabulario (dimensiones).
     """
     vec_a, vec_b, vocab = get_frequency_vectors(text1, text2)
-    
+
     # 1. Producto Punto (A · B)
     producto_punto = 0
     for i in range(len(vocab)):
         producto_punto += vec_a[i] * vec_b[i]
-        
+
     # 2. Magnitud de A (||A||)
     suma_cuadrados_a = 0
     for val in vec_a:
         suma_cuadrados_a += val ** 2
     magnitud_a = suma_cuadrados_a ** 0.5  # Equivalente a math.sqrt
-    
+
     # 3. Magnitud de B (||B||)
     suma_cuadrados_b = 0
     for val in vec_b:
         suma_cuadrados_b += val ** 2
     magnitud_b = suma_cuadrados_b ** 0.5
-    
+
     # Validación de división por cero (textos completamente vacíos)
     if magnitud_a == 0 or magnitud_b == 0:
         return 0.0, vec_a, vec_b, vocab
-        
+
     # 4. Cálculo final del coseno
     coseno = producto_punto / (magnitud_a * magnitud_b)
-    
+
     return coseno, vec_a, vec_b, vocab
 
 def compute_idf(corpus: list[str]) -> dict[str, float]:
@@ -125,26 +126,41 @@ def compute_idf(corpus: list[str]) -> dict[str, float]:
     """
     n_documentos = len(corpus)
 
-    # df(t): se cuenta una vez por documento, por eso se recorre el conjunto
-    # de tokens únicos de cada abstract
+    # df(t): se cuenta una vez por documento, por eso se recorren los términos
+    # únicos de cada abstract
     df = {}
     for documento in corpus:
-        for token in set(preprocess_and_tokenize(documento)):
-            df[token] = df.get(token, 0) + 1
+        for token in terminos_unicos(tokenizar(documento)):
+            if token in df:
+                df[token] += 1
+            else:
+                df[token] = 1
 
     idf = {}
     for token in df:
-        idf[token] = math.log(n_documentos / df[token])
+        idf[token] = natural_log(n_documentos / df[token])
     return idf
 
 
-def tfidf_cosine_similarity(text1: str, text2: str, corpus: list[str]) -> dict:
+def _esta_en_corpus(texto: str, corpus: list[str]) -> bool:
+    """Búsqueda lineal del texto entre los documentos del corpus."""
+    for documento in corpus:
+        if documento == texto:
+            return True
+    return False
+
+
+def tfidf_cosine_similarity(
+    text1: str, text2: str, corpus: list[str], idf_corpus: dict[str, float] | None = None,
+    con_angulo: bool = True,
+) -> dict:
     """
     Calcula la Similitud del Coseno entre dos textos con pesos TF-IDF.
 
     Pasos algorítmicos transparentes:
     1. Calcular el IDF de cada término sobre el corpus (`compute_idf`).
-       Si alguno de los dos textos no está en el corpus, se agrega.
+       Si alguno de los dos textos no está en el corpus, se agrega. Quien compara
+       muchos pares del mismo corpus puede pasar `idf_corpus` ya calculado.
     2. Construir el vocabulario unificado de los dos textos (las dimensiones).
     3. Contar la frecuencia de cada término en cada texto (TF).
     4. Peso de cada término: w(t) = tf(t) * idf(t).
@@ -153,7 +169,10 @@ def tfidf_cosine_similarity(text1: str, text2: str, corpus: list[str]) -> dict:
     7. cos(θ) = (A · B) / (||A|| * ||B||) y el ángulo θ = arccos(cos(θ)).
 
     Complejidad: O(T + V) en tiempo (T tokens del corpus, V vocabulario del
-    par de textos) y O(V) en espacio para los vectores.
+    par de textos) y O(V) en espacio para los vectores. Con `idf_corpus`, T son
+    solo los tokens del par. El ángulo cuesta O(1), pero con una constante alta;
+    `con_angulo=False` lo omite para medir el crecimiento con la longitud del
+    texto sin que esa constante lo tape.
 
     Returns:
         dict con todos los pasos intermedios, para la demostración:
@@ -161,21 +180,18 @@ def tfidf_cosine_similarity(text1: str, text2: str, corpus: list[str]) -> dict:
             pesos_a, pesos_b, producto_punto, norma_a, norma_b, coseno y
             angulo_grados.
     """
-    if text1 not in corpus:
-        corpus = corpus + [text1]
-    if text2 not in corpus:
-        corpus = corpus + [text2]
-
     # 1. IDF sobre el corpus
-    idf_corpus = compute_idf(corpus)
+    if idf_corpus is None:
+        if not _esta_en_corpus(text1, corpus):
+            corpus = corpus + [text1]
+        if not _esta_en_corpus(text2, corpus):
+            corpus = corpus + [text2]
+        idf_corpus = compute_idf(corpus)
 
-    # 2. Vocabulario unificado y ordenado (índice determinista)
-    tokens_a = preprocess_and_tokenize(text1)
-    tokens_b = preprocess_and_tokenize(text2)
-    vocabulario = sorted(set(tokens_a) | set(tokens_b))
-    posicion = {}
-    for i in range(len(vocabulario)):
-        posicion[vocabulario[i]] = i
+    # 2. Vocabulario unificado
+    tokens_a = tokenizar(text1)
+    tokens_b = tokenizar(text2)
+    vocabulario, posicion = _vocabulario_unificado(tokens_a, tokens_b)
 
     # 3. Frecuencias (TF)
     tf_a = [0] * len(vocabulario)
@@ -213,8 +229,7 @@ def tfidf_cosine_similarity(text1: str, text2: str, corpus: list[str]) -> dict:
         coseno = 0.0
     else:
         coseno = producto_punto / (norma_a * norma_b)
-    # Se recorta a [-1, 1] por los errores de redondeo antes de arccos
-    angulo_grados = math.degrees(math.acos(max(-1.0, min(1.0, coseno))))
+    angulo_grados = angle_degrees(coseno) if con_angulo else None
 
     return {
         "vocabulario": vocabulario,

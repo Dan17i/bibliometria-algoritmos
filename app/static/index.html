@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>Análisis de algoritmos en el contexto de la bibliometría</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="/static/vendor/katex/katex.min.css">
 <link rel="stylesheet" href="/static/estilo.css">
 </head>
 <body>
@@ -15,7 +15,7 @@
   <div class="ficha__interior">
     <div class="ficha__titulo">
       <h1>Análisis de algoritmos en el contexto de la bibliometría</h1>
-      <p class="ficha__sub">Veinte artículos sobre inteligencia artificial en educación, medidos con algoritmos implementados desde cero.</p>
+      <p class="ficha__sub">Esta página analiza veinte artículos científicos sobre inteligencia artificial en educación. Tiene tres partes: similitud textual entre artículos, agrupamiento jerárquico según su parecido y búsqueda exacta de patrones dentro de sus abstracts. Cada resultado tiene un botón que muestra qué hace el algoritmo y cómo se calculó, con sus fórmulas y los valores reales.</p>
     </div>
     <dl class="ficha__datos" id="ficha-datos">
       <div><dt>Artículos</dt><dd id="d-articulos">—</dd></div>
@@ -25,7 +25,7 @@
   </div>
 </header>
 
-<nav class="indice">
+<nav class="indice" aria-label="Secciones">
   <a href="#similitud">Similitud textual</a>
   <a href="#clustering">Agrupamiento</a>
   <a href="#patrones">Búsqueda de patrones</a>
@@ -38,24 +38,32 @@
   <div class="bloque__encabezado">
     <span class="req">Requerimiento 1</span>
     <h2>Similitud textual</h2>
-    <p>Elige dos artículos para ver cómo los mide cada algoritmo. Con más de dos, la comparación se muestra como matriz.</p>
+    <p>Aquí se comparan artículos para saber qué tanto se parecen. Se usa su <em>abstract</em>, el resumen que cada artículo trae al inicio. Como «parecerse» puede significar varias cosas, hay seis algoritmos: cuatro clásicos, que miran las letras y las palabras, y dos de inteligencia artificial, que intentan captar el significado.</p>
+    <div class="guia">
+      <h3>Qué vas a ver</h3>
+      <ol>
+        <li>Marca dos o más artículos en la lista y oprime «Comparar».</li>
+        <li>Con dos artículos verás una tabla con los seis resultados. Con más de dos, un cuadro de colores donde cada casilla compara una pareja: entre más intenso el color, más se parecen.</li>
+        <li>Cada resultado tiene el botón «Ver demostración», que explica qué hace ese algoritmo y cómo salió el número, paso a paso.</li>
+      </ol>
+    </div>
   </div>
 
   <div class="trabajo">
     <div class="controles">
       <div class="controles__cabecera">
-        <h3>Corpus</h3>
+        <h3>Los 20 artículos</h3>
         <button type="button" id="limpiar" class="enlace-boton">Quitar selección</button>
       </div>
       <ul class="lista-articulos" id="lista-articulos"></ul>
       <div class="controles__pie">
         <p class="contador"><span id="n-elegidos">0</span> elegidos</p>
-        <button type="button" id="calcular" class="boton" disabled>Calcular similitud</button>
+        <button type="button" id="calcular" class="boton" disabled>Comparar</button>
       </div>
     </div>
 
     <div class="resultados" id="resultado-similitud">
-      <p class="vacio">Elige al menos dos artículos de la lista. El cálculo ocurre en el momento, sobre los abstracts completos.</p>
+      <p class="vacio">Elige al menos dos artículos de la lista. La comparación se hace sobre sus abstracts completos.</p>
     </div>
   </div>
 </section>
@@ -65,10 +73,21 @@
   <div class="bloque__encabezado">
     <span class="req">Requerimiento 2</span>
     <h2>Agrupamiento jerárquico</h2>
-    <p>Los veinte abstracts agrupados con tres criterios de enlace. El CPCC mide cuánto deforma cada árbol las distancias originales: más alto es más fiel.</p>
+    <p>Aquí los 20 artículos se organizan en grupos según qué tanto se parecen. Nadie le dice al algoritmo cuáles son los grupos: él los va formando, juntando primero lo más parecido. El resultado es un árbol llamado dendrograma, que muestra qué se unió con qué.</p>
+    <div class="guia">
+      <h3>Cómo leer esta parte</h3>
+      <ol>
+        <li>Elige abajo cómo se mide el parecido entre artículos. Cada opción produce árboles distintos.</li>
+        <li>Para leer un árbol, empieza por abajo, donde está cada artículo (P1 a P20). Cuando dos líneas se unen, esos artículos quedan en el mismo grupo, y entre más abajo se unan, más se parecen.</li>
+        <li>Hay tres árboles porque hay tres formas de decidir qué tan cerca están dos grupos: Single mira a sus miembros más cercanos, Complete a los más lejanos y Average el promedio de todos.</li>
+        <li>El CPCC es la nota de cada árbol: dice qué tan bien respeta el dibujo los parecidos reales. Entre más cerca de 1, mejor.</li>
+        <li>Con «Ver demostración» se muestra cómo se formaron los grupos y de dónde sale la nota.</li>
+      </ol>
+    </div>
   </div>
 
   <div class="selector-repr" id="selector-repr"></div>
+  <p class="nota-seleccion" id="repr-explicacion"></p>
   <div class="dendro" id="dendro"></div>
 </section>
 
@@ -77,11 +96,19 @@
   <div class="bloque__encabezado">
     <span class="req">Requerimiento 3</span>
     <h2>Búsqueda de patrones</h2>
-    <p>Busca una cadena exacta en los veinte abstracts con KMP, Boyer-Moore y Rabin-Karp. Los tres recorren el mismo texto y deben encontrar lo mismo.</p>
+    <p>Aquí puedes buscar una palabra o frase dentro de los 20 abstracts. La búsqueda se hace con tres algoritmos distintos: KMP, Boyer-Moore y Rabin-Karp. Los tres deben encontrar exactamente lo mismo, pero cada uno trabaja a su manera y hace un esfuerzo diferente. La búsqueda es exacta: «AI» y «ai» cuentan como cosas distintas.</p>
+    <div class="guia">
+      <h3>Qué vas a ver</h3>
+      <ol>
+        <li>Escribe lo que quieras buscar, o elige una de las sugerencias.</li>
+        <li>Una tabla dirá cuántas veces aparece, cuántas comparaciones hizo cada algoritmo y cuánto tardó. Debajo aparecen las frases donde está, resaltadas.</li>
+        <li>Con «Ver demostración» puedes seguir paso a paso cómo se mueve lo que buscas sobre el texto, letra por letra.</li>
+      </ol>
+    </div>
   </div>
 
   <form class="buscador" id="form-buscar">
-    <label for="patron">Cadena a buscar</label>
+    <label for="patron">Palabra o frase a buscar</label>
     <div class="buscador__campo">
       <input type="text" id="patron" name="patron" value="artificial intelligence"
              maxlength="120" autocomplete="off" spellcheck="false">
@@ -92,7 +119,7 @@
       <button type="button" class="chip" data-patron="learning">learning</button>
       <button type="button" class="chip" data-patron="assessment">assessment</button>
       <button type="button" class="chip" data-patron="systematic review">systematic review</button>
-      <button type="button" class="chip" data-patron="chatgpt">chatgpt</button>
+      <button type="button" class="chip" data-patron="ChatGPT">ChatGPT</button>
     </p>
   </form>
 
@@ -106,6 +133,20 @@
   <p class="nota">Los algoritmos están implementados sin funciones de alto nivel del lenguaje ni librerías que los resuelvan.</p>
 </footer>
 
+<!-- Hoja de la demostración -->
+<dialog class="hoja" id="hoja" aria-labelledby="hoja-titulo">
+  <div class="hoja__barra">
+    <div>
+      <p class="hoja__familia" id="hoja-familia"></p>
+      <h2 id="hoja-titulo"></h2>
+    </div>
+    <button type="button" class="hoja__cerrar" id="hoja-cerrar" aria-label="Cerrar la demostración">×</button>
+  </div>
+  <div class="hoja__cuerpo" id="hoja-cuerpo"></div>
+</dialog>
+
+<script src="/static/vendor/katex/katex.min.js"></script>
+<script src="/static/demostraciones.js"></script>
 <script src="/static/app.js"></script>
 </body>
 </html>

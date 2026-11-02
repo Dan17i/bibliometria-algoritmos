@@ -7,10 +7,10 @@ algoritmos clásicos y los embeddings? Se mide con el tau de Kendall.
     .venv\\Scripts\\python.exe -m src.similarity.ai.demo_clasicos20
 
 Los clásicos se importan de `caso_estudio.classic_scores` (que a su vez usa los
-módulos de Samuel sin modificarlos). Las dos representaciones de IA son GloVe
-sin stopwords y MiniLM, con el coseno calculado a mano (`metrics.py`).
+módulos de Samuel). Las dos representaciones de IA son GloVe y MiniLM sobre el
+abstract transformado, con el coseno calculado a mano (`metrics.py`).
 
-Salida: tests/fixtures/daniel/corpus20/clasicos_resumen.json
+Salida: data/resultados/clasicos_resumen.json
     - similitudes de cada par (i < j) por algoritmo,
     - rango (máx - mín) de cada algoritmo,
     - matriz de tau de Kendall entre todos los algoritmos.
@@ -22,8 +22,7 @@ from pathlib import Path
 from src.similarity.ai.caso_estudio import classic_scores
 from src.similarity.ai.demo_corpus20 import SALIDA, load_corpus
 from src.similarity.ai.demo_flujo import kendall_tau, value_range
-from src.similarity.ai.demo_modelos import glove_embeddings, sentence_embeddings
-from src.similarity.ai.stopwords import STOPWORDS
+from src.similarity.ai.demo_modelos import vectores_del_corpus
 from src.similarity.metrics import cosine_similarity
 
 CLASICOS = {
@@ -57,11 +56,8 @@ def similitudes_clasicas(textos: list[str], corpus: list[str]) -> dict[str, list
 
 
 def similitudes_ia(textos: list[str]) -> dict[str, list[float]]:
-    """Series de GloVe (sin stopwords) y MiniLM: coseno a mano por cada par i < j."""
-    vectores = {
-        "glove": glove_embeddings(textos, stopwords=STOPWORDS)["vectors"],
-        "minilm": sentence_embeddings(textos),
-    }
+    """Series de GloVe y MiniLM: coseno a mano por cada par i < j."""
+    vectores = vectores_del_corpus(textos)
     return {
         nombre: [cosine_similarity(vecs[i], vecs[j]) for i, j in pares(len(vecs))]
         for nombre, vecs in vectores.items()

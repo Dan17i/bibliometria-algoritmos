@@ -5,11 +5,12 @@ Responde a los pendientes de Req. 1 IA / Req. 2 con el corpus completo:
 
     .venv\\Scripts\\python.exe -m src.similarity.ai.demo_corpus20
 
-Para cada representación (GloVe promediado sin stopwords, GloVe centrado y
-MiniLM) calcula la matriz de distancias coseno, aplica los 3 enlaces, evalúa con
-CPCC y silueta, y exporta el JSON de fusiones (formato de export.py).
+Cada abstract se transforma (`src.preprocessing.transformacion`). Para cada
+representación (GloVe promediado, GloVe centrado y MiniLM) calcula la matriz de
+distancias coseno, aplica los 3 enlaces, evalúa con CPCC y silueta, y exporta el
+JSON de fusiones (formato de export.py).
 
-Salidas (en tests/fixtures/daniel/corpus20/):
+Salidas (en data/resultados/):
     - fusiones_<representacion>.json : fusiones de los 3 enlaces.
     - resumen.json                   : CPCC, mejor k y silueta por representación y enlace,
                                        más rango y tau de Kendall entre representaciones.
@@ -21,13 +22,8 @@ from src.clustering.evaluation import best_k_by_silhouette, cophenetic_correlati
 from src.clustering.export import export_merges_json, load_export
 from src.clustering.linkage import LINKAGES, hierarchical_clustering
 from src.similarity.ai.demo_flujo import kendall_tau, upper_triangle, value_range
-from src.similarity.ai.demo_modelos import glove_embeddings, sentence_embeddings
-from src.similarity.ai.stopwords import STOPWORDS
+from src.similarity.ai.demo_modelos import ABSTRACTS, RESULTADOS as SALIDA, vectores_del_corpus
 from src.similarity.metrics import center_vectors, cosine_distance, cosine_similarity, pairwise_matrix
-
-RAIZ = Path(__file__).resolve().parents[3]
-ABSTRACTS = RAIZ / "data" / "processed" / "abstracts.json"
-SALIDA = RAIZ / "tests" / "fixtures" / "daniel" / "corpus20"
 
 
 def load_corpus(path: Path = ABSTRACTS) -> tuple[list[str], list[str]]:
@@ -38,12 +34,12 @@ def load_corpus(path: Path = ABSTRACTS) -> tuple[list[str], list[str]]:
 
 def representaciones(textos: list[str]) -> dict[str, list[list[float]]]:
     """Un vector por abstract según cada enfoque. Costo dominado por el modelo."""
-    glove = glove_embeddings(textos, stopwords=STOPWORDS)["vectors"]
-    centrado, _ = center_vectors(glove)
+    vectores = vectores_del_corpus(textos)
+    centrado, _ = center_vectors(vectores["glove"])
     return {
-        "glove": glove,
+        "glove": vectores["glove"],
         "glove_centrado": centrado,
-        "minilm": sentence_embeddings(textos),
+        "minilm": vectores["minilm"],
     }
 
 

@@ -226,6 +226,3 @@ CLAUDE.md
 
 # Respaldos del extractor
 *.bak
-
-# Intermedio regenerable del pipeline
-# data/processed/fusiones.json

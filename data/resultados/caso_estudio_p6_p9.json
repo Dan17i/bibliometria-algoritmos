@@ -1,0 +1,64 @@
+{
+  "par": [
+    "P6",
+    "P9"
+  ],
+  "filas": [
+    {
+      "algoritmo": "Levenshtein (caracteres)",
+      "tipo": "clásico, PD",
+      "valor": "distancia 938 de 1243",
+      "similitud": 0.2453740949316171,
+      "nota": "normalizada: 1 - d / max(|A|, |B|)"
+    },
+    {
+      "algoritmo": "Jaccard (palabras)",
+      "tipo": "clásico, conjuntos",
+      "valor": "|∩| = 27, |∪| = 174",
+      "similitud": 0.15517241379310345,
+      "nota": "sin stopwords removidas"
+    },
+    {
+      "algoritmo": "Coseno TF (frecuencias)",
+      "tipo": "clásico, espacio vectorial",
+      "valor": "174 dimensiones",
+      "similitud": 0.68084938301576,
+      "nota": "solo TF, sin IDF"
+    },
+    {
+      "algoritmo": "Needleman-Wunsch",
+      "tipo": "clásico, PD",
+      "valor": "puntaje -461 (L = 1243)",
+      "similitud": 0.3145615446500402,
+      "nota": "normalizada: (s - L*gap) / (L*match - L*gap), pesos +1/-1/-1"
+    },
+    {
+      "algoritmo": "Coseno TF-IDF",
+      "tipo": "clásico, espacio vectorial",
+      "valor": "174 dimensiones, ángulo 80.8°",
+      "similitud": 0.16000454044494675,
+      "nota": "IDF = ln(N/df) sobre el corpus"
+    },
+    {
+      "algoritmo": "GloVe-100 promedio",
+      "tipo": "IA, vectores de palabras",
+      "valor": "ángulo 8.3°, euclidiana 0.669",
+      "similitud": 0.9895204331020153,
+      "nota": "con stopwords"
+    },
+    {
+      "algoritmo": "GloVe-100 promedio",
+      "tipo": "IA, vectores de palabras",
+      "valor": "ángulo 11.7°, euclidiana 0.723",
+      "similitud": 0.9792233244509619,
+      "nota": "sin stopwords"
+    },
+    {
+      "algoritmo": "all-MiniLM-L6-v2",
+      "tipo": "IA, embedding de oración",
+      "valor": "ángulo 31.8°, euclidiana 0.548",
+      "similitud": 0.8499670129137581,
+      "nota": "384 dimensiones"
+    }
+  ]
+}
