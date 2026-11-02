@@ -2,6 +2,8 @@
 
 ## Requerimientos 1 (IA) y 2 (Clustering jerárquico)
 
+> Esta bitácora es un registro: cada valor es el de su fecha. Los resultados cambiaron al corregir el extractor y transformar el abstract (ver [Actualización del 2026-11-02](#actualización-del-2026-11-02)). Los valores vigentes están en `docs/Documento_Tecnico.docx`.
+
 ### Registro de actividades
 
 **[2026-10-07]**
@@ -450,4 +452,33 @@ Se actualizó `caso_estudio.py` (usa `needleman_wunsch.py` y `tfidf_cosine_simil
 
 ### Falta
 - [x] El 0.049 de Samuel salía de un IDF sobre los 4 artículos de prueba; con el IDF sobre los 20 abstracts el valor es 0.052 (comprobado 2026-10-18).
-- [ ] Decidir con el equipo con qué distancia se dibuja el dendrograma oficial (hoy Jaccard en `python_viz`).
+- [x] Decidir con el equipo con qué distancia se dibuja el dendrograma oficial: es el de MiniLM con enlace Average (ver la actualización siguiente).
+
+---
+
+## Actualización del 2026-11-02
+
+Registrada por Samuel, durante la auditoría final. No cambia el diseño de esta bitácora: cambian los datos de entrada.
+
+**Qué cambió en la entrada.**
+- El extractor se rehízo con PyMuPDF. Se corrigieron P3 (desordenado), P15 (cortado) y P20 (pegado), y las palabras cortadas al final de línea se unen con el vocabulario de los 20 PDF. Ningún registro queda marcado con `_revisar`.
+- Los enfoques de IA y el clustering reciben el abstract transformado (`src/preprocessing/transformacion.py`): minúsculas, sin puntuación ni stopwords. MiniLM corta a 256 tokens, y 13 de los 20 abstracts sin transformar superaban ese límite; transformados, el más largo tiene 212.
+- `tokenize` ya no usa expresiones regulares: los algoritmos comparten `src/similarity/classic/tokenizador.py`.
+
+**Dónde están ahora los archivos.** Lo que antes se guardaba en `tests/fixtures/daniel/` y `corpus20/` está en `data/resultados/`. En `tests/fixtures/daniel/` solo quedan los datos sintéticos.
+
+**CPCC con los 20 abstracts:**
+
+| Representación | Single | Complete | Average |
+|---|---|---|---|
+| all-MiniLM-L6-v2 | 0.7973 | 0.7685 | **0.8371** |
+| GloVe promediado | 0.6939 | 0.6154 | **0.7473** |
+| GloVe centrado | 0.3976 | 0.5644 | **0.6242** |
+
+**Lo que se mantuvo.** Average sigue siendo el enlace más coherente en todas las representaciones. La silueta sigue siendo baja: con MiniLM, 0.188, 0.204 y 0.220 en k = 2. Centrar GloVe abre el rango (de 0.078 a 1.053), pero baja el tau frente a MiniLM de 0.45 a 0.21, así que sigue sin recomendarse.
+
+**Lo que cambió en la lectura.** Con los datos anteriores, la silueta de MiniLM ordenaba primero a Complete. Ahora también ordena primero a Average, así que las dos métricas coinciden con MiniLM. El argumento de que «los dos criterios no coinciden» ya no aplica a esa representación; con GloVe, Single y Average siguen empatados en silueta (0.291) y el CPCC los separa.
+
+**Caso de estudio.** Pasó de P1–P3 a P6–P9, el par más parecido de los 190 según MiniLM (0.8500). GloVe da 0.9792.
+
+**Dendrograma oficial.** MiniLM con enlace Average (CPCC 0.8371). Los árboles con las otras representaciones se conservan para comparar.

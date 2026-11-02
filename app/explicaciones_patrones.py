@@ -125,7 +125,7 @@ def _kmp(texto: str, patron: str) -> dict:
     return {
         "que_es": "Es un algoritmo que busca una palabra o frase dentro de un texto largo. Se encarga de recorrer el texto de izquierda a derecha sin devolverse nunca, "
                   "y aprovecha lo que ya leyó para no comparar dos veces lo mismo. A lo que se busca se le llama patrón.",
-        "formula_simple": "En palabras: i marca por dónde va el texto, T, y j por dónde va el patrón, P. La tabla lps guarda, para cada posición del patrón, cuántas letras de su inicio se repiten justo "
+        "formula_simple": "El puntero i marca por dónde va el texto, T, y j por dónde va el patrón, P. La tabla lps guarda, para cada posición del patrón, cuántas letras de su inicio se repiten justo "
                           "al final de lo que lleva hasta ahí. Cuando una letra falla, j retrocede a lo que dice esa tabla, e i se queda donde está.",
         "idea": "Cuando falla, KMP ya sabe qué parte del patrón coincidió, y usa eso para seguir sin volver atrás en el texto. "
                 "La búsqueda ingenua retrocede y vuelve a comparar lo que ya conocía; KMP no.",
@@ -217,7 +217,7 @@ def _boyer_moore(texto: str, patron: str) -> dict:
     return {
         "que_es": "Es un algoritmo que busca una palabra o frase dentro de un texto largo, pero empieza a comparar por el final de lo que busca. Se encarga de saltarse "
                   "pedazos enteros del texto cuando ve que ahí no puede estar, así que no necesita leerlo todo. A lo que se busca se le llama patrón.",
-        "formula_simple": "En palabras: cada vez que algo falla, el patrón se mueve a la derecha. La fórmula calcula dos saltos posibles y toma el mayor: uno según la letra que falló, c, y su última "
+        "formula_simple": "Cada vez que algo falla, el patrón se mueve a la derecha. La fórmula calcula dos saltos posibles y toma el mayor: uno según la letra que falló, c, y su última "
                           "posición en el patrón; y otro, bueno, según el pedazo que sí coincidió. j es la posición donde ocurrió el fallo. Ninguno de los dos saltos se pasa de largo una aparición.",
         "idea": "Compara el patrón de derecha a izquierda. Si el carácter del texto que falló no está en el patrón, ninguna alineación que lo "
                 "incluya puede funcionar y el patrón salta completo. Por eso puede terminar sin leer todo el texto.",
@@ -355,7 +355,7 @@ def _rabin_karp(texto: str, patron: str) -> dict:
     return {
         "que_es": "Es un algoritmo que busca una palabra o frase dentro de un texto largo convirtiendo las letras en números. Se encarga de calcular un número para lo que se busca "
                   "y otro para cada pedazo del texto del mismo tamaño. Solo cuando los dos números coinciden revisa letra por letra si de verdad es lo que se busca. A lo que se busca se le llama patrón.",
-        "formula_simple": "En palabras: la primera fórmula convierte un pedazo de texto en un número, como si sus letras fueran las cifras de un número en base b. Con mod q se queda solo con el residuo de dividir "
+        "formula_simple": "La primera fórmula convierte un pedazo de texto en un número, como si sus letras fueran las cifras de un número en base b. Con mod q se queda solo con el residuo de dividir "
                           "entre q, para que el número no crezca demasiado. La segunda calcula el número del pedazo siguiente a partir del anterior: quita la letra que sale y agrega la que entra.",
         "idea": "En vez de comparar letras, convierte cada pedazo de texto en un número y compara números. El número se actualiza al deslizar "
                 "la ventana (el pedazo del texto que se está mirando), sin recalcularlo. Es como una huella: si no coincide, las cadenas son distintas; si coincide, hay que confirmar.",

@@ -1,116 +1,136 @@
 # Análisis de algoritmos en el contexto de la bibliometría
 
-Proyecto de **Análisis de Algoritmos** · Ingeniería de Sistemas y Computación · Universidad del Quindío.
+Proyecto de **Análisis de Algoritmos** · Ingeniería de Sistemas y Computación · Universidad del Quindío · 2026-2.
 
-Implementa, **desde cero y sin librerías que resuelvan el algoritmo**, técnicas de análisis textual sobre los *abstracts* de un corpus de 20 artículos científicos (dominio: IA generativa), y compara los enfoques clásicos con los basados en IA:
+Implementa, **desde cero y sin librerías que resuelvan el algoritmo**, técnicas de análisis textual sobre los *abstracts* de un corpus de 20 artículos científicos sobre inteligencia artificial en educación, y compara los enfoques clásicos con los basados en IA:
 
-- **Similitud textual** entre abstracts: Levenshtein, Needleman-Wunsch, Jaccard, coseno con TF-IDF y similitud sobre *embeddings* de modelos preentrenados.
-- **Clustering jerárquico** de los 20 abstracts: tres criterios de enlace (Single, Complete, Average), evaluación interna y datos para dibujar los dendrogramas.
+- **Similitud textual** entre dos o más abstracts: Levenshtein, Needleman-Wunsch, Jaccard, coseno con TF-IDF, promedio de vectores GloVe y embeddings de `all-MiniLM-L6-v2`.
+- **Agrupamiento jerárquico** de los 20 abstracts: Single, Complete y Average, con su dendrograma y evaluación interna (CPCC y silueta).
+- **Búsqueda de patrones**: KMP, Boyer-Moore y Rabin-Karp, con búsqueda exacta y análisis de su complejidad contrastado con mediciones.
 
-> **Estado:** proyecto en desarrollo. Ya están el procesamiento de los 20 PDFs, los dos enfoques de IA, los tres enlaces con su evaluación, los dendrogramas y los benchmarks. Faltan Needleman-Wunsch, el coseno con TF-IDF, la aplicación desplegada y el documento de diseño; ver [Estado del proyecto](#estado-del-proyecto).
+**Aplicación publicada:** https://bibliometria-algoritmos.onrender.com (la primera carga después de un rato sin uso puede tardar unos 20 segundos).
+
+Cada resultado de la aplicación tiene un botón «Ver demostración», que ejecuta ese algoritmo en el momento y muestra qué hace, sus fórmulas con los valores reales y cada paso del cálculo.
 
 ## Tabla de contenido
 
-1. [Estado del proyecto](#estado-del-proyecto)
-2. [Regla de implementación explícita](#regla-de-implementación-explícita)
-3. [Estructura del repositorio](#estructura-del-repositorio)
-4. [Instalación](#instalación)
-5. [Uso](#uso)
-6. [Pruebas](#pruebas)
-7. [Resultados](#resultados)
-8. [Documentación](#documentación)
-9. [Equipo](#equipo)
-10. [Uso de IA generativa](#uso-de-ia-generativa)
-
-## Estado del proyecto
-
-| Componente | Estado |
-|---|---|
-| Similitud: Levenshtein, Jaccard, coseno de frecuencias (TF) | Implementados (Samuel) |
-| Similitud: Needleman-Wunsch | Pendiente (el archivo existe pero está vacío) |
-| Similitud: coseno con TF-IDF | Pendiente (el coseno actual usa solo TF) |
-| Similitud con IA: promedio de vectores GloVe y `all-MiniLM-L6-v2`, con coseno y euclidiana a mano | Implementada y con pruebas |
-| Clustering jerárquico: Single, Complete, Average | Implementado y con pruebas |
-| Evaluación interna: correlación cofenética (CPCC) y silueta | Implementada y con pruebas |
-| Exportación de las fusiones a JSON para los dendrogramas | Implementada y con pruebas |
-| Corrida de los 2 enfoques de IA y los 3 enlaces sobre los 20 abstracts (`demo_corpus20`) | Hecha; resultados en [Resultados](#resultados) |
-| Extracción de abstracts, títulos y autores de los 20 PDFs (`src/preprocessing/`) | Implementada (Cayón); salida en `data/processed/` |
-| Dendrogramas (`python_viz/dendrograma.py`) y gráficas de rendimiento (`python_viz/graficas.py`) | Implementados (Cayón); figuras en `data/figuras/` |
-| Benchmarks de tiempos (`src/benchmark/runner.py`) | Implementados (Cayón); salida en `data/benchmark/rendimiento.csv` |
-| Dendrograma oficial con la distancia de los embeddings | Pendiente de decidir con el equipo: hoy `python_viz` dibuja con distancia Jaccard |
-| Aplicación desplegada (`app/`) y documento de diseño final | Pendiente |
-
-Los resultados de la sección [Resultados](#resultados) se obtuvieron con los 20 abstracts del corpus. El análisis crítico clásicos frente a IA está incompleto hasta que estén Needleman-Wunsch y el coseno con TF-IDF.
+1. [Regla de implementación explícita](#regla-de-implementación-explícita)
+2. [Estructura del repositorio](#estructura-del-repositorio)
+3. [Instalación](#instalación)
+4. [Uso](#uso)
+5. [Pruebas](#pruebas)
+6. [Resultados](#resultados)
+7. [Documentación](#documentación)
+8. [Equipo](#equipo)
+9. [Uso de IA generativa](#uso-de-ia-generativa)
 
 ## Regla de implementación explícita
 
-No se usan funciones de alto nivel que implementen los algoritmos. Todo el cálculo se escribe con estructuras básicas de Python (listas, diccionarios, bucles y aritmética), de modo que el funcionamiento interno sea transparente y analizable, y las funciones devuelven los **pasos intermedios** (matriz de programación dinámica, pesos, historial de fusiones) para poder demostrarlos paso a paso.
+No se usan funciones de alto nivel que implementen los algoritmos. Todo el cálculo se escribe con estructuras básicas de Python (listas, diccionarios, bucles y aritmética), de modo que el funcionamiento interno sea transparente y analizable, y las funciones devuelven los **pasos intermedios** (matriz de programación dinámica, pesos, historial de fusiones, comparaciones) para poder demostrarlos paso a paso.
 
 | No se usa para los algoritmos | Sí se permite |
 |---|---|
-| `scikit-learn`, `scipy` (incluido `scipy.cluster.hierarchy`) y `numpy` | Extraer texto del PDF (`pdfplumber` / `PyMuPDF`) |
+| `scikit-learn`, `scipy` (incluido `scipy.cluster.hierarchy`) y `numpy` | Extraer texto del PDF (`PyMuPDF`) |
 | `difflib`, `rapidfuzz`, `textdistance`, `jellyfish` y similares | Listas de *stopwords* |
 | `model.similarity`, `n_similarity`, `wmdistance`, `util.cos_sim` | Modelos preentrenados, **solo para obtener los vectores** |
-| | `matplotlib` para graficar y `pandas` para leer/escribir CSV |
+| En el núcleo de los algoritmos: `min`, `max`, `sum`, `sorted`, `set`, `lower`, `split`, `replace`, `find`, `index`, `count`, `intersection`, `union`, `math` | `matplotlib` para graficar |
 
-Los modelos de embeddings entregan vectores; el promedio, el producto punto, la norma, el coseno, la distancia euclidiana, la matriz de distancias, la fusión de clusters y las métricas de evaluación se calculan a mano. Esta regla se vigila automáticamente en [`tests/test_transparencia.py`](tests/test_transparencia.py), que revisa el código del módulo de IA, las métricas y el clustering y falla si importa `sklearn`, `scipy`, `numpy` o `difflib`, o si llama a las similitudes de los modelos.
+Sí se usan `len`, `range`, `ord`, `chr` y `enumerate`, que son parte de la estructura básica del lenguaje. Los modelos entregan vectores; el promedio, el producto punto, la norma, el coseno, la distancia euclidiana, la matriz de distancias, la fusión de clusters y las métricas de evaluación se calculan a mano. La regla se verifica automáticamente en [`tests/test_transparencia.py`](tests/test_transparencia.py), que recorre el árbol sintáctico del código y falla si se incumple.
 
 ## Estructura del repositorio
 
 ```
 bibliometria-algoritmos/
-├── app/                      # Aplicación desplegable (pendiente)
+├── app/
+│   ├── servidor.py               # Rutas de la aplicación (Flask sobre waitress)
+│   ├── explicaciones*.py         # Arman cada demostración: idea, fórmulas, pasos y conclusiones
+│   ├── lanzar.py                 # Lanzador local
+│   └── static/                   # Página, estilos, scripts y KaTeX
 ├── data/
-│   ├── raw/                  # PDFs del docente (ignorados por git)
-│   ├── processed/            # Abstracts, títulos y autores extraídos (CSV y JSON)
-│   ├── benchmark/            # rendimiento.csv con los tiempos medidos
-│   └── figuras/              # Dendrogramas y gráficas de rendimiento (PNG)
+│   ├── processed/                # Abstracts extraídos, vectores y los 190 pares calculados
+│   ├── resultados/               # Fusiones, caso de estudio y trazas (JSON)
+│   ├── benchmark/                # Tiempos medidos (CSV) y datos del entorno
+│   └── figuras/                  # Dendrogramas, gráficas y diagramas (PNG)
 ├── docs/
-│   ├── enunciado/            # Enunciado y plan de trabajo (PDF)
-│   ├── articulos/            # Los 20 PDFs del corpus
-│   ├── bitacora_samuel.md    # Bitácora de los algoritmos clásicos
-│   └── bitacora_daniel.md    # Bitácora de IA y clustering, con la justificación matemática
-├── python_viz/               # Dendrogramas y gráficas de rendimiento (matplotlib)
+│   ├── Documento_Tecnico.docx    # Diseño, arquitectura y explicación de cada requerimiento
+│   ├── Justificacion_uso_IA.docx # Declaración del uso de IA generativa
+│   ├── bitacora_samuel.md        # Registro del trabajo en los algoritmos clásicos
+│   ├── bitacora_daniel.md        # Registro del trabajo en IA y clustering
+│   ├── enunciado/                # Descripción del proyecto y plan de trabajo (PDF)
+│   └── articulos/                # Los 20 PDF del corpus
+├── python_viz/                   # Dendrogramas, gráficas, trazas y diagramas (matplotlib)
 ├── src/
-│   ├── preprocessing/        # Extracción de abstract, título y autores de los PDFs
+│   ├── preprocessing/            # Extractor de los PDF y transformación del abstract
 │   ├── similarity/
-│   │   ├── classic/          # Levenshtein, Needleman-Wunsch, Jaccard y coseno
-│   │   ├── ai/               # Embeddings, comparación, caso de estudio y corrida de los 20
-│   │   └── metrics.py        # Producto punto, norma, coseno y euclidiana a mano
-│   ├── clustering/           # Enlaces jerárquicos, evaluación interna y exportación
-│   └── benchmark/            # Medición de tiempos y exportación de CSV
-├── tests/                    # Pruebas con pytest y datos de prueba (fixtures/daniel/)
-├── requirements.txt          # Dependencias base
-└── requirements-ai.txt       # Librerías de IA (pesadas, opcionales)
+│   │   ├── classic/              # Levenshtein, Needleman-Wunsch, Jaccard, coseno y tokenizador
+│   │   ├── ai/                   # Embeddings, comparación, caso de estudio y corridas
+│   │   ├── metrics.py            # Producto punto, norma, coseno, euclidiana y ángulo a mano
+│   │   └── traza_clasicos.py     # Pasos de la demostración de los clásicos
+│   ├── clustering/               # Enlaces jerárquicos, evaluación interna y exportación
+│   ├── pattern/                  # KMP, Boyer-Moore, Rabin-Karp y caso de estudio
+│   └── benchmark/                # Medición de tiempos
+├── tests/                        # Pruebas con pytest
+├── Iniciar aplicacion.bat        # Abre la aplicación con doble clic en Windows
+├── render.yaml                   # Configuración del despliegue
+├── requirements.txt              # Desarrollo: pytest, pymupdf, matplotlib, flask, waitress
+├── requirements-ai.txt           # Modelos: gensim y sentence-transformers (pesadas)
+└── requirements-web.txt          # Servidor publicado: flask y waitress
 ```
+
+La sección 2.8 del [documento técnico](docs/Documento_Tecnico.docx) dice en qué carpeta, archivo y funciones está cada algoritmo.
 
 ## Instalación
 
-Requiere **Python 3.13** (el desarrollo y las pruebas se hicieron con esa versión).
+Las pruebas y mediciones se hicieron con **Python 3.11**; el servidor publicado usa Python 3.12.
 
 ```bash
 python -m venv .venv
 .venv\Scripts\activate          # Windows
 # source .venv/bin/activate     # Linux / macOS
 
-pip install -r requirements.txt     # pytest, pdfplumber, matplotlib
+pip install -r requirements.txt
 ```
 
-`requirements.txt` solo trae lo necesario para el código base y las pruebas. Las librerías de IA van aparte porque **`sentence-transformers` instala PyTorch (varios GB)**:
+Con eso basta para correr la aplicación y las pruebas, porque los resultados ya vienen guardados en `data/`. Las librerías de IA van aparte porque **`sentence-transformers` instala PyTorch (varios GB)**, y solo hacen falta para regenerar los vectores:
 
 ```bash
-pip install -r requirements-ai.txt     # opcional: gensim + sentence-transformers
+pip install -r requirements-ai.txt
 ```
 
-Instalar `requirements-ai.txt` arrastra `numpy`, `scipy` y `scikit-learn` como dependencias de esas librerías. Quedan instalados, pero el código de los algoritmos no los importa.
-
-La primera vez que se usan los modelos se descargan automáticamente (GloVe ≈ 130 MB y MiniLM ≈ 90 MB).
+Instalar `requirements-ai.txt` arrastra `numpy`, `scipy` y `scikit-learn` como dependencias de esas librerías. Quedan instalados, pero el código de los algoritmos no los importa. La primera vez que se usan los modelos se descargan automáticamente (GloVe ≈ 130 MB y MiniLM ≈ 90 MB).
 
 ## Uso
 
 Todos los ejemplos se ejecutan desde la raíz del repositorio.
 
-**Similitud entre vectores**
+**Abrir la aplicación**
+
+En Windows, doble clic en `Iniciar aplicacion.bat`. En cualquier sistema:
+
+```bash
+python -m app.lanzar
+```
+
+El lanzador arranca el servidor y abre el navegador. Si ya hay una instancia abierta, la reutiliza: para cargar una versión nueva del código hay que cerrar primero la anterior con Ctrl+C.
+
+**Regenerar todos los resultados**, desde los PDF hasta las figuras (requiere `requirements-ai.txt`):
+
+```bash
+python -m src.preprocessing.extractor         # PDF -> data/processed/abstracts.csv y .json
+python -m src.similarity.ai.precalculo        # vectores.json, glove_palabras.json y similitudes_pd.json
+python -m src.similarity.ai.demo_corpus20     # fusiones por representación y resumen.json
+python -m src.similarity.ai.demo_clasicos20   # comparación de los 190 pares
+python -m src.similarity.ai.caso_estudio      # caso de estudio P6-P9 y su traza
+python -m src.pattern.traza                   # caso de estudio de la búsqueda de patrones
+python -m python_viz.dendrograma              # dendrogramas -> data/figuras/
+python -m python_viz.trazas                   # iteraciones y desplazamientos de la búsqueda
+python -m src.benchmark.runner                # tiempos -> data/benchmark/
+python -m python_viz.graficas                 # gráficas de rendimiento
+python -m python_viz.arquitectura             # diagrama general
+python -m python_viz.diagramas                # paquetes, módulos y secuencias
+```
+
+**Usar los módulos directamente**
 
 ```python
 from src.similarity.metrics import cosine_steps, euclidean_distance
@@ -120,47 +140,18 @@ print(pasos["dot"], pasos["norm_a"], pasos["cosine"], pasos["angle_degrees"])  #
 print(euclidean_distance([0, 0], [3, 4]))                                     # 5.0
 ```
 
-**Clustering jerárquico, evaluación y exportación**
-
 ```python
 from src.similarity.metrics import cosine_distance, pairwise_matrix
 from src.clustering.linkage import hierarchical_clustering
 from src.clustering.evaluation import cophenetic_correlation, cut_tree, silhouette
-from src.clustering.export import export_merges_json
 
 dist = pairwise_matrix(embeddings, cosine_distance)          # matriz de distancias n x n
 merges = hierarchical_clustering(dist, "average")            # [(a, b, distancia, tamaño), ...]
 print(cophenetic_correlation(dist, merges)["cpcc"])
 print(silhouette(dist, cut_tree(merges, len(dist), 3))["silhouette"])
-
-export_merges_json("fusiones.json", dist, etiquetas)         # los tres enlaces, listos para dibujar
 ```
 
-El formato del JSON (ids de hojas, alturas y orden de las fusiones) está documentado en el docstring de [`src/clustering/export.py`](src/clustering/export.py).
-
-**Demo con modelos preentrenados** (requiere `requirements-ai.txt`)
-
-```bash
-python -m src.similarity.ai.demo_modelos      # matrices de similitud de los 4 artículos de ejemplo
-python -m src.similarity.ai.caso_estudio      # tabla comparativa clásicos vs IA para un par de abstracts
-```
-
-**Corrida sobre los 20 abstracts** (requiere `requirements-ai.txt`)
-
-```bash
-python -m src.similarity.ai.demo_corpus20     # GloVe, GloVe centrado y MiniLM con single/complete/average, CPCC y silueta
-```
-
-Escribe `resumen.json` y un `fusiones_<representacion>.json` por representación en `tests/fixtures/daniel/corpus20/`.
-
-**Pipeline de datos, dendrogramas y benchmarks** (desde `data/raw/` hasta las figuras)
-
-```bash
-python -m src.preprocessing.extractor         # PDFs -> data/processed/abstracts.csv y .json
-python -m python_viz.dendrograma              # dendrogramas -> data/figuras/ (hoy con distancia Jaccard)
-python -m src.benchmark.runner                # tiempos -> data/benchmark/rendimiento.csv
-python -m python_viz.graficas                 # gráficas de rendimiento -> data/figuras/
-```
+El formato del JSON de fusiones (ids de hojas, alturas y orden) está en el docstring de [`src/clustering/export.py`](src/clustering/export.py).
 
 ## Pruebas
 
@@ -168,56 +159,66 @@ python -m python_viz.graficas                 # gráficas de rendimiento -> data
 python -m pytest tests -q
 ```
 
-Hay pruebas con casos pequeños resueltos a mano (por ejemplo, un clustering de 4 puntos en una recta) y un flujo completo con datos sintéticos. Las pruebas que descargan modelos reales **no corren por defecto**:
+Son **604 pruebas**: 602 corren siempre y 2 se omiten por defecto porque descargan los modelos reales. Para incluirlas:
 
 ```bash
 set RUN_MODEL_TESTS=1           # PowerShell: $env:RUN_MODEL_TESTS = "1"
-python -m pytest tests/test_ai_modelos.py -v
+python -m pytest tests -q
 ```
+
+Incluyen casos pequeños resueltos a mano, un flujo completo con datos sintéticos, la extracción de los 20 PDF, la guardia de transparencia, la aplicación web y la comparación de los tres algoritmos de búsqueda contra una búsqueda ingenua. 232 de ellas verifican que los diagramas de secuencia del documento técnico coincidan con el código.
 
 ## Resultados
 
-**Clustering sobre los 20 abstracts** (distancia = 1 − coseno calculado a mano; GloVe sin *stopwords*):
+El análisis completo está en el [documento técnico](docs/Documento_Tecnico.docx).
 
-| Representación | Single | Complete | Average |
-|---|---|---|---|
-| GloVe promediado | 0.6185 | 0.5673 | **0.7125** |
-| GloVe promediado y centrado | 0.3426 | 0.5820 | **0.6427** |
-| all-MiniLM-L6-v2 | 0.7453 | 0.5592 | **0.7765** |
-
-Los valores son el CPCC (correlación cofenética). **Average** es el enlace más coherente en las tres representaciones, así que la elección no depende del modelo. La silueta, que mide un solo corte, es baja en todos los casos (máximo 0.30, con mejor k = 2 casi siempre) porque el corpus es un solo tema; por eso el CPCC es la métrica principal y la silueta queda como complemento. La justificación matemática está en la bitácora.
-
-**Representaciones.** El promedio de vectores GloVe casi no discrimina: todos los pares de los 20 abstracts quedan en un rango de solo 0.085. Centrar los vectores abre ese rango (1.10), pero el tau de Kendall frente al orden de MiniLM baja de 0.32 a 0.18 y el CPCC empeora, de modo que la hipótesis del centrado quedó **refutada** (`center_vectors` queda como opción, no recomendada).
-
-**Caso de estudio P1–P3** (par más parecido según MiniLM entre los 4 primeros artículos):
+**Caso de estudio P6–P9** (el par más parecido según MiniLM entre los 190 del corpus):
 
 | Algoritmo | Similitud |
 |---|---|
-| Levenshtein (normalizada) | 0.2876 |
-| Jaccard | 0.1584 |
-| Coseno TF | 0.7360 |
-| Needleman-Wunsch / coseno TF-IDF | pendientes |
-| GloVe-100 promedio (con / sin stopwords) | 0.9938 / 0.9810 |
-| all-MiniLM-L6-v2 | 0.7353 |
+| Levenshtein (normalizada) | 0.2454 |
+| Needleman-Wunsch (normalizada) | 0.3146 |
+| Jaccard | 0.1552 |
+| Coseno TF (referencia) | 0.6808 |
+| Coseno TF-IDF | 0.1600 |
+| GloVe-100 promediado | 0.9792 |
+| all-MiniLM-L6-v2 | 0.8500 |
 
-**Limitaciones.** Los abstracts P13, P15, P16, P18 y P19 vienen marcados `_revisar` por el extractor (título o autores dudosos), y P6 y P15 tienen el texto con restos al final. El análisis crítico completo, con los pendientes, está en [`docs/bitacora_daniel.md`](docs/bitacora_daniel.md).
+Las medidas literales dan valores bajos porque miden coincidencia de caracteres o palabras, no de tema. TF-IDF baja mucho frente al coseno TF porque las palabras presentes en todos los abstracts dejan de contar. GloVe promediado casi no discrimina: todos los pares del corpus quedan entre 0.91 y 0.98. MiniLM va de 0.42 a 0.85.
+
+**Agrupamiento de los 20 abstracts** (CPCC; distancia = 1 − coseno calculado a mano):
+
+| Representación | Single | Complete | Average |
+|---|---|---|---|
+| all-MiniLM-L6-v2 | 0.7973 | 0.7685 | **0.8371** |
+| GloVe promediado | 0.6939 | 0.6154 | **0.7473** |
+| GloVe promediado y centrado | 0.3976 | 0.5644 | **0.6242** |
+| Jaccard | 0.6473 | 0.5450 | **0.7113** |
+
+**Average** es el enlace más coherente en todas las representaciones, así que la elección no depende del modelo. La silueta es baja en todos los casos (con MiniLM, 0.188, 0.204 y 0.220 en k = 2) porque el corpus es de un solo tema; por eso el CPCC, que evalúa el árbol completo, es la métrica principal.
+
+**Búsqueda de patrones.** Con «artificial intelligence» sobre los 20 abstracts, Boyer-Moore tarda 1.15 ms, KMP 4.49 ms y Rabin-Karp 13.87 ms (mediana de 101 repeticiones). El preprocesamiento es como máximo el 2.73 % del tiempo total. Los exponentes medidos sobre prefijos crecientes son 0.95 (KMP), 0.96 (Boyer-Moore) y 1.03 (Rabin-Karp).
+
+**Limitaciones.** El CPCC mide fidelidad a las distancias, no coherencia temática, y favorece por construcción a Average. El tau de Kendall mide acuerdo entre métodos, no cuál acierta. El corpus es de 20 abstracts de un mismo tema.
 
 ## Documentación
 
-- [`docs/enunciado/`](docs/enunciado/): enunciado del proyecto y plan de trabajo.
-- [`docs/bitacora_samuel.md`](docs/bitacora_samuel.md): algoritmos clásicos, con su fundamento matemático.
-- [`docs/bitacora_daniel.md`](docs/bitacora_daniel.md): métricas, embeddings, clustering, justificación de la evaluación interna (CPCC frente a silueta) y caso de estudio.
+- [`docs/Documento_Tecnico.docx`](docs/Documento_Tecnico.docx): arquitectura, diagramas, demostración de cada algoritmo, análisis crítico, complejidad, pruebas y despliegue.
+- [`docs/Justificacion_uso_IA.docx`](docs/Justificacion_uso_IA.docx): qué herramientas de IA generativa se usaron, para qué y cómo se validó.
+- [`docs/bitacora_samuel.md`](docs/bitacora_samuel.md) y [`docs/bitacora_daniel.md`](docs/bitacora_daniel.md): registro del trabajo, con los valores de cada momento.
+- [`docs/enunciado/`](docs/enunciado/): descripción del proyecto y plan de trabajo.
 - Cada función algorítmica documenta su fórmula y su complejidad temporal y espacial en el *docstring*.
-- El documento de diseño final y la declaración de uso de IA generativa se entregarán aparte (pendiente).
 
 ## Equipo
 
 | Integrante | Responsabilidades |
 |---|---|
-| **Samuel** | Requerimiento 1, algoritmos clásicos y su análisis matemático paso a paso |
-| **Daniel** | Requerimiento 1, enfoques con IA y análisis crítico; Requerimiento 2, enlaces jerárquicos y evaluación interna |
-| **Cayón** | Visualización y benchmarks, preprocesamiento de los PDFs, despliegue y documento de diseño |
+| **Samuel Castaño** | Requerimiento 1, algoritmos clásicos y su análisis matemático; auditoría final, demostraciones en la aplicación y actualización de la documentación |
+| **Daniel Jurado Celemin** | Requerimiento 1, enfoques con IA y análisis crítico; Requerimiento 2, enlaces jerárquicos y evaluación interna |
+| **Juan Esteban Cayón Marmolejo** | Requerimiento 3, búsqueda de patrones; preprocesamiento de los PDF, visualización, mediciones, despliegue y documento de diseño |
 
 ## Uso de IA generativa
 
-La IA generativa se usó solo como apoyo. Durante el desarrollo se usó **Claude** (Anthropic) como asistente de programación en el módulo de IA, las métricas, el clustering y sus pruebas. La IA no reemplaza el diseño algorítmico ni el análisis formal, que son del equipo. La declaración formal completa irá en el documento de diseño final.
+En el desarrollo se usaron **Claude Code** y **Claude** (Anthropic) como asistentes de programación y redacción. Las herramientas fueron un apoyo y no reemplazan el diseño algorítmico ni el análisis formal, que son del equipo. El detalle de qué herramienta usó cada integrante, para qué y cómo se validó está en [`docs/Justificacion_uso_IA.docx`](docs/Justificacion_uso_IA.docx).
+
+Los modelos `all-MiniLM-L6-v2` y GloVe son otra cosa: forman parte del requerimiento 1 y solo se usan para obtener vectores.

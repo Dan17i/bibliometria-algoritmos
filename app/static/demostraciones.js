@@ -491,7 +491,7 @@ const Demostracion = (() => {
       ${seccion("La idea", `<p>${seguro(d.que_es)}</p><p>${seguro(d.idea)}</p>
         <p class="dem-guia">Más abajo está la fórmula, el cálculo paso a paso con estos datos, un dibujo para seguirlo y qué significa el resultado.</p>`)}
       ${seccion("La fórmula", `<div class="dem-tarjeta">${d.formulas.map(formula).join("")}<p class="dem-guia" style="margin-bottom:0">${seguro(d.formula_simple)}</p></div>`,
-        "Es la idea anterior escrita en símbolos. Si prefieres, sáltala: el paso a paso hace lo mismo con números reales.")}
+        "La idea anterior escrita en símbolos. El paso a paso la aplica con los valores reales.")}
       ${seccion("Paso a paso, con estos valores", pasos(d.pasos), "Aquí se hace el cálculo de verdad, en orden. Cada tarjeta es un paso, y los números son los de estos datos.")}
       ${seccion("Para verlo", d.visual.map((v) => VISUALES[v.tipo](v)).join(""), "Lo mismo en tablas y dibujos, para seguirlo con los ojos.")}
       ${lectura(d)}

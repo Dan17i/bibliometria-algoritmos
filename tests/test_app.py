@@ -325,10 +325,10 @@ def test_las_filas_de_la_busqueda_traen_su_clave(cliente):
       for e in ("single", "complete", "average")],
     *[("/api/demostracion-patron", {"algoritmo": c, "patron": "learning"}) for c in PATRONES],
 ])
-def test_cada_demostracion_se_explica_sin_matematicas(cliente, ruta, cuerpo):
+def test_cada_demostracion_describe_el_algoritmo_y_su_formula(cliente, ruta, cuerpo):
     d = cliente.post(ruta, json=cuerpo).get_json()
     assert d["que_es"].startswith("Es un")
-    assert d["que_significa"] and d["formula_simple"].startswith("En palabras:")
+    assert d["que_significa"] and d["formula_simple"]
     for tecnicismo in ("vector", "matriz", "embedding", "hash", "O(", "normaliz", "algoritmo de programación"):
         assert tecnicismo not in d["que_es"].lower(), tecnicismo
 

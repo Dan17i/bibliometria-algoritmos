@@ -174,7 +174,7 @@ def _levenshtein(a: str, b: str, lado: int) -> dict:
         "ms": ms,
         "que_es": "Es un algoritmo que compara dos textos letra por letra y se encarga de calcular cuántos cambios hacen falta para que uno quede igual al otro. Entre menos cambios, más se parecen. No entiende lo que dicen los textos: solo mira sus letras.",
         "que_significa": "Este número va de 0 a 1: 1 significa que los textos son idénticos, y entre más bajo, más letras hay que cambiar.",
-        "formula_simple": "En palabras: se llena una tabla en la que cada casilla, D(i, j), guarda los cambios necesarios para convertir las primeras i letras de un texto en las primeras j del otro. Cada casilla se queda con la opción más barata entre quitar, poner o cambiar una letra. c vale 0 si las dos letras son iguales, porque no hay nada que cambiar, y 1 si son distintas.",
+        "formula_simple": "Se llena una tabla en la que cada casilla, D(i, j), guarda los cambios necesarios para convertir las primeras i letras de un texto en las primeras j del otro. Cada casilla se queda con la opción más barata entre quitar, poner o cambiar una letra. c vale 0 si las dos letras son iguales, porque no hay nada que cambiar, y 1 si son distintas.",
         "idea": "¿Cuántos cambios de una letra necesito para convertir un texto en el otro? Cada cambio puede ser "
                 "quitar una letra, poner una o cambiarla por otra. Es como corregir un texto a mano y contar las correcciones.",
         "en_una_frase": ("Los dos textos son idénticos: no hace falta ninguna edición." if t["distancia"] == 0
@@ -245,7 +245,7 @@ def _needleman(a: str, b: str, lado: int) -> dict:
         "ms": ms,
         "que_es": "Es un algoritmo que pone dos textos uno sobre el otro y se encarga de acomodarlos para que coincida la mayor cantidad posible de letras. Gana puntos por cada letra que coincide y pierde por cada letra distinta o cada hueco que tenga que dejar. Nació en la biología para comparar proteínas, y aquí se usa con texto.",
         "que_significa": "Este número va de 0 a 1: 1 significa que todas las letras coinciden sin dejar huecos, y entre más bajo, peor encajan los dos textos.",
-        "formula_simple": "En palabras: cada casilla de la tabla, F(i, j), guarda el mejor puntaje posible al alinear las primeras i letras de un texto con las primeras j del otro. Se queda con la mejor de tres opciones: emparejar las dos letras o dejar un hueco en uno de los dos textos. S suma 1 si las letras coinciden y resta 1 si no, y d es lo que resta cada hueco.",
+        "formula_simple": "Cada casilla de la tabla, F(i, j), guarda el mejor puntaje posible al alinear las primeras i letras de un texto con las primeras j del otro. Se queda con la mejor de tres opciones: emparejar las dos letras o dejar un hueco en uno de los dos textos. S suma 1 si las letras coinciden y resta 1 si no, y d es lo que resta cada hueco.",
         "idea": "Pone los dos textos uno encima del otro y los alinea para que coincidan la mayor cantidad de letras, abriendo "
                 "huecos donde haga falta. Cada coincidencia suma y cada fallo o hueco resta. A diferencia de Levenshtein, "
                 "que minimiza un costo, este maximiza un puntaje.",
@@ -306,7 +306,7 @@ def _jaccard(a: str, b: str, _lado: int) -> dict:
         "ms": ms,
         "que_es": "Es un algoritmo que compara dos textos por las palabras que usan, sin importar en qué orden aparecen. Se encarga de responder una pregunta sencilla: de todas las palabras que aparecen entre los dos textos, ¿cuántas están en ambos?",
         "que_significa": "Este número va de 0 a 1: 0 significa que no comparten ninguna palabra, y 1 que usan exactamente las mismas.",
-        "formula_simple": "En palabras: A y B son las listas de palabras de cada texto, sin repetir. Arriba se cuentan las palabras que están en los dos (∩), y abajo todas las palabras distintas que hay entre ambos (∪).",
+        "formula_simple": "A y B son las listas de palabras de cada texto, sin repetir. Arriba se cuentan las palabras que están en los dos (∩), y abajo todas las palabras distintas que hay entre ambos (∪).",
         "idea": "Mete las palabras de cada texto en una bolsa, sin orden y sin repetir, y pregunta qué proporción de todas "
                 "las palabras está en las dos bolsas. No importa cuántas veces aparece una palabra, solo si aparece.",
         "en_una_frase": f"Comparten {inter} de las {union} palabras distintas que aparecen en los dos textos.",
@@ -386,7 +386,7 @@ def _tfidf(a: str, b: str, _lado: int, corpus: list[str], idf: dict | None) -> d
         "ms": ms,
         "que_es": "Es un algoritmo que compara dos textos por las palabras que usan, pero dándoles más importancia a las palabras poco comunes. Se encarga de que compartir «the», que está en todos los artículos, no cuente, y de que compartir una palabra especializada sí. Así, dos textos se parecen cuando usan el mismo vocabulario específico.",
         "que_significa": "Este número va de 0 a 1: 0 significa que no comparten ninguna palabra que aporte, y 1 que usan las mismas palabras en la misma proporción.",
-        "formula_simple": "En palabras: la primera fórmula le da un peso a cada palabra, w(t). Crece con las veces que aparece en el texto (tf) y baja si aparece en muchos de los N artículos (df): si está en todos, el logaritmo da 0 y no pesa. La segunda compara los dos textos con esos pesos: mide el ángulo θ entre sus flechas, y su coseno es el resultado.",
+        "formula_simple": "La primera fórmula le da un peso a cada palabra, w(t). Crece con las veces que aparece en el texto (tf) y baja si aparece en muchos de los N artículos (df): si está en todos, el logaritmo da 0 y no pesa. La segunda compara los dos textos con esos pesos: mide el ángulo θ entre sus flechas, y su coseno es el resultado.",
         "idea": "Cada texto se vuelve una flecha en un espacio con una dimensión por palabra. Las palabras raras alargan más la flecha "
                 "que las comunes. Dos textos se parecen si sus flechas apuntan hacia el mismo lado: compartir una palabra poco "
                 "usada dice más que compartir «the».",
@@ -460,7 +460,7 @@ def _glove(a: str, b: str) -> dict:
         "ms": ms,
         "que_es": "Es un método de inteligencia artificial que compara dos textos por el significado de sus palabras, no por cómo se escriben. Usa un diccionario ya entrenado que le da a cada palabra una lista de 100 números, de modo que palabras con significado parecido tienen números parecidos. Cada texto se resume en el promedio de sus palabras, y luego se comparan los dos promedios.",
         "que_significa": "Cerca de 1, los dos promedios apuntan casi al mismo lado. En estos artículos casi todos los pares dan más de 0.9, así que el número solo dice poco: hay que mirarlo frente a los demás pares.",
-        "formula_simple": "En palabras: la primera fórmula saca el promedio. Para cada una de las 100 posiciones (j), suma el número de cada una de las k palabras y lo divide entre k. La segunda compara los dos promedios, A y B: mide el ángulo θ entre ellos, y su coseno es el resultado.",
+        "formula_simple": "La primera fórmula saca el promedio. Para cada una de las 100 posiciones (j), suma el número de cada una de las k palabras y lo divide entre k. La segunda compara los dos promedios, A y B: mide el ángulo θ entre ellos, y su coseno es el resultado.",
         "idea": "Cada palabra ya tiene una posición en un mapa de significados: «teacher» queda cerca de «student». El abstract se resume "
                 "en el punto medio de todas sus palabras, y dos abstracts se comparan por el ángulo entre esos puntos. Las palabras "
                 "cercanas en significado acercan los textos aunque no sean iguales.",
@@ -528,7 +528,7 @@ def _minilm(a: str, b: str, vector_a: list[float], vector_b: list[float]) -> dic
         "ms": ms,
         "que_es": "Es un modelo de inteligencia artificial que lee un texto completo y lo resume en una lista de 384 números que representa de qué trata. Se encarga de que dos textos con un significado parecido reciban números parecidos, aunque usen palabras distintas. Después solo queda comparar las dos listas.",
         "que_significa": "Cerca de 1, el modelo considera que los dos textos hablan de algo muy parecido. En estos artículos, los valores van de 0.42 a 0.85.",
-        "formula_simple": "En palabras: A y B son las dos listas de 384 números. Arriba se multiplican posición por posición y se suma todo; abajo se divide entre el tamaño de cada lista. El resultado es el coseno del ángulo θ entre ellas: entre más cerca de 1, más apuntan hacia el mismo lado.",
+        "formula_simple": "A y B son las dos listas de 384 números. Arriba se multiplican posición por posición y se suma todo; abajo se divide entre el tamaño de cada lista. El resultado es el coseno del ángulo θ entre ellas: entre más cerca de 1, más apuntan hacia el mismo lado.",
         "idea": "Una red neuronal entrenada para que textos con significado parecido queden cerca lee el abstract completo y devuelve "
                 "un solo vector. A diferencia de GloVe, no promedia palabras sueltas: la misma palabra aporta distinto según las que "
                 "la rodean.",

@@ -60,3 +60,21 @@
     - Tiempo: $O(N)$ donde $N$ es la suma total de tokens en ambos textos, dominado por la construcción del vocabulario y los vectores.
     - Espacio: $O(|V|)$ donde $V$ es el tamaño del vocabulario unificado, necesario para almacenar los vectores densos.
   - Al retornar explícitamente el vocabulario unificado, el Vector A y el Vector B, la demostración paso a paso del caso de estudio (los 2 *abstracts*) será trivial: solo se copiará la tabla de frecuencias de los vectores arrojados por la consola y se mostrará la multiplicación manual.
+
+**[2026-11-02]**
+- **Actividad:** Reescritura de los algoritmos clásicos sin funciones nativas.
+- **Detalles:**
+  - Las entradas anteriores quedan como registro de ese momento. Ya no existe `preprocess_text_to_set` ni se usa el `Set` de Python: los conjuntos de Jaccard son listas sin repetidos, y la intersección y la unión se calculan recorriéndolas con un diccionario.
+  - Se creó `src/similarity/classic/tokenizador.py` (`a_minuscula`, `es_alfanumerico`, `tokenizar`, `terminos_unicos`), que comparten Jaccard, el coseno y la transformación del abstract.
+  - **Decisión de tokenización:** se corta en todo lo que no sea letra o dígito. «problem-solving» cuenta como *problem* + *solving*, y «AI's» como *ai*.
+  - `natural_log` se agregó a `src/similarity/metrics.py` para el IDF, y `tfidf_cosine_similarity` recibe el IDF ya calculado sobre los 20 abstracts.
+- **Actividad:** Demostraciones sobre el caso de estudio P6–P9.
+- **Detalles:**
+  - El caso de estudio pasó de P1–P3 a P6–P9, el par más parecido de los 190 según MiniLM.
+  - `src/similarity/traza_clasicos.py` devuelve los pasos de cada clásico: esquinas de la matriz, operaciones de un camino óptimo, conjuntos y términos que más aportan.
+  - **Resultados:** Levenshtein 0.2454 (distancia 938 de 1243), Needleman-Wunsch 0.3146 (puntaje −461), Jaccard 0.1552 (27 de 174), coseno TF-IDF 0.1600 (80.79°).
+- **Actividad:** Auditoría final del proyecto.
+- **Detalles:**
+  - Se corrigió el extractor (ahora con PyMuPDF), se agregó la transformación del abstract para la IA y el clustering, y se midió con 101 repeticiones por punto.
+  - Las demostraciones de los 12 algoritmos y criterios quedaron en la aplicación, se agregaron los diagramas del documento técnico y se actualizaron el README y la justificación del uso de IA.
+  - Los valores vigentes están en `docs/Documento_Tecnico.docx`.

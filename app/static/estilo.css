@@ -141,7 +141,8 @@ button { font: inherit; color: inherit; }
   padding: .8rem 1.5rem;
   overflow-x: auto;
 }
-@media (min-width: 900px) { .indice { padding-inline: 3rem; } }
+/* El mismo borde izquierdo del contenido, que se centra con un ancho máximo de 1180px */
+@media (min-width: 900px) { .indice { padding-inline: max(3rem, calc((100% - 1180px) / 2 + 3rem)); } }
 
 .indice a {
   color: var(--tinta-media);

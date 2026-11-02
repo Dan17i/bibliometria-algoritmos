@@ -261,9 +261,9 @@ def demostracion(clave: str, enlace: str, vectores: dict, textos: list[str], ids
                   "llamado dendrograma, que muestra qué se unió con qué y en qué orden.",
         "que_significa": "Este número, llamado CPCC, es la nota del árbol: va de −1 a 1, y entre más cerca de 1, mejor respeta el dibujo los parecidos reales entre los artículos.",
         "formula_simple": {
-            "single": "En palabras: D(A, B) es la distancia entre dos grupos, y d(x, y) la distancia entre dos artículos. Single mira todas las parejas posibles entre los dos grupos y se queda con la más cercana (min).",
-            "complete": "En palabras: D(A, B) es la distancia entre dos grupos, y d(x, y) la distancia entre dos artículos. Complete mira todas las parejas posibles entre los dos grupos y se queda con la más lejana (max).",
-            "average": "En palabras: D(A, B) es la distancia entre dos grupos, y d(x, y) la distancia entre dos artículos. Average suma las distancias de todas las parejas posibles entre los dos grupos y saca el promedio.",
+            "single": "D(A, B) es la distancia entre dos grupos, y d(x, y) la distancia entre dos artículos. Single mira todas las parejas posibles entre los dos grupos y se queda con la más cercana (min).",
+            "complete": "D(A, B) es la distancia entre dos grupos, y d(x, y) la distancia entre dos artículos. Complete mira todas las parejas posibles entre los dos grupos y se queda con la más lejana (max).",
+            "average": "D(A, B) es la distancia entre dos grupos, y d(x, y) la distancia entre dos artículos. Average suma las distancias de todas las parejas posibles entre los dos grupos y saca el promedio.",
         }[enlace] + " La segunda fórmula es la nota del árbol: compara la distancia real entre cada par de artículos, d(x, y), con la distancia a la que el árbol los une, C(x, y). Si las dos listas se parecen, el árbol es fiel.",
         "idea": {
             "single": "Va uniendo, de a dos, los grupos más cercanos, y mide la cercanía entre grupos por sus dos miembros más próximos. Es como unir amigos de amigos: basta una persona en común para juntar dos círculos.",
