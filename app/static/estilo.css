@@ -209,6 +209,7 @@ main { max-width: 1180px; margin: 0 auto; padding: 0 1.5rem 4rem; }
 }
 .articulo__titulo { color: var(--tinta-media); }
 .articulo input:checked ~ .articulo__titulo { color: var(--tinta); }
+.articulo__autores { display: block; font-size: .78rem; color: var(--tinta-tenue); margin-top: .15rem; }
 
 .controles__pie {
   display: flex;
@@ -267,7 +268,7 @@ main { max-width: 1180px; margin: 0 auto; padding: 0 1.5rem 4rem; }
 
 /* ---------- Resultados --------------------------------------------------- */
 
-.resultados { min-height: 120px; }
+.resultados { min-height: 120px; overflow-x: auto; }
 .vacio, .error {
   color: var(--tinta-tenue);
   background: var(--blanco);
@@ -336,6 +337,20 @@ main { max-width: 1180px; margin: 0 auto; padding: 0 1.5rem 4rem; }
   color: var(--tinta);
 }
 .matriz td.diagonal { color: var(--tinta-tenue); }
+
+/* Con los 20 artículos son 190 filas: la tabla tiene su propio desplazamiento */
+.subtitulo-resultados { font-size: 1rem; margin: 1.75rem 0 .75rem; }
+.tabla-pares { max-height: 420px; overflow: auto; border: 1px solid var(--linea); border-radius: 3px; }
+.tabla-pares thead th { position: sticky; top: 0; background: var(--blanco); }
+
+/* ---------- Abstracts comparados ------------------------------------------ */
+
+.abstracts { margin-top: 1.75rem; }
+.abstracts h3 { font-size: 1rem; margin-bottom: .75rem; }
+.abstract { background: var(--blanco); border: 1px solid var(--linea); border-radius: 3px; padding: .7rem 1rem; margin-bottom: .5rem; }
+.abstract summary { cursor: pointer; font-size: .92rem; }
+.abstract p { font-size: .9rem; margin: .7rem 0 0; }
+.abstract__autores { color: var(--tinta-tenue); font-size: .84rem; }
 
 /* ---------- Dendrogramas -------------------------------------------------- */
 

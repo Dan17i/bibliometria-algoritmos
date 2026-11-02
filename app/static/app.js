@@ -36,6 +36,13 @@ async function pedir(ruta, opciones) {
   return datos;
 }
 
+/** Los títulos y abstracts traen caracteres como "&": se muestran como texto, no como HTML. */
+function escapar(valor) {
+  const nodo = document.createElement("span");
+  nodo.textContent = valor;
+  return nodo.innerHTML;
+}
+
 function mostrarError(contenedor, mensaje) {
   contenedor.innerHTML = `<p class="error">${mensaje}</p>`;
 }
@@ -97,7 +104,9 @@ async function cargarArticulos() {
         <label class="articulo">
           <input type="checkbox" value="${a.id}">
           <span class="articulo__id">${a.id}</span>
-          <span class="articulo__titulo">${a.titulo}</span>
+          <span class="articulo__titulo">${escapar(a.titulo)}
+            <small class="articulo__autores">${escapar(a.autores)}</small>
+          </span>
         </label>
       </li>`).join("");
 
@@ -118,13 +127,6 @@ function actualizarContador() {
 }
 
 function filaMedida(m) {
-  if (m.similitud === null) {
-    return `<tr>
-      <td>${m.algoritmo}<div class="detalle">${m.detalle}</div></td>
-      <td class="familia">${m.familia}</td>
-      <td class="num ausente" colspan="2">sin medir</td>
-    </tr>`;
-  }
   const porcentaje = Math.max(0, Math.min(1, m.similitud)) * 100;
   return `<tr>
     <td>${m.algoritmo}<div class="detalle">${m.detalle}</div></td>
@@ -137,6 +139,17 @@ function filaMedida(m) {
   </tr>`;
 }
 
+/** Los abstracts comparados, con su título y sus autores. */
+function bloqueAbstracts(articulos) {
+  const fichas = articulos.map((a) => `
+    <details class="abstract">
+      <summary>${a.id} · ${escapar(a.titulo)}</summary>
+      <p class="abstract__autores">${escapar(a.autores)}</p>
+      <p>${escapar(a.texto)}</p>
+    </details>`).join("");
+  return `<div class="abstracts"><h3>Abstracts comparados</h3>${fichas}</div>`;
+}
+
 function dibujarPar(d, contenedor) {
   const [a, b] = d.articulos;
   contenedor.innerHTML = `
@@ -146,14 +159,63 @@ function dibujarPar(d, contenedor) {
         <tr><th>Algoritmo</th><th>Enfoque</th><th class="num">Similitud</th><th class="num">Tiempo</th></tr>
       </thead>
       <tbody>${d.algoritmos.map(filaMedida).join("")}</tbody>
-    </table>`;
+    </table>
+    ${bloqueAbstracts(d.articulos)}`;
+}
+
+/** Una fila por par de artículos y una columna por algoritmo. */
+function tablaDePares(d) {
+  const encabezado = d.algoritmos.map((a) => `<th class="num">${a.algoritmo}</th>`).join("");
+  const filas = [];
+  for (let i = 0; i < d.ids.length; i++) {
+    for (let j = i + 1; j < d.ids.length; j++) {
+      const celdas = d.algoritmos.map((a) =>
+        `<td class="num">${d.matrices[a.clave][i][j].toFixed(4)}</td>`).join("");
+      filas.push(`<tr><td class="num">${d.ids[i]} · ${d.ids[j]}</td>${celdas}</tr>`);
+    }
+  }
+  return `
+    <h3 class="subtitulo-resultados">Todos los pares</h3>
+    <div class="tabla-pares">
+      <table class="medidas">
+        <thead><tr><th>Par</th>${encabezado}</tr></thead>
+        <tbody>${filas.join("")}</tbody>
+      </table>
+    </div>`;
 }
 
 function dibujarMatriz(d, contenedor) {
-  const { minimo, maximo } = rangoMatriz(d.matriz);
+  contenedor.innerHTML = `
+    <p class="par-titulo">${d.ids.length} artículos · ${d.algoritmos.length} algoritmos · ${d.ms_total.toFixed(0)} ms</p>
+    <div class="selector-repr" id="selector-matriz">
+      ${d.algoritmos.map((a, i) => `
+        <button type="button" class="repr" data-i="${i}" aria-pressed="${i === 0}">
+          ${a.algoritmo}
+          <small>${a.familia}</small>
+        </button>`).join("")}
+    </div>
+    <div id="matriz-actual"></div>
+    ${tablaDePares(d)}
+    ${bloqueAbstracts(d.articulos)}`;
+
+  const selector = $("#selector-matriz");
+  selector.addEventListener("click", (evento) => {
+    const boton = evento.target.closest(".repr");
+    if (!boton) return;
+    selector.querySelectorAll(".repr").forEach((b) =>
+      b.setAttribute("aria-pressed", b === boton));
+    dibujarMatrizDe(d, d.algoritmos[Number(boton.dataset.i)]);
+  });
+
+  dibujarMatrizDe(d, d.algoritmos[0]);
+}
+
+function dibujarMatrizDe(d, algoritmo) {
+  const matriz = d.matrices[algoritmo.clave];
+  const { minimo, maximo } = rangoMatriz(matriz);
   const encabezado = d.ids.map((id) => `<th>${id}</th>`).join("");
 
-  const filas = d.matriz.map((fila, i) => {
+  const filas = matriz.map((fila, i) => {
     const celdas = fila.map((v, j) => {
       if (i === j) return `<td class="diagonal" style="background:var(--papel-hondo)">—</td>`;
       const { fondo, texto: color } = tonoSimilitud(v, minimo, maximo);
@@ -163,8 +225,7 @@ function dibujarMatriz(d, contenedor) {
     return `<tr><th>${d.ids[i]}</th>${celdas}</tr>`;
   }).join("");
 
-  contenedor.innerHTML = `
-    <p class="par-titulo">${d.ids.length} artículos · ${d.metrica} · ${d.ms_total.toFixed(0)} ms</p>
+  $("#matriz-actual").innerHTML = `
     <div class="matriz-envoltura">
       <table class="matriz">
         <thead><tr><th></th>${encabezado}</tr></thead>
@@ -179,11 +240,12 @@ function dibujarMatriz(d, contenedor) {
       </p>
     </div>
     <p class="detalle" style="margin-top:1rem;color:var(--tinta-tenue);font-size:.87rem;max-width:68ch">
-      El color se escala al rango real de esta selección, no a 0–1: dos abstracts
-      distintos comparten pocas palabras, así que todos los valores caen en una
-      franja estrecha y una escala absoluta no mostraría diferencias.
-      Con más de dos artículos se usa una medida rápida, porque los algoritmos de
-      programación dinámica sobre todos los pares tardarían demasiado en vivo.
+      ${algoritmo.algoritmo}: ${algoritmo.complejidad} por par,
+      ${algoritmo.origen === "en vivo"
+        ? "calculado en el momento."
+        : "leído de los 190 pares calculados una vez, porque cada par tarda varios segundos en el servidor."}
+      El color se escala al rango real de esta selección, no a 0–1: los valores
+      suelen caer en una franja estrecha y una escala absoluta no mostraría diferencias.
     </p>`;
 }
 
@@ -340,7 +402,7 @@ $("#limpiar").addEventListener("click", () => {
   document.querySelectorAll(".articulo input").forEach((c) => (c.checked = false));
   actualizarContador();
   $("#resultado-similitud").innerHTML =
-    `<p class="vacio">Elige al menos dos artículos de la lista. El cálculo ocurre en el momento, sobre los abstracts completos.</p>`;
+    `<p class="vacio">Elige al menos dos artículos de la lista. La comparación se hace sobre sus abstracts completos.</p>`;
 });
 
 $("#form-buscar").addEventListener("submit", (evento) => {
