@@ -7,7 +7,7 @@ demás requerimientos del proyecto: título, autores y abstract.
 Contexto del problema:
 Los 20 artículos del corpus provienen de cuatro editoriales distintas y cada
 una maqueta la primera página de forma diferente. El texto plano que produce
-un PDF no respeta las columnas visuales, por lo que una extracción ingenua
+un PDF no respeta las columnas visuales, por lo que una extracción poco efectiva produce una
 mezcla afiliaciones, palabras clave y cuerpo del abstract.
 
 Se identificaron tres familias de maquetación:
