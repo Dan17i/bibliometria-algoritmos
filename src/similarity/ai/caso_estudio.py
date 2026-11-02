@@ -1,7 +1,7 @@
 """
-Caso de estudio P1-P3: clásicos de Samuel vs. enfoques de IA (Req. 1).
+Caso de estudio P6-P9: clásicos de Samuel vs. enfoques de IA (Req. 1).
 ----------------------------------------------------------------------
-Compara un par de abstracts con:
+P6-P9 es el par más parecido del corpus según MiniLM. Compara un par de abstracts con:
     - los 4 clásicos de Samuel (más el coseno TF), importados SIN modificarlos:
       Levenshtein, Needleman-Wunsch, Jaccard, coseno TF y coseno TF-IDF;
     - los 2 enfoques de IA: promedio de vectores GloVe (con stopwords, solo como
@@ -14,26 +14,29 @@ idf = 0).
     .venv\\Scripts\\python.exe -m src.similarity.ai.caso_estudio
 
 Genera dos archivos en data/resultados/:
-    - matrices_p1_p4.json: matrices de similitud coseno de los 4 abstracts con
-      cada enfoque de IA.
-    - caso_estudio_p1_p3.json: la tabla comparativa del par elegido.
+    - caso_estudio_p6_p9.json: la tabla comparativa del par elegido.
+    - traza_req1_p6_p9.json: los números intermedios de cada algoritmo, para la
+      demostración paso a paso del documento técnico.
 """
 import json
 
+from src.preprocessing.transformacion import transformar_abstract
 from src.similarity.ai.demo_modelos import (
-    ABSTRACTS,
     RESULTADOS as SALIDA,
-    format_matrix,
     glove_embeddings,
     load_abstracts,
+    sentence_embeddings,
     vectores_del_corpus,
 )
+from src.similarity.ai.demostracion import average_steps, compare_vectors_steps
+from src.similarity.ai.embeddings import load_gensim_vectors, tokenize
+from src.similarity.ai.stopwords import STOPWORDS
 from src.similarity.classic.cosine import cosine_similarity as classic_cosine
 from src.similarity.classic.cosine import tfidf_cosine_similarity
 from src.similarity.classic.jaccard import jaccard_similarity
 from src.similarity.classic.levenshtein import levenshtein_distance
 from src.similarity.classic.needleman_wunsch import needleman_wunsch, normalized_needleman_wunsch
-from src.similarity.metrics import cosine_steps, euclidean_distance, pairwise_matrix
+from src.similarity.metrics import cosine_steps, euclidean_distance
 
 
 def classic_scores(texto_a: str, texto_b: str, corpus: list[str] | None = None) -> list[dict]:
@@ -130,6 +133,158 @@ def ai_scores(glove_con: tuple, glove_sin: tuple, minilm: tuple) -> list[dict]:
     return filas
 
 
+def operaciones_levenshtein(a: str, b: str, matriz: list[list[int]]) -> dict:
+    """
+    Recorre la matriz desde D(m, n) hacia atrás y cuenta las operaciones de un
+    camino óptimo. Complejidad temporal: O(m + n). Espacial: O(1).
+    """
+    i, j = len(a), len(b)
+    conteo = {"coincidencias": 0, "sustituciones": 0, "eliminaciones": 0, "inserciones": 0}
+    while i > 0 or j > 0:
+        if i > 0 and j > 0 and a[i - 1] == b[j - 1] and matriz[i][j] == matriz[i - 1][j - 1]:
+            conteo["coincidencias"] += 1
+            i, j = i - 1, j - 1
+        elif i > 0 and j > 0 and matriz[i][j] == matriz[i - 1][j - 1] + 1:
+            conteo["sustituciones"] += 1
+            i, j = i - 1, j - 1
+        elif i > 0 and matriz[i][j] == matriz[i - 1][j] + 1:
+            conteo["eliminaciones"] += 1
+            i -= 1
+        else:
+            conteo["inserciones"] += 1
+            j -= 1
+    return conteo
+
+
+def operaciones_needleman(a: str, b: str, matriz: list[list[int]], gap: int = -1,
+                          match: int = 1, mismatch: int = -1) -> dict:
+    """Igual que `operaciones_levenshtein`, para el alineamiento de puntaje máximo."""
+    i, j = len(a), len(b)
+    conteo = {"coincidencias": 0, "discrepancias": 0, "huecos": 0}
+    while i > 0 or j > 0:
+        if i > 0 and j > 0:
+            s = match if a[i - 1] == b[j - 1] else mismatch
+            if matriz[i][j] == matriz[i - 1][j - 1] + s:
+                conteo["coincidencias" if s == match else "discrepancias"] += 1
+                i, j = i - 1, j - 1
+                continue
+        if i > 0 and matriz[i][j] == matriz[i - 1][j] + gap:
+            i -= 1
+        else:
+            j -= 1
+        conteo["huecos"] += 1
+    return conteo
+
+
+def _esquina(matriz: list[list[int]], filas: range, columnas: range) -> list[list[int]]:
+    return [[matriz[i][j] for j in columnas] for i in filas]
+
+
+def traza_clasicos(texto_a: str, texto_b: str, corpus: list[str], lado: int = 8) -> dict:
+    """
+    Todos los números intermedios de los cuatro clásicos sobre el par.
+
+    Las matrices tienen más de un millón de celdas: se guardan la esquina inicial
+    y la final, de `lado` x `lado`, y las operaciones del camino óptimo.
+    """
+    m, n = len(texto_a), len(texto_b)
+    distancia, matriz_lev = levenshtein_distance(texto_a, texto_b)
+    puntaje, matriz_nw = needleman_wunsch(texto_a, texto_b)
+    jaccard, interseccion, union = jaccard_similarity(texto_a, texto_b)
+    tfidf = tfidf_cosine_similarity(texto_a, texto_b, corpus)
+
+    terminos = []
+    for i in range(len(tfidf["vocabulario"])):
+        terminos.append({
+            "termino": tfidf["vocabulario"][i],
+            "tf_a": tfidf["tf_a"][i],
+            "tf_b": tfidf["tf_b"][i],
+            "idf": tfidf["idf"][i],
+            "peso_a": tfidf["pesos_a"][i],
+            "peso_b": tfidf["pesos_b"][i],
+            "producto": tfidf["pesos_a"][i] * tfidf["pesos_b"][i],
+        })
+    terminos.sort(key=lambda t: t["producto"], reverse=True)
+
+    inicio = range(lado)
+    return {
+        "m": m,
+        "n": n,
+        "celdas": (m + 1) * (n + 1),
+        "levenshtein": {
+            "distancia": distancia,
+            "similitud": 1.0 - distancia / max(m, n),
+            "inicio_a": texto_a[:lado - 1],
+            "inicio_b": texto_b[:lado - 1],
+            "esquina_inicial": _esquina(matriz_lev, inicio, inicio),
+            "fin_a": texto_a[m - lado + 1:],
+            "fin_b": texto_b[n - lado + 1:],
+            "esquina_final": _esquina(matriz_lev, range(m - lado + 1, m + 1),
+                                      range(n - lado + 1, n + 1)),
+            "operaciones": operaciones_levenshtein(texto_a, texto_b, matriz_lev),
+        },
+        "needleman_wunsch": {
+            "puntaje": puntaje,
+            "similitud": normalized_needleman_wunsch(texto_a, texto_b),
+            "esquina_inicial": _esquina(matriz_nw, inicio, inicio),
+            "esquina_final": _esquina(matriz_nw, range(m - lado + 1, m + 1),
+                                      range(n - lado + 1, n + 1)),
+            "operaciones": operaciones_needleman(texto_a, texto_b, matriz_nw),
+        },
+        "jaccard": {
+            "similitud": jaccard,
+            "tam_interseccion": len(interseccion),
+            "tam_union": len(union),
+            "interseccion": interseccion,
+        },
+        "coseno_tfidf": {
+            "n_documentos": len(corpus),
+            "dimensiones": len(tfidf["vocabulario"]),
+            "producto_punto": tfidf["producto_punto"],
+            "norma_a": tfidf["norma_a"],
+            "norma_b": tfidf["norma_b"],
+            "coseno": tfidf["coseno"],
+            "angulo_grados": tfidf["angulo_grados"],
+            "terminos_que_mas_aportan": terminos[:12],
+            "terminos_con_idf_cero": [t["termino"] for t in terminos if t["idf"] == 0.0],
+        },
+    }
+
+
+def traza_ia(texto_a: str, texto_b: str, dims: int = 6) -> dict:
+    """Todos los números intermedios de los dos enfoques de IA sobre el par."""
+    transformado_a = transformar_abstract(texto_a)
+    transformado_b = transformar_abstract(texto_b)
+
+    vocabulario = {}
+    for token in tokenize(transformado_a) + tokenize(transformado_b):
+        vocabulario[token] = True
+    palabras = load_gensim_vectors("glove-wiki-gigaword-100", list(vocabulario))
+
+    promedio_a = average_steps(transformado_a, palabras, STOPWORDS, dims)
+    promedio_b = average_steps(transformado_b, palabras, STOPWORDS, dims)
+    minilm = sentence_embeddings([transformado_a, transformado_b])
+
+    return {
+        "transformado_a": transformado_a,
+        "transformado_b": transformado_b,
+        "glove": {
+            "k_a": promedio_a["k"],
+            "k_b": promedio_b["k"],
+            "fuera_de_vocabulario_a": promedio_a["fuera_de_vocabulario"],
+            "fuera_de_vocabulario_b": promedio_b["fuera_de_vocabulario"],
+            "suma_a": promedio_a["suma"],
+            "suma_b": promedio_b["suma"],
+            "promedio_a": promedio_a["promedio"],
+            "promedio_b": promedio_b["promedio"],
+            "comparacion": compare_vectors_steps(promedio_a["vector"], promedio_b["vector"], dims),
+        },
+        "minilm": {
+            "comparacion": compare_vectors_steps(minilm[0], minilm[1], dims),
+        },
+    }
+
+
 def format_table(filas: list[dict]) -> str:
     """Tabla en markdown con las filas de `classic_scores` + `ai_scores`."""
     lineas = [
@@ -142,42 +297,35 @@ def format_table(filas: list[dict]) -> str:
     return "\n".join(lineas)
 
 
-def main(par: tuple[str, str] = ("P1", "P3")) -> None:
-    ids, textos = load_abstracts()
-    corpus = [r["texto"] for r in json.loads(ABSTRACTS.read_text(encoding="utf-8"))]
-    glove_con = glove_embeddings(textos)["vectors"]
+def main(par: tuple[str, str] = ("P6", "P9")) -> None:
+    ids, textos = load_abstracts(cuantos=20)
+    i, j = ids.index(par[0]), ids.index(par[1])
+    glove_con = glove_embeddings([textos[i], textos[j]])["vectors"]
     vectores = vectores_del_corpus(textos)
     glove_sin = vectores["glove"]
     minilm = vectores["minilm"]
 
-    # 1. matrices de los 4 abstracts, con y sin stopwords
     SALIDA.mkdir(parents=True, exist_ok=True)
-    matrices = {
-        "ids": ids,
-        "glove_con_stopwords": pairwise_matrix(glove_con, lambda a, b: cosine_steps(a, b)["cosine"]),
-        "glove_sin_stopwords": pairwise_matrix(glove_sin, lambda a, b: cosine_steps(a, b)["cosine"]),
-        "minilm": pairwise_matrix(minilm, lambda a, b: cosine_steps(a, b)["cosine"]),
-    }
-    (SALIDA / "matrices_p1_p4.json").write_text(
-        json.dumps(matrices, indent=2, ensure_ascii=False), encoding="utf-8"
+    filas = classic_scores(textos[i], textos[j], textos) + ai_scores(
+        (glove_con[0], glove_con[1]), (glove_sin[i], glove_sin[j]), (minilm[i], minilm[j])
     )
-    for clave, titulo in [
-        ("glove_con_stopwords", "GloVe-100 promedio, CON stopwords"),
-        ("glove_sin_stopwords", "GloVe-100 promedio, SIN stopwords"),
-        ("minilm", "all-MiniLM-L6-v2"),
-    ]:
-        print(f"\n{titulo}\n{format_matrix(ids, matrices[clave])}")
-
-    # 2. caso de estudio: un par
-    i, j = ids.index(par[0]), ids.index(par[1])
-    filas = classic_scores(textos[i], textos[j], corpus) + ai_scores(
-        (glove_con[i], glove_con[j]), (glove_sin[i], glove_sin[j]), (minilm[i], minilm[j])
-    )
-    (SALIDA / f"caso_estudio_{par[0].lower()}_{par[1].lower()}.json").write_text(
+    nombre = f"{par[0].lower()}_{par[1].lower()}"
+    (SALIDA / f"caso_estudio_{nombre}.json").write_text(
         json.dumps({"par": list(par), "filas": filas}, indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
     print(f"\nCaso de estudio {par[0]} vs {par[1]}\n{format_table(filas)}")
+
+    traza = {
+        "par": list(par),
+        "texto_a": textos[i],
+        "texto_b": textos[j],
+        "clasicos": traza_clasicos(textos[i], textos[j], textos),
+        "ia": traza_ia(textos[i], textos[j]),
+    }
+    (SALIDA / f"traza_req1_{nombre}.json").write_text(
+        json.dumps(traza, indent=1, ensure_ascii=False), encoding="utf-8"
+    )
 
 
 if __name__ == "__main__":

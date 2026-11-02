@@ -1,0 +1,682 @@
+{
+ "par": [
+  "P6",
+  "P9"
+ ],
+ "texto_a": "With the rapid development of artificial intelligence (AI) technologies and a continuously growing interest in their application in educational contexts, there has been significant growth in the scientific literature in relation to the application of AI in education (AIEd). This study aims to present multiple perspectives on the development of AIEd in terms of relevant grants, conferences, journals, software tools, article trends, top issues, institutions, and researchers to provide an overview of AIEd for its further development and implementation. With this study, we contribute to the research field by enabling educators and scholars to understand the status and development of relevant grants and publications concerning AIEd. Also, findings concerning active actors can help educators and scholars identify the active researchers and institutions in the research on AIEd. Furthermore, researchers and educators are able to identify relevant journals and be more aware of major issues in AIEd studies. In addition, we also highlight the significance and necessity of the launch of the new Elsevier journal AIEd-related journal named Computers & Education: Artificial Intelligence.",
+ "texto_b": "From unique educational perspectives, this article reports a comprehensive review of selected empirical studies on artificial intelligence in education (AIEd) published in 1993–2020, as collected in the Web of Sciences database and selected AIEd-specialized journals. A total of 40 empirical studies met all selection criteria, and were fully reviewed using multiple methods, including selected bibliometrics, content analysis and categorical meta-trends analysis. This article reports the current state of AIEd research, highlights selected AIEd technologies and applications, reviews their proven and potential benefits for education, bridges the gaps between AI technological innovations and their educational applications, and generates practical examples and inspirations for both technological experts that create AIEd technologies and educators who spearhead AI innovations in education. It also provides rich discussions on practical implications and future research directions from multiple perspectives. The advancement of AIEd calls for critical initiatives to address AI ethics and privacy concerns, and requires interdisciplinary and transdisciplinary collaborations in large-scaled, longitudinal research and development efforts.",
+ "clasicos": {
+  "m": 1191,
+  "n": 1243,
+  "celdas": 1482848,
+  "levenshtein": {
+   "distancia": 938,
+   "similitud": 0.2453740949316171,
+   "inicio_a": "With th",
+   "inicio_b": "From un",
+   "esquina_inicial": [
+    [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    [
+     1,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    [
+     2,
+     2,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    [
+     3,
+     3,
+     3,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    [
+     4,
+     4,
+     4,
+     4,
+     4,
+     5,
+     6,
+     7
+    ],
+    [
+     5,
+     5,
+     5,
+     5,
+     5,
+     4,
+     5,
+     6
+    ],
+    [
+     6,
+     6,
+     6,
+     6,
+     6,
+     5,
+     5,
+     6
+    ],
+    [
+     7,
+     7,
+     7,
+     7,
+     7,
+     6,
+     6,
+     6
+    ]
+   ],
+   "fin_a": "igence.",
+   "fin_b": "fforts.",
+   "esquina_final": [
+    [
+     932,
+     932,
+     932,
+     933,
+     934,
+     934,
+     935,
+     936
+    ],
+    [
+     933,
+     933,
+     933,
+     933,
+     934,
+     935,
+     935,
+     936
+    ],
+    [
+     933,
+     934,
+     934,
+     934,
+     934,
+     935,
+     936,
+     936
+    ],
+    [
+     933,
+     934,
+     935,
+     935,
+     935,
+     935,
+     936,
+     937
+    ],
+    [
+     934,
+     934,
+     935,
+     936,
+     936,
+     936,
+     936,
+     937
+    ],
+    [
+     934,
+     935,
+     935,
+     936,
+     937,
+     937,
+     937,
+     937
+    ],
+    [
+     933,
+     934,
+     935,
+     936,
+     937,
+     938,
+     938,
+     938
+    ],
+    [
+     934,
+     934,
+     935,
+     936,
+     937,
+     938,
+     939,
+     938
+    ]
+   ],
+   "operaciones": {
+    "coincidencias": 385,
+    "sustituciones": 726,
+    "eliminaciones": 80,
+    "inserciones": 132
+   }
+  },
+  "needleman_wunsch": {
+   "puntaje": -461,
+   "similitud": 0.3145615446500402,
+   "esquina_inicial": [
+    [
+     0,
+     -1,
+     -2,
+     -3,
+     -4,
+     -5,
+     -6,
+     -7
+    ],
+    [
+     -1,
+     -1,
+     -2,
+     -3,
+     -4,
+     -5,
+     -6,
+     -7
+    ],
+    [
+     -2,
+     -2,
+     -2,
+     -3,
+     -4,
+     -5,
+     -6,
+     -7
+    ],
+    [
+     -3,
+     -3,
+     -3,
+     -3,
+     -4,
+     -5,
+     -6,
+     -7
+    ],
+    [
+     -4,
+     -4,
+     -4,
+     -4,
+     -4,
+     -5,
+     -6,
+     -7
+    ],
+    [
+     -5,
+     -5,
+     -5,
+     -5,
+     -5,
+     -3,
+     -4,
+     -5
+    ],
+    [
+     -6,
+     -6,
+     -6,
+     -6,
+     -6,
+     -4,
+     -4,
+     -5
+    ],
+    [
+     -7,
+     -7,
+     -7,
+     -7,
+     -7,
+     -5,
+     -5,
+     -5
+    ]
+   ],
+   "esquina_final": [
+    [
+     -459,
+     -459,
+     -459,
+     -460,
+     -461,
+     -462,
+     -462,
+     -462
+    ],
+    [
+     -460,
+     -460,
+     -460,
+     -460,
+     -461,
+     -462,
+     -463,
+     -463
+    ],
+    [
+     -461,
+     -461,
+     -461,
+     -461,
+     -461,
+     -462,
+     -463,
+     -464
+    ],
+    [
+     -460,
+     -461,
+     -462,
+     -462,
+     -462,
+     -462,
+     -463,
+     -464
+    ],
+    [
+     -458,
+     -459,
+     -460,
+     -461,
+     -462,
+     -463,
+     -463,
+     -464
+    ],
+    [
+     -458,
+     -459,
+     -460,
+     -461,
+     -462,
+     -463,
+     -464,
+     -464
+    ],
+    [
+     -456,
+     -457,
+     -458,
+     -459,
+     -460,
+     -461,
+     -462,
+     -463
+    ],
+    [
+     -457,
+     -457,
+     -458,
+     -459,
+     -460,
+     -461,
+     -462,
+     -461
+    ]
+   ],
+   "operaciones": {
+    "coincidencias": 490,
+    "discrepancias": 503,
+    "huecos": 448
+   }
+  },
+  "jaccard": {
+   "similitud": 0.15517241379310345,
+   "tam_interseccion": 27,
+   "tam_union": 174,
+   "interseccion": [
+    "educational",
+    "perspectives",
+    "this",
+    "article",
+    "a",
+    "of",
+    "studies",
+    "on",
+    "artificial",
+    "intelligence",
+    "in",
+    "education",
+    "aied",
+    "the",
+    "and",
+    "journals",
+    "multiple",
+    "trends",
+    "research",
+    "technologies",
+    "their",
+    "for",
+    "ai",
+    "educators",
+    "also",
+    "to",
+    "development"
+   ]
+  },
+  "coseno_tfidf": {
+   "n_documentos": 20,
+   "dimensiones": 174,
+   "producto_punto": 100.52711094984107,
+   "norma_a": 24.654355517180697,
+   "norma_b": 25.483392332140546,
+   "coseno": 0.16000454044494675,
+   "angulo_grados": 80.79284023499538,
+   "terminos_que_mas_aportan": [
+    {
+     "termino": "aied",
+     "tf_a": 7,
+     "tf_b": 6,
+     "idf": 1.0498221244986776,
+     "peso_a": 7.348754871490743,
+     "peso_b": 6.298932746992065,
+     "producto": 46.28931270965051
+    },
+    {
+     "termino": "multiple",
+     "tf_a": 1,
+     "tf_b": 2,
+     "idf": 2.3025850929940455,
+     "peso_a": 2.3025850929940455,
+     "peso_b": 4.605170185988091,
+     "producto": 10.603796220956793
+    },
+    {
+     "termino": "development",
+     "tf_a": 4,
+     "tf_b": 1,
+     "idf": 1.3862943611198906,
+     "peso_a": 5.545177444479562,
+     "peso_b": 1.3862943611198906,
+     "producto": 7.687248222691222
+    },
+    {
+     "termino": "journals",
+     "tf_a": 2,
+     "tf_b": 1,
+     "idf": 1.897119984885881,
+     "peso_a": 3.794239969771762,
+     "peso_b": 1.897119984885881,
+     "producto": 7.198128474106811
+    },
+    {
+     "termino": "educators",
+     "tf_a": 3,
+     "tf_b": 1,
+     "idf": 1.3862943611198906,
+     "peso_a": 4.1588830833596715,
+     "peso_b": 1.3862943611198906,
+     "producto": 5.765436167018416
+    },
+    {
+     "termino": "their",
+     "tf_a": 1,
+     "tf_b": 2,
+     "idf": 1.6094379124341003,
+     "peso_a": 1.6094379124341003,
+     "peso_b": 3.2188758248682006,
+     "producto": 5.180580787960469
+    },
+    {
+     "termino": "perspectives",
+     "tf_a": 1,
+     "tf_b": 2,
+     "idf": 1.6094379124341003,
+     "peso_a": 1.6094379124341003,
+     "peso_b": 3.2188758248682006,
+     "producto": 5.180580787960469
+    },
+    {
+     "termino": "article",
+     "tf_a": 1,
+     "tf_b": 2,
+     "idf": 1.6094379124341003,
+     "peso_a": 1.6094379124341003,
+     "peso_b": 3.2188758248682006,
+     "producto": 5.180580787960469
+    },
+    {
+     "termino": "technologies",
+     "tf_a": 1,
+     "tf_b": 2,
+     "idf": 1.203972804325936,
+     "peso_a": 1.203972804325936,
+     "peso_b": 2.407945608651872,
+     "producto": 2.8991010271129167
+    },
+    {
+     "termino": "trends",
+     "tf_a": 1,
+     "tf_b": 1,
+     "idf": 1.3862943611198906,
+     "peso_a": 1.3862943611198906,
+     "peso_b": 1.3862943611198906,
+     "producto": 1.9218120556728056
+    },
+    {
+     "termino": "also",
+     "tf_a": 2,
+     "tf_b": 1,
+     "idf": 0.7985076962177716,
+     "peso_a": 1.5970153924355432,
+     "peso_b": 0.7985076962177716,
+     "producto": 1.275229081838026
+    },
+    {
+     "termino": "studies",
+     "tf_a": 1,
+     "tf_b": 2,
+     "idf": 0.43078291609245434,
+     "peso_a": 0.43078291609245434,
+     "peso_b": 0.8615658321849087,
+     "producto": 0.3711478415942371
+    }
+   ],
+   "terminos_con_idf_cero": [
+    "the",
+    "of",
+    "artificial",
+    "intelligence",
+    "and",
+    "in",
+    "to"
+   ]
+  }
+ },
+ "ia": {
+  "transformado_a": "rapid development artificial intelligence ai technologies continuously growing interest application educational contexts significant growth scientific literature relation application ai education aied study aims present multiple perspectives development aied terms relevant grants conferences journals software tools article trends top issues institutions researchers provide overview aied development implementation study contribute research field enabling educators scholars understand status development relevant grants publications concerning aied findings concerning active actors help educators scholars identify active researchers institutions research aied furthermore researchers educators able identify relevant journals aware major issues aied studies addition highlight significance necessity launch new elsevier journal aied related journal named computers education artificial intelligence",
+  "transformado_b": "unique educational perspectives article reports comprehensive review selected empirical studies artificial intelligence education aied published 1993 2020 collected web sciences database selected aied specialized journals total 40 empirical studies met selection criteria fully reviewed using multiple methods including selected bibliometrics content analysis categorical meta trends analysis article reports current state aied research highlights selected aied technologies applications reviews proven potential benefits education bridges gaps ai technological innovations educational applications generates practical examples inspirations technological experts create aied technologies educators spearhead ai innovations education provides rich discussions practical implications future research directions multiple perspectives advancement aied calls critical initiatives address ai ethics privacy concerns requires interdisciplinary transdisciplinary collaborations large scaled longitudinal research development efforts",
+  "glove": {
+   "k_a": 95,
+   "k_b": 106,
+   "fuera_de_vocabulario_a": [
+    "aied",
+    "aied",
+    "aied",
+    "aied",
+    "aied",
+    "aied",
+    "aied"
+   ],
+   "fuera_de_vocabulario_b": [
+    "aied",
+    "aied",
+    "bibliometrics",
+    "aied",
+    "aied",
+    "aied",
+    "aied"
+   ],
+   "suma_a": [
+    -9.966209588106722,
+    26.59523148171138,
+    -5.866309737786651,
+    31.95964556466788,
+    24.404226446524262,
+    -25.744322989601642
+   ],
+   "suma_b": [
+    -18.743327490519732,
+    31.624225604347885,
+    -2.5760209938744083,
+    19.554741197265685,
+    35.4561237586895,
+    -31.29961538905627
+   ],
+   "promedio_a": [
+    -0.10490746934849181,
+    0.2799498050706461,
+    -0.06175062881880685,
+    0.3364173217333461,
+    0.2568865941739396,
+    -0.2709928735747541
+   ],
+   "promedio_b": [
+    -0.17682384425018616,
+    0.298341750984414,
+    -0.024302084847871778,
+    0.1844786905402423,
+    0.33449173357254247,
+    -0.295279390462795
+   ],
+   "comparacion": {
+    "dim": 100,
+    "first": [
+     [
+      1,
+      -0.10490746934849181,
+      -0.17682384425018616,
+      0.018550142020758893
+     ],
+     [
+      2,
+      0.2799498050706461,
+      0.298341750984414,
+      0.08352071503252194
+     ],
+     [
+      3,
+      -0.06175062881880685,
+      -0.024302084847871778,
+      0.0015006690209640803
+     ],
+     [
+      4,
+      0.3364173217333461,
+      0.1844786905402423,
+      0.06206182698842309
+     ],
+     [
+      5,
+      0.2568865941739396,
+      0.33449173357254247,
+      0.08592644221678725
+     ],
+     [
+      6,
+      -0.2709928735747541,
+      -0.295279390462795,
+      0.08001861052891465
+     ]
+    ],
+    "dot": 10.50389708141842,
+    "norm_a": 3.4173258277958243,
+    "norm_b": 3.1389349767317074,
+    "cosine": 0.9792233244509619,
+    "angle_degrees": 11.699854821159322,
+    "euclidean": 0.7233494581689068,
+    "sum_squares": 0.523234438633251
+   }
+  },
+  "minilm": {
+   "comparacion": {
+    "dim": 384,
+    "first": [
+     [
+      1,
+      -0.020679105073213577,
+      -0.06538237631320953,
+      0.0013520490297172505
+     ],
+     [
+      2,
+      -0.01788874715566635,
+      -0.023477703332901,
+      0.0004199866987180112
+     ],
+     [
+      3,
+      -0.011982200667262077,
+      -0.005097953137010336,
+      6.108469747995605e-05
+     ],
+     [
+      4,
+      0.04880208522081375,
+      0.0286087766289711,
+      0.0013961679551102724
+     ],
+     [
+      5,
+      0.01867341808974743,
+      0.029392749071121216,
+      0.0005488630922120818
+     ],
+     [
+      6,
+      0.03995700180530548,
+      0.03361077234148979,
+      0.0013429856911266191
+     ]
+    ],
+    "dot": 0.84996707231339,
+    "norm_a": 1.0000000181972502,
+    "norm_b": 1.0000000285269504,
+    "cosine": 0.8499670325993596,
+    "angle_degrees": 31.791916151660146,
+    "euclidean": 0.5477827569590203,
+    "sum_squares": 0.30006594882162513
+   }
+  }
+ }
+}

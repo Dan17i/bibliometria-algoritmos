@@ -1,0 +1,3568 @@
+{
+ "patron": "learning",
+ "texto": "Trend Two posits the role of affective states in learning trajectories and suggests the related machine learning approaches.",
+ "n": 124,
+ "m": 8,
+ "kmp": {
+  "lps": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "pasos_lps": [
+   {
+    "i": 1,
+    "comparacion": "patron[1]='e' != patron[0]='l'",
+    "accion": "sin borde que preservar: lps[i]=0",
+    "lps": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "i": 2,
+    "comparacion": "patron[2]='a' != patron[0]='l'",
+    "accion": "sin borde que preservar: lps[i]=0",
+    "lps": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "i": 3,
+    "comparacion": "patron[3]='r' != patron[0]='l'",
+    "accion": "sin borde que preservar: lps[i]=0",
+    "lps": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "i": 4,
+    "comparacion": "patron[4]='n' != patron[0]='l'",
+    "accion": "sin borde que preservar: lps[i]=0",
+    "lps": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "i": 5,
+    "comparacion": "patron[5]='i' != patron[0]='l'",
+    "accion": "sin borde que preservar: lps[i]=0",
+    "lps": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "i": 6,
+    "comparacion": "patron[6]='n' != patron[0]='l'",
+    "accion": "sin borde que preservar: lps[i]=0",
+    "lps": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "i": 7,
+    "comparacion": "patron[7]='g' != patron[0]='l'",
+    "accion": "sin borde que preservar: lps[i]=0",
+    "lps": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "pasos": [
+   {
+    "i": 0,
+    "j": 0,
+    "alineacion": 0,
+    "caracter_texto": "T",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 1,
+    "j": 0,
+    "alineacion": 1,
+    "caracter_texto": "r",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 2,
+    "j": 0,
+    "alineacion": 2,
+    "caracter_texto": "e",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 3,
+    "j": 0,
+    "alineacion": 3,
+    "caracter_texto": "n",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 4,
+    "j": 0,
+    "alineacion": 4,
+    "caracter_texto": "d",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 5,
+    "j": 0,
+    "alineacion": 5,
+    "caracter_texto": " ",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 6,
+    "j": 0,
+    "alineacion": 6,
+    "caracter_texto": "T",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 7,
+    "j": 0,
+    "alineacion": 7,
+    "caracter_texto": "w",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 8,
+    "j": 0,
+    "alineacion": 8,
+    "caracter_texto": "o",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 9,
+    "j": 0,
+    "alineacion": 9,
+    "caracter_texto": " ",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 10,
+    "j": 0,
+    "alineacion": 10,
+    "caracter_texto": "p",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 11,
+    "j": 0,
+    "alineacion": 11,
+    "caracter_texto": "o",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 12,
+    "j": 0,
+    "alineacion": 12,
+    "caracter_texto": "s",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 13,
+    "j": 0,
+    "alineacion": 13,
+    "caracter_texto": "i",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 14,
+    "j": 0,
+    "alineacion": 14,
+    "caracter_texto": "t",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 15,
+    "j": 0,
+    "alineacion": 15,
+    "caracter_texto": "s",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 16,
+    "j": 0,
+    "alineacion": 16,
+    "caracter_texto": " ",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 17,
+    "j": 0,
+    "alineacion": 17,
+    "caracter_texto": "t",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 18,
+    "j": 0,
+    "alineacion": 18,
+    "caracter_texto": "h",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 19,
+    "j": 0,
+    "alineacion": 19,
+    "caracter_texto": "e",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 20,
+    "j": 0,
+    "alineacion": 20,
+    "caracter_texto": " ",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 21,
+    "j": 0,
+    "alineacion": 21,
+    "caracter_texto": "r",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 22,
+    "j": 0,
+    "alineacion": 22,
+    "caracter_texto": "o",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 23,
+    "j": 0,
+    "alineacion": 23,
+    "caracter_texto": "l",
+    "caracter_patron": "l",
+    "coincide": true,
+    "accion": "avanzan i y j"
+   },
+   {
+    "i": 24,
+    "j": 1,
+    "alineacion": 23,
+    "caracter_texto": "e",
+    "caracter_patron": "e",
+    "coincide": true,
+    "accion": "avanzan i y j"
+   },
+   {
+    "i": 25,
+    "j": 2,
+    "alineacion": 23,
+    "caracter_texto": " ",
+    "caracter_patron": "a",
+    "coincide": false,
+    "accion": "falla: j baja de 2 a lps[1] = 0; i no se mueve"
+   },
+   {
+    "i": 25,
+    "j": 0,
+    "alineacion": 25,
+    "caracter_texto": " ",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 26,
+    "j": 0,
+    "alineacion": 26,
+    "caracter_texto": "o",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 27,
+    "j": 0,
+    "alineacion": 27,
+    "caracter_texto": "f",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 28,
+    "j": 0,
+    "alineacion": 28,
+    "caracter_texto": " ",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 29,
+    "j": 0,
+    "alineacion": 29,
+    "caracter_texto": "a",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 30,
+    "j": 0,
+    "alineacion": 30,
+    "caracter_texto": "f",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 31,
+    "j": 0,
+    "alineacion": 31,
+    "caracter_texto": "f",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 32,
+    "j": 0,
+    "alineacion": 32,
+    "caracter_texto": "e",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 33,
+    "j": 0,
+    "alineacion": 33,
+    "caracter_texto": "c",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 34,
+    "j": 0,
+    "alineacion": 34,
+    "caracter_texto": "t",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 35,
+    "j": 0,
+    "alineacion": 35,
+    "caracter_texto": "i",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 36,
+    "j": 0,
+    "alineacion": 36,
+    "caracter_texto": "v",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 37,
+    "j": 0,
+    "alineacion": 37,
+    "caracter_texto": "e",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 38,
+    "j": 0,
+    "alineacion": 38,
+    "caracter_texto": " ",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 39,
+    "j": 0,
+    "alineacion": 39,
+    "caracter_texto": "s",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 40,
+    "j": 0,
+    "alineacion": 40,
+    "caracter_texto": "t",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 41,
+    "j": 0,
+    "alineacion": 41,
+    "caracter_texto": "a",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 42,
+    "j": 0,
+    "alineacion": 42,
+    "caracter_texto": "t",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 43,
+    "j": 0,
+    "alineacion": 43,
+    "caracter_texto": "e",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 44,
+    "j": 0,
+    "alineacion": 44,
+    "caracter_texto": "s",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 45,
+    "j": 0,
+    "alineacion": 45,
+    "caracter_texto": " ",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 46,
+    "j": 0,
+    "alineacion": 46,
+    "caracter_texto": "i",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 47,
+    "j": 0,
+    "alineacion": 47,
+    "caracter_texto": "n",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 48,
+    "j": 0,
+    "alineacion": 48,
+    "caracter_texto": " ",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 49,
+    "j": 0,
+    "alineacion": 49,
+    "caracter_texto": "l",
+    "caracter_patron": "l",
+    "coincide": true,
+    "accion": "avanzan i y j"
+   },
+   {
+    "i": 50,
+    "j": 1,
+    "alineacion": 49,
+    "caracter_texto": "e",
+    "caracter_patron": "e",
+    "coincide": true,
+    "accion": "avanzan i y j"
+   },
+   {
+    "i": 51,
+    "j": 2,
+    "alineacion": 49,
+    "caracter_texto": "a",
+    "caracter_patron": "a",
+    "coincide": true,
+    "accion": "avanzan i y j"
+   },
+   {
+    "i": 52,
+    "j": 3,
+    "alineacion": 49,
+    "caracter_texto": "r",
+    "caracter_patron": "r",
+    "coincide": true,
+    "accion": "avanzan i y j"
+   },
+   {
+    "i": 53,
+    "j": 4,
+    "alineacion": 49,
+    "caracter_texto": "n",
+    "caracter_patron": "n",
+    "coincide": true,
+    "accion": "avanzan i y j"
+   },
+   {
+    "i": 54,
+    "j": 5,
+    "alineacion": 49,
+    "caracter_texto": "i",
+    "caracter_patron": "i",
+    "coincide": true,
+    "accion": "avanzan i y j"
+   },
+   {
+    "i": 55,
+    "j": 6,
+    "alineacion": 49,
+    "caracter_texto": "n",
+    "caracter_patron": "n",
+    "coincide": true,
+    "accion": "avanzan i y j"
+   },
+   {
+    "i": 56,
+    "j": 7,
+    "alineacion": 49,
+    "caracter_texto": "g",
+    "caracter_patron": "g",
+    "coincide": true,
+    "accion": "OCURRENCIA en 49; j baja a 0"
+   },
+   {
+    "i": 57,
+    "j": 0,
+    "alineacion": 57,
+    "caracter_texto": " ",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 58,
+    "j": 0,
+    "alineacion": 58,
+    "caracter_texto": "t",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 59,
+    "j": 0,
+    "alineacion": 59,
+    "caracter_texto": "r",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 60,
+    "j": 0,
+    "alineacion": 60,
+    "caracter_texto": "a",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 61,
+    "j": 0,
+    "alineacion": 61,
+    "caracter_texto": "j",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 62,
+    "j": 0,
+    "alineacion": 62,
+    "caracter_texto": "e",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 63,
+    "j": 0,
+    "alineacion": 63,
+    "caracter_texto": "c",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 64,
+    "j": 0,
+    "alineacion": 64,
+    "caracter_texto": "t",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 65,
+    "j": 0,
+    "alineacion": 65,
+    "caracter_texto": "o",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 66,
+    "j": 0,
+    "alineacion": 66,
+    "caracter_texto": "r",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 67,
+    "j": 0,
+    "alineacion": 67,
+    "caracter_texto": "i",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 68,
+    "j": 0,
+    "alineacion": 68,
+    "caracter_texto": "e",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 69,
+    "j": 0,
+    "alineacion": 69,
+    "caracter_texto": "s",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 70,
+    "j": 0,
+    "alineacion": 70,
+    "caracter_texto": " ",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 71,
+    "j": 0,
+    "alineacion": 71,
+    "caracter_texto": "a",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 72,
+    "j": 0,
+    "alineacion": 72,
+    "caracter_texto": "n",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 73,
+    "j": 0,
+    "alineacion": 73,
+    "caracter_texto": "d",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 74,
+    "j": 0,
+    "alineacion": 74,
+    "caracter_texto": " ",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 75,
+    "j": 0,
+    "alineacion": 75,
+    "caracter_texto": "s",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 76,
+    "j": 0,
+    "alineacion": 76,
+    "caracter_texto": "u",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 77,
+    "j": 0,
+    "alineacion": 77,
+    "caracter_texto": "g",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 78,
+    "j": 0,
+    "alineacion": 78,
+    "caracter_texto": "g",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 79,
+    "j": 0,
+    "alineacion": 79,
+    "caracter_texto": "e",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 80,
+    "j": 0,
+    "alineacion": 80,
+    "caracter_texto": "s",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 81,
+    "j": 0,
+    "alineacion": 81,
+    "caracter_texto": "t",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 82,
+    "j": 0,
+    "alineacion": 82,
+    "caracter_texto": "s",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 83,
+    "j": 0,
+    "alineacion": 83,
+    "caracter_texto": " ",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 84,
+    "j": 0,
+    "alineacion": 84,
+    "caracter_texto": "t",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 85,
+    "j": 0,
+    "alineacion": 85,
+    "caracter_texto": "h",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 86,
+    "j": 0,
+    "alineacion": 86,
+    "caracter_texto": "e",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 87,
+    "j": 0,
+    "alineacion": 87,
+    "caracter_texto": " ",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 88,
+    "j": 0,
+    "alineacion": 88,
+    "caracter_texto": "r",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 89,
+    "j": 0,
+    "alineacion": 89,
+    "caracter_texto": "e",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 90,
+    "j": 0,
+    "alineacion": 90,
+    "caracter_texto": "l",
+    "caracter_patron": "l",
+    "coincide": true,
+    "accion": "avanzan i y j"
+   },
+   {
+    "i": 91,
+    "j": 1,
+    "alineacion": 90,
+    "caracter_texto": "a",
+    "caracter_patron": "e",
+    "coincide": false,
+    "accion": "falla: j baja de 1 a lps[0] = 0; i no se mueve"
+   },
+   {
+    "i": 91,
+    "j": 0,
+    "alineacion": 91,
+    "caracter_texto": "a",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 92,
+    "j": 0,
+    "alineacion": 92,
+    "caracter_texto": "t",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 93,
+    "j": 0,
+    "alineacion": 93,
+    "caracter_texto": "e",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 94,
+    "j": 0,
+    "alineacion": 94,
+    "caracter_texto": "d",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 95,
+    "j": 0,
+    "alineacion": 95,
+    "caracter_texto": " ",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 96,
+    "j": 0,
+    "alineacion": 96,
+    "caracter_texto": "m",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 97,
+    "j": 0,
+    "alineacion": 97,
+    "caracter_texto": "a",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 98,
+    "j": 0,
+    "alineacion": 98,
+    "caracter_texto": "c",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 99,
+    "j": 0,
+    "alineacion": 99,
+    "caracter_texto": "h",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 100,
+    "j": 0,
+    "alineacion": 100,
+    "caracter_texto": "i",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 101,
+    "j": 0,
+    "alineacion": 101,
+    "caracter_texto": "n",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 102,
+    "j": 0,
+    "alineacion": 102,
+    "caracter_texto": "e",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 103,
+    "j": 0,
+    "alineacion": 103,
+    "caracter_texto": " ",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 104,
+    "j": 0,
+    "alineacion": 104,
+    "caracter_texto": "l",
+    "caracter_patron": "l",
+    "coincide": true,
+    "accion": "avanzan i y j"
+   },
+   {
+    "i": 105,
+    "j": 1,
+    "alineacion": 104,
+    "caracter_texto": "e",
+    "caracter_patron": "e",
+    "coincide": true,
+    "accion": "avanzan i y j"
+   },
+   {
+    "i": 106,
+    "j": 2,
+    "alineacion": 104,
+    "caracter_texto": "a",
+    "caracter_patron": "a",
+    "coincide": true,
+    "accion": "avanzan i y j"
+   },
+   {
+    "i": 107,
+    "j": 3,
+    "alineacion": 104,
+    "caracter_texto": "r",
+    "caracter_patron": "r",
+    "coincide": true,
+    "accion": "avanzan i y j"
+   },
+   {
+    "i": 108,
+    "j": 4,
+    "alineacion": 104,
+    "caracter_texto": "n",
+    "caracter_patron": "n",
+    "coincide": true,
+    "accion": "avanzan i y j"
+   },
+   {
+    "i": 109,
+    "j": 5,
+    "alineacion": 104,
+    "caracter_texto": "i",
+    "caracter_patron": "i",
+    "coincide": true,
+    "accion": "avanzan i y j"
+   },
+   {
+    "i": 110,
+    "j": 6,
+    "alineacion": 104,
+    "caracter_texto": "n",
+    "caracter_patron": "n",
+    "coincide": true,
+    "accion": "avanzan i y j"
+   },
+   {
+    "i": 111,
+    "j": 7,
+    "alineacion": 104,
+    "caracter_texto": "g",
+    "caracter_patron": "g",
+    "coincide": true,
+    "accion": "OCURRENCIA en 104; j baja a 0"
+   },
+   {
+    "i": 112,
+    "j": 0,
+    "alineacion": 112,
+    "caracter_texto": " ",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 113,
+    "j": 0,
+    "alineacion": 113,
+    "caracter_texto": "a",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 114,
+    "j": 0,
+    "alineacion": 114,
+    "caracter_texto": "p",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 115,
+    "j": 0,
+    "alineacion": 115,
+    "caracter_texto": "p",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 116,
+    "j": 0,
+    "alineacion": 116,
+    "caracter_texto": "r",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 117,
+    "j": 0,
+    "alineacion": 117,
+    "caracter_texto": "o",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 118,
+    "j": 0,
+    "alineacion": 118,
+    "caracter_texto": "a",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 119,
+    "j": 0,
+    "alineacion": 119,
+    "caracter_texto": "c",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 120,
+    "j": 0,
+    "alineacion": 120,
+    "caracter_texto": "h",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 121,
+    "j": 0,
+    "alineacion": 121,
+    "caracter_texto": "e",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 122,
+    "j": 0,
+    "alineacion": 122,
+    "caracter_texto": "s",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   },
+   {
+    "i": 123,
+    "j": 0,
+    "alineacion": 123,
+    "caracter_texto": ".",
+    "caracter_patron": "l",
+    "coincide": false,
+    "accion": "falla con j = 0: avanza i"
+   }
+  ],
+  "ocurrencias": [
+   49,
+   104
+  ],
+  "comparaciones": 126
+ },
+ "boyer_moore": {
+  "caracter_malo": {
+   "l": 0,
+   "e": 1,
+   "a": 2,
+   "r": 3,
+   "n": 6,
+   "i": 5,
+   "g": 7
+  },
+  "sufijo_bueno": [
+   8,
+   8,
+   8,
+   8,
+   8,
+   8,
+   8,
+   8,
+   1
+  ],
+  "pasos": [
+   {
+    "posicion": 0,
+    "ventana": "Trend Tw",
+    "comparaciones": 1,
+    "resultado": "falla en j=7, caracter malo 'w' (no esta en el patron)",
+    "salto_malo": 8,
+    "salto_bueno": 1,
+    "salto": 8
+   },
+   {
+    "posicion": 8,
+    "ventana": "o posits",
+    "comparaciones": 1,
+    "resultado": "falla en j=7, caracter malo 's' (no esta en el patron)",
+    "salto_malo": 8,
+    "salto_bueno": 1,
+    "salto": 8
+   },
+   {
+    "posicion": 16,
+    "ventana": " the rol",
+    "comparaciones": 1,
+    "resultado": "falla en j=7, caracter malo 'l'",
+    "salto_malo": 7,
+    "salto_bueno": 1,
+    "salto": 7
+   },
+   {
+    "posicion": 23,
+    "ventana": "le of af",
+    "comparaciones": 1,
+    "resultado": "falla en j=7, caracter malo 'f' (no esta en el patron)",
+    "salto_malo": 8,
+    "salto_bueno": 1,
+    "salto": 8
+   },
+   {
+    "posicion": 31,
+    "ventana": "fective ",
+    "comparaciones": 1,
+    "resultado": "falla en j=7, caracter malo ' ' (no esta en el patron)",
+    "salto_malo": 8,
+    "salto_bueno": 1,
+    "salto": 8
+   },
+   {
+    "posicion": 39,
+    "ventana": "states i",
+    "comparaciones": 1,
+    "resultado": "falla en j=7, caracter malo 'i'",
+    "salto_malo": 2,
+    "salto_bueno": 1,
+    "salto": 2
+   },
+   {
+    "posicion": 41,
+    "ventana": "ates in ",
+    "comparaciones": 1,
+    "resultado": "falla en j=7, caracter malo ' ' (no esta en el patron)",
+    "salto_malo": 8,
+    "salto_bueno": 1,
+    "salto": 8
+   },
+   {
+    "posicion": 49,
+    "ventana": "learning",
+    "comparaciones": 8,
+    "resultado": "OCURRENCIA",
+    "salto": 8
+   },
+   {
+    "posicion": 57,
+    "ventana": " traject",
+    "comparaciones": 1,
+    "resultado": "falla en j=7, caracter malo 't' (no esta en el patron)",
+    "salto_malo": 8,
+    "salto_bueno": 1,
+    "salto": 8
+   },
+   {
+    "posicion": 65,
+    "ventana": "ories an",
+    "comparaciones": 1,
+    "resultado": "falla en j=7, caracter malo 'n'",
+    "salto_malo": 1,
+    "salto_bueno": 1,
+    "salto": 1
+   },
+   {
+    "posicion": 66,
+    "ventana": "ries and",
+    "comparaciones": 1,
+    "resultado": "falla en j=7, caracter malo 'd' (no esta en el patron)",
+    "salto_malo": 8,
+    "salto_bueno": 1,
+    "salto": 8
+   },
+   {
+    "posicion": 74,
+    "ventana": " suggest",
+    "comparaciones": 1,
+    "resultado": "falla en j=7, caracter malo 't' (no esta en el patron)",
+    "salto_malo": 8,
+    "salto_bueno": 1,
+    "salto": 8
+   },
+   {
+    "posicion": 82,
+    "ventana": "s the re",
+    "comparaciones": 1,
+    "resultado": "falla en j=7, caracter malo 'e'",
+    "salto_malo": 6,
+    "salto_bueno": 1,
+    "salto": 6
+   },
+   {
+    "posicion": 88,
+    "ventana": "related ",
+    "comparaciones": 1,
+    "resultado": "falla en j=7, caracter malo ' ' (no esta en el patron)",
+    "salto_malo": 8,
+    "salto_bueno": 1,
+    "salto": 8
+   },
+   {
+    "posicion": 96,
+    "ventana": "machine ",
+    "comparaciones": 1,
+    "resultado": "falla en j=7, caracter malo ' ' (no esta en el patron)",
+    "salto_malo": 8,
+    "salto_bueno": 1,
+    "salto": 8
+   },
+   {
+    "posicion": 104,
+    "ventana": "learning",
+    "comparaciones": 8,
+    "resultado": "OCURRENCIA",
+    "salto": 8
+   },
+   {
+    "posicion": 112,
+    "ventana": " approac",
+    "comparaciones": 1,
+    "resultado": "falla en j=7, caracter malo 'c' (no esta en el patron)",
+    "salto_malo": 8,
+    "salto_bueno": 1,
+    "salto": 8
+   }
+  ],
+  "ocurrencias": [
+   49,
+   104
+  ],
+  "comparaciones": 31
+ },
+ "rabin_karp": {
+  "base": 256,
+  "primo": 1000003,
+  "factor": 794341,
+  "hash_patron": 40707,
+  "hash_primera_ventana": 660900,
+  "ventanas": [
+   {
+    "posicion": 0,
+    "ventana": "Trend Tw",
+    "hash_ventana": 660900,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 1,
+    "ventana": "rend Two",
+    "hash_ventana": 732386,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 2,
+    "ventana": "end Two ",
+    "hash_ventana": 512089,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 3,
+    "ventana": "nd Two p",
+    "hash_ventana": 675224,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 4,
+    "ventana": "d Two po",
+    "hash_ventana": 281483,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 5,
+    "ventana": " Two pos",
+    "hash_ventana": 990955,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 6,
+    "ventana": "Two posi",
+    "hash_ventana": 461875,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 7,
+    "ventana": "wo posit",
+    "hash_ventana": 782144,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 8,
+    "ventana": "o posits",
+    "hash_ventana": 496752,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 9,
+    "ventana": " posits ",
+    "hash_ventana": 242023,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 10,
+    "ventana": "posits t",
+    "hash_ventana": 735870,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 11,
+    "ventana": "osits th",
+    "hash_ventana": 105433,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 12,
+    "ventana": "sits the",
+    "hash_ventana": 64728,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 13,
+    "ventana": "its the ",
+    "hash_ventana": 241467,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 14,
+    "ventana": "ts the r",
+    "hash_ventana": 993459,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 15,
+    "ventana": "s the ro",
+    "hash_ventana": 645284,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 16,
+    "ventana": " the rol",
+    "hash_ventana": 863435,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 17,
+    "ventana": "the role",
+    "hash_ventana": 816850,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 18,
+    "ventana": "he role ",
+    "hash_ventana": 433436,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 19,
+    "ventana": "e role o",
+    "hash_ventana": 488057,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 20,
+    "ventana": " role of",
+    "hash_ventana": 523040,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 21,
+    "ventana": "role of ",
+    "hash_ventana": 675922,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 22,
+    "ventana": "ole of a",
+    "hash_ventana": 57412,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 23,
+    "ventana": "le of af",
+    "hash_ventana": 771392,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 24,
+    "ventana": "e of aff",
+    "hash_ventana": 601781,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 25,
+    "ventana": " of affe",
+    "hash_ventana": 636296,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 26,
+    "ventana": "of affec",
+    "hash_ventana": 669438,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 27,
+    "ventana": "f affect",
+    "hash_ventana": 449591,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 28,
+    "ventana": " affecti",
+    "hash_ventana": 325090,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 29,
+    "ventana": "affectiv",
+    "hash_ventana": 958,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 30,
+    "ventana": "ffective",
+    "hash_ventana": 228812,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 31,
+    "ventana": "fective ",
+    "hash_ventana": 805764,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 32,
+    "ventana": "ective s",
+    "hash_ventana": 505115,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 33,
+    "ventana": "ctive st",
+    "hash_ventana": 889890,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 34,
+    "ventana": "tive sta",
+    "hash_ventana": 93345,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 35,
+    "ventana": "ive stat",
+    "hash_ventana": 216795,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 36,
+    "ventana": "ve state",
+    "hash_ventana": 677432,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 37,
+    "ventana": "e states",
+    "hash_ventana": 41245,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 38,
+    "ventana": " states ",
+    "hash_ventana": 139440,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 39,
+    "ventana": "states i",
+    "hash_ventana": 474689,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 40,
+    "ventana": "tates in",
+    "hash_ventana": 191246,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 41,
+    "ventana": "ates in ",
+    "hash_ventana": 279292,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 42,
+    "ventana": "tes in l",
+    "hash_ventana": 482110,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 43,
+    "ventana": "es in le",
+    "hash_ventana": 740323,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 44,
+    "ventana": "s in lea",
+    "hash_ventana": 102936,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 45,
+    "ventana": " in lear",
+    "hash_ventana": 22767,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 46,
+    "ventana": "in learn",
+    "hash_ventana": 606496,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 47,
+    "ventana": "n learni",
+    "hash_ventana": 440592,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 48,
+    "ventana": " learnin",
+    "hash_ventana": 215870,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 49,
+    "ventana": "learning",
+    "hash_ventana": 40707,
+    "hash_patron": 40707,
+    "coincide_hash": true,
+    "colision": false,
+    "ocurrencia": true
+   },
+   {
+    "posicion": 50,
+    "ventana": "earning ",
+    "hash_ventana": 546912,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 51,
+    "ventana": "arning t",
+    "hash_ventana": 589889,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 52,
+    "ventana": "rning tr",
+    "hash_ventana": 994711,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 53,
+    "ventana": "ning tra",
+    "hash_ventana": 667153,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 54,
+    "ventana": "ing traj",
+    "hash_ventana": 215308,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 55,
+    "ventana": "ng traje",
+    "hash_ventana": 296760,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 56,
+    "ventana": "g trajec",
+    "hash_ventana": 394978,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 57,
+    "ventana": " traject",
+    "hash_ventana": 993531,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 58,
+    "ventana": "trajecto",
+    "hash_ventana": 121334,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 59,
+    "ventana": "rajector",
+    "hash_ventana": 381956,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 60,
+    "ventana": "ajectori",
+    "hash_ventana": 802352,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 61,
+    "ventana": "jectorie",
+    "hash_ventana": 385061,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 62,
+    "ventana": "ectories",
+    "hash_ventana": 402726,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 63,
+    "ventana": "ctories ",
+    "hash_ventana": 678300,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 64,
+    "ventana": "tories a",
+    "hash_ventana": 926470,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 65,
+    "ventana": "ories an",
+    "hash_ventana": 496150,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 66,
+    "ventana": "ries and",
+    "hash_ventana": 87979,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 67,
+    "ventana": "ies and ",
+    "hash_ventana": 544392,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 68,
+    "ventana": "es and s",
+    "hash_ventana": 542026,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 69,
+    "ventana": "s and su",
+    "hash_ventana": 339077,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 70,
+    "ventana": " and sug",
+    "hash_ventana": 474672,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 71,
+    "ventana": "and sugg",
+    "hash_ventana": 293821,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 72,
+    "ventana": "nd sugge",
+    "hash_ventana": 201515,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 73,
+    "ventana": "d sugges",
+    "hash_ventana": 12346,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 74,
+    "ventana": " suggest",
+    "hash_ventana": 92088,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 75,
+    "ventana": "suggests",
+    "hash_ventana": 352623,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 76,
+    "ventana": "uggests ",
+    "hash_ventana": 942368,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 77,
+    "ventana": "ggests t",
+    "hash_ventana": 215345,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 78,
+    "ventana": "gests th",
+    "hash_ventana": 7606,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 79,
+    "ventana": "ests the",
+    "hash_ventana": 826581,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 80,
+    "ventana": "sts the ",
+    "hash_ventana": 184853,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 81,
+    "ventana": "ts the r",
+    "hash_ventana": 993459,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 82,
+    "ventana": "s the re",
+    "hash_ventana": 645274,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 83,
+    "ventana": " the rel",
+    "hash_ventana": 860875,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 84,
+    "ventana": "the rela",
+    "hash_ventana": 161486,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 85,
+    "ventana": "he relat",
+    "hash_ventana": 660840,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 86,
+    "ventana": "e relate",
+    "hash_ventana": 703297,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 87,
+    "ventana": " related",
+    "hash_ventana": 624313,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 88,
+    "ventana": "related ",
+    "hash_ventana": 601732,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 89,
+    "ventana": "elated m",
+    "hash_ventana": 64841,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 90,
+    "ventana": "lated ma",
+    "hash_ventana": 180063,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 91,
+    "ventana": "ated mac",
+    "hash_ventana": 222007,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 92,
+    "ventana": "ted mach",
+    "hash_ventana": 817191,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 93,
+    "ventana": "ed machi",
+    "hash_ventana": 520805,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 94,
+    "ventana": "d machin",
+    "hash_ventana": 906512,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 95,
+    "ventana": " machine",
+    "hash_ventana": 997885,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 96,
+    "ventana": "machine ",
+    "hash_ventana": 235876,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 97,
+    "ventana": "achine l",
+    "hash_ventana": 159415,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 98,
+    "ventana": "chine le",
+    "hash_ventana": 793684,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 99,
+    "ventana": "hine lea",
+    "hash_ventana": 464684,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 100,
+    "ventana": "ine lear",
+    "hash_ventana": 487524,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 101,
+    "ventana": "ne learn",
+    "hash_ventana": 983858,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 102,
+    "ventana": "e learni",
+    "hash_ventana": 291544,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 103,
+    "ventana": " learnin",
+    "hash_ventana": 215870,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 104,
+    "ventana": "learning",
+    "hash_ventana": 40707,
+    "hash_patron": 40707,
+    "coincide_hash": true,
+    "colision": false,
+    "ocurrencia": true
+   },
+   {
+    "posicion": 105,
+    "ventana": "earning ",
+    "hash_ventana": 546912,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 106,
+    "ventana": "arning a",
+    "hash_ventana": 589870,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 107,
+    "ventana": "rning ap",
+    "hash_ventana": 989845,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 108,
+    "ventana": "ning app",
+    "hash_ventana": 421475,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 109,
+    "ventana": "ing appr",
+    "hash_ventana": 321937,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 110,
+    "ventana": "ng appro",
+    "hash_ventana": 593713,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 111,
+    "ventana": "g approa",
+    "hash_ventana": 414716,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 112,
+    "ventana": " approac",
+    "hash_ventana": 46424,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 113,
+    "ventana": "approach",
+    "hash_ventana": 662664,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 114,
+    "ventana": "pproache",
+    "hash_ventana": 625041,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 115,
+    "ventana": "proaches",
+    "hash_ventana": 733307,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 116,
+    "ventana": "roaches.",
+    "hash_ventana": 449250,
+    "hash_patron": 40707,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   }
+  ],
+  "ocurrencias": [
+   49,
+   104
+  ],
+  "comparaciones": 133,
+  "primo_pequeno": 101,
+  "ventanas_primo_pequeno": [
+   {
+    "posicion": 0,
+    "ventana": "Trend Tw",
+    "hash_ventana": 98,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 1,
+    "ventana": "rend Two",
+    "hash_ventana": 80,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 2,
+    "ventana": "end Two ",
+    "hash_ventana": 93,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 3,
+    "ventana": "nd Two p",
+    "hash_ventana": 84,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 4,
+    "ventana": "d Two po",
+    "hash_ventana": 98,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 5,
+    "ventana": " Two pos",
+    "hash_ventana": 32,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 6,
+    "ventana": "Two posi",
+    "hash_ventana": 12,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 7,
+    "ventana": "wo posit",
+    "hash_ventana": 87,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 8,
+    "ventana": "o posits",
+    "hash_ventana": 58,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 9,
+    "ventana": " posits ",
+    "hash_ventana": 51,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 10,
+    "ventana": "posits t",
+    "hash_ventana": 39,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 11,
+    "ventana": "osits th",
+    "hash_ventana": 28,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 12,
+    "ventana": "sits the",
+    "hash_ventana": 15,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 13,
+    "ventana": "its the ",
+    "hash_ventana": 39,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 14,
+    "ventana": "ts the r",
+    "hash_ventana": 86,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 15,
+    "ventana": "s the ro",
+    "hash_ventana": 35,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 16,
+    "ventana": " the rol",
+    "hash_ventana": 84,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 17,
+    "ventana": "the role",
+    "hash_ventana": 89,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 18,
+    "ventana": "he role ",
+    "hash_ventana": 17,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 19,
+    "ventana": "e role o",
+    "hash_ventana": 85,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 20,
+    "ventana": " role of",
+    "hash_ventana": 46,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 21,
+    "ventana": "role of ",
+    "hash_ventana": 89,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 22,
+    "ventana": "ole of a",
+    "hash_ventana": 38,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 23,
+    "ventana": "le of af",
+    "hash_ventana": 51,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 24,
+    "ventana": "e of aff",
+    "hash_ventana": 81,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 25,
+    "ventana": " of affe",
+    "hash_ventana": 31,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 26,
+    "ventana": "of affec",
+    "hash_ventana": 53,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 27,
+    "ventana": "f affect",
+    "hash_ventana": 67,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 28,
+    "ventana": " affecti",
+    "hash_ventana": 8,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 29,
+    "ventana": "affectiv",
+    "hash_ventana": 42,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 30,
+    "ventana": "ffective",
+    "hash_ventana": 59,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 31,
+    "ventana": "fective ",
+    "hash_ventana": 8,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 32,
+    "ventana": "ective s",
+    "hash_ventana": 64,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 33,
+    "ventana": "ctive st",
+    "hash_ventana": 37,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 34,
+    "ventana": "tive sta",
+    "hash_ventana": 31,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 35,
+    "ventana": "ive stat",
+    "hash_ventana": 100,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 36,
+    "ventana": "ve state",
+    "hash_ventana": 34,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 37,
+    "ventana": "e states",
+    "hash_ventana": 2,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 38,
+    "ventana": " states ",
+    "hash_ventana": 39,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 39,
+    "ventana": "states i",
+    "hash_ventana": 87,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 40,
+    "ventana": "tates in",
+    "hash_ventana": 66,
+    "hash_patron": 66,
+    "coincide_hash": true,
+    "colision": true,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 41,
+    "ventana": "ates in ",
+    "hash_ventana": 88,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 42,
+    "ventana": "tes in l",
+    "hash_ventana": 25,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 43,
+    "ventana": "es in le",
+    "hash_ventana": 64,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 44,
+    "ventana": "s in lea",
+    "hash_ventana": 18,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 45,
+    "ventana": " in lear",
+    "hash_ventana": 81,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 46,
+    "ventana": "in learn",
+    "hash_ventana": 37,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 47,
+    "ventana": "n learni",
+    "hash_ventana": 70,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 48,
+    "ventana": " learnin",
+    "hash_ventana": 48,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 49,
+    "ventana": "learning",
+    "hash_ventana": 66,
+    "hash_patron": 66,
+    "coincide_hash": true,
+    "colision": false,
+    "ocurrencia": true
+   },
+   {
+    "posicion": 50,
+    "ventana": "earning ",
+    "hash_ventana": 13,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 51,
+    "ventana": "arning t",
+    "hash_ventana": 10,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 52,
+    "ventana": "rning tr",
+    "hash_ventana": 61,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 53,
+    "ventana": "ning tra",
+    "hash_ventana": 41,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 54,
+    "ventana": "ing traj",
+    "hash_ventana": 94,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 55,
+    "ventana": "ng traje",
+    "hash_ventana": 13,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 56,
+    "ventana": "g trajec",
+    "hash_ventana": 90,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 57,
+    "ventana": " traject",
+    "hash_ventana": 71,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 58,
+    "ventana": "trajecto",
+    "hash_ventana": 3,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 59,
+    "ventana": "rajector",
+    "hash_ventana": 0,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 60,
+    "ventana": "ajectori",
+    "hash_ventana": 88,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 61,
+    "ventana": "jectorie",
+    "hash_ventana": 18,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 62,
+    "ventana": "ectories",
+    "hash_ventana": 86,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 63,
+    "ventana": "ctories ",
+    "hash_ventana": 30,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 64,
+    "ventana": "tories a",
+    "hash_ventana": 57,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 65,
+    "ventana": "ories an",
+    "hash_ventana": 84,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 66,
+    "ventana": "ries and",
+    "hash_ventana": 8,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 67,
+    "ventana": "ies and ",
+    "hash_ventana": 43,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 68,
+    "ventana": "es and s",
+    "hash_ventana": 0,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 69,
+    "ventana": "s and su",
+    "hash_ventana": 16,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 70,
+    "ventana": " and sug",
+    "hash_ventana": 63,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 71,
+    "ventana": "and sugg",
+    "hash_ventana": 68,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 72,
+    "ventana": "nd sugge",
+    "hash_ventana": 49,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 73,
+    "ventana": "d sugges",
+    "hash_ventana": 30,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 74,
+    "ventana": " suggest",
+    "hash_ventana": 98,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 75,
+    "ventana": "suggests",
+    "hash_ventana": 51,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 76,
+    "ventana": "uggests ",
+    "hash_ventana": 64,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 77,
+    "ventana": "ggests t",
+    "hash_ventana": 86,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 78,
+    "ventana": "gests th",
+    "hash_ventana": 45,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 79,
+    "ventana": "ests the",
+    "hash_ventana": 50,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 80,
+    "ventana": "sts the ",
+    "hash_ventana": 5,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 81,
+    "ventana": "ts the r",
+    "hash_ventana": 86,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 82,
+    "ventana": "s the re",
+    "hash_ventana": 25,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 83,
+    "ventana": " the rel",
+    "hash_ventana": 49,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 84,
+    "ventana": "the rela",
+    "hash_ventana": 13,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 85,
+    "ventana": "he relat",
+    "hash_ventana": 37,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 86,
+    "ventana": "e relate",
+    "hash_ventana": 44,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 87,
+    "ventana": " related",
+    "hash_ventana": 52,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 88,
+    "ventana": "related ",
+    "hash_ventana": 9,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 89,
+    "ventana": "elated m",
+    "hash_ventana": 73,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 90,
+    "ventana": "lated ma",
+    "hash_ventana": 100,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 91,
+    "ventana": "ated mac",
+    "hash_ventana": 98,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 92,
+    "ventana": "ted mach",
+    "hash_ventana": 56,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 93,
+    "ventana": "ed machi",
+    "hash_ventana": 25,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 94,
+    "ventana": "d machin",
+    "hash_ventana": 46,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 95,
+    "ventana": " machine",
+    "hash_ventana": 38,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 96,
+    "ventana": "machine ",
+    "hash_ventana": 61,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 97,
+    "ventana": "achine l",
+    "hash_ventana": 43,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 98,
+    "ventana": "chine le",
+    "hash_ventana": 12,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 99,
+    "ventana": "hine lea",
+    "hash_ventana": 95,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 100,
+    "ventana": "ine lear",
+    "hash_ventana": 58,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 101,
+    "ventana": "ne learn",
+    "hash_ventana": 98,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 102,
+    "ventana": "e learni",
+    "hash_ventana": 40,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 103,
+    "ventana": " learnin",
+    "hash_ventana": 48,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 104,
+    "ventana": "learning",
+    "hash_ventana": 66,
+    "hash_patron": 66,
+    "coincide_hash": true,
+    "colision": false,
+    "ocurrencia": true
+   },
+   {
+    "posicion": 105,
+    "ventana": "earning ",
+    "hash_ventana": 13,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 106,
+    "ventana": "arning a",
+    "hash_ventana": 92,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 107,
+    "ventana": "rning ap",
+    "hash_ventana": 43,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 108,
+    "ventana": "ning app",
+    "hash_ventana": 94,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 109,
+    "ventana": "ing appr",
+    "hash_ventana": 35,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 110,
+    "ventana": "ng appro",
+    "hash_ventana": 69,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 111,
+    "ventana": "g approa",
+    "hash_ventana": 82,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 112,
+    "ventana": " approac",
+    "hash_ventana": 26,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 113,
+    "ventana": "approach",
+    "hash_ventana": 91,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 114,
+    "ventana": "pproache",
+    "hash_ventana": 79,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 115,
+    "ventana": "proaches",
+    "hash_ventana": 78,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   },
+   {
+    "posicion": 116,
+    "ventana": "roaches.",
+    "hash_ventana": 56,
+    "hash_patron": 66,
+    "coincide_hash": false,
+    "colision": false,
+    "ocurrencia": false
+   }
+  ]
+ },
+ "articulo": "P10"
+}

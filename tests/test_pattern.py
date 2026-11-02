@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.pattern import boyer_moore, buscador, kmp, rabin_karp
+from src.pattern import boyer_moore, buscador, kmp, rabin_karp, traza
 
 ALGORITMOS = [
     pytest.param(kmp, id="kmp"),
@@ -132,6 +132,33 @@ def test_las_fases_por_separado_dan_lo_mismo_que_buscar():
         boyer_moore.tabla_sufijo_bueno(patron)) == esperado
     assert rabin_karp.buscar_con_hashes(
         texto, patron, *rabin_karp.preprocesar(texto, patron)) == esperado
+
+
+def test_kmp_con_pasos_da_lo_mismo_y_no_retrocede_en_el_texto():
+    texto, patron = "ABABDABACDABABCABAB", "ABABCABAB"
+    ocurrencias, pasos = kmp.buscar_con_pasos(texto, patron)
+    assert ocurrencias == kmp.buscar(texto, patron)
+    for anterior, siguiente in zip(pasos, pasos[1:]):
+        assert siguiente["i"] >= anterior["i"]
+    assert len(pasos) == kmp.buscar_con_metricas(texto, patron)["comparaciones"]
+
+
+def test_rabin_karp_con_primo_pequeno_detecta_colisiones_sin_falsos_positivos():
+    texto = ("Trend Two posits the role of affective states in learning trajectories "
+             "and suggests the related machine learning approaches.")
+    ocurrencias, pasos = rabin_karp.buscar_con_pasos(texto, "learning", max_pasos=len(texto), primo=101)
+    assert ocurrencias == busqueda_ingenua(texto, "learning") == [49, 104]
+    assert [p["posicion"] for p in pasos if p["colision"]] == [40]
+    for paso in pasos:
+        assert paso["ocurrencia"] == (paso["ventana"] == "learning")
+
+
+def test_traza_del_caso_de_estudio():
+    texto = "the role of learning and machine learning approaches"
+    t = traza.construir_traza(texto, "learning")
+    assert t["kmp"]["ocurrencias"] == t["boyer_moore"]["ocurrencias"] == t["rabin_karp"]["ocurrencias"]
+    assert t["kmp"]["ocurrencias"] == busqueda_ingenua(texto, "learning")
+    assert t["boyer_moore"]["comparaciones"] < t["kmp"]["comparaciones"]
 
 
 def test_boyer_moore_peor_caso_con_muchas_ocurrencias():

@@ -1,14 +1,14 @@
 """
-Demo de punta a punta con modelos reales (4 abstracts de docs/articulos/).
---------------------------------------------------------------------------
-Genera los datos del documento para P1-P3 y el flujo completo:
+Utilidades de comparación y demo de punta a punta con los 4 primeros abstracts.
+-------------------------------------------------------------------------------
 
     .venv\\Scripts\\python.exe -m src.similarity.ai.demo_flujo
 
 Salidas (en data/resultados/):
     - experimento_centrado.json : rangos de GloVe con/sin stopwords, con/sin centrar.
     - fusiones_p1_p4.json       : fusiones de los 3 enlaces con MiniLM (formato de export.py).
-Imprime en pantalla la demostración paso a paso (markdown) y el resumen del clustering.
+Imprime en pantalla la demostración paso a paso (markdown) de P1-P3 y el resumen del
+clustering. El caso de estudio del documento técnico sale de `caso_estudio.py`.
 """
 import json
 
