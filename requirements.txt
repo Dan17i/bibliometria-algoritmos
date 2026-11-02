@@ -1,4 +1,5 @@
 pytest
-pdfplumber
+pymupdf
 matplotlib
 flask
+waitress
