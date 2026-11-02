@@ -109,15 +109,27 @@ def buscar(texto: str, patron: str) -> list[int]:
     n, m = len(texto), len(patron)
     if m == 0 or m > n:
         return []
+    return buscar_con_hashes(texto, patron, *preprocesar(texto, patron))
 
-    # b^(m-1) mod q: el peso del carácter que sale de la ventana
+
+def preprocesar(texto: str, patron: str) -> tuple[int, int, int]:
+    """
+    El peso del carácter que sale de la ventana, b^(m-1) mod q, y los hashes del
+    patrón y de la primera ventana.
+
+    Complejidad: O(m).
+    """
+    m = len(patron)
     factor = 1
     for _ in range(m - 1):
         factor = (factor * BASE) % PRIMO
+    return factor, calcular_hash(patron, m), calcular_hash(texto, m)
 
-    hash_patron = calcular_hash(patron, m)
-    hash_ventana = calcular_hash(texto, m)
 
+def buscar_con_hashes(texto: str, patron: str, factor: int, hash_patron: int,
+                      hash_ventana: int) -> list[int]:
+    """La fase de búsqueda, con los hashes ya calculados. Permite medirla por separado."""
+    n, m = len(texto), len(patron)
     ocurrencias: list[int] = []
 
     for i in range(n - m + 1):

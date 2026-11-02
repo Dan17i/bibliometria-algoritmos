@@ -151,7 +151,8 @@ def _esta_en_corpus(texto: str, corpus: list[str]) -> bool:
 
 
 def tfidf_cosine_similarity(
-    text1: str, text2: str, corpus: list[str], idf_corpus: dict[str, float] | None = None
+    text1: str, text2: str, corpus: list[str], idf_corpus: dict[str, float] | None = None,
+    con_angulo: bool = True,
 ) -> dict:
     """
     Calcula la Similitud del Coseno entre dos textos con pesos TF-IDF.
@@ -169,7 +170,9 @@ def tfidf_cosine_similarity(
 
     Complejidad: O(T + V) en tiempo (T tokens del corpus, V vocabulario del
     par de textos) y O(V) en espacio para los vectores. Con `idf_corpus`, T son
-    solo los tokens del par.
+    solo los tokens del par. El ángulo cuesta O(1), pero con una constante alta;
+    `con_angulo=False` lo omite para medir el crecimiento con la longitud del
+    texto sin que esa constante lo tape.
 
     Returns:
         dict con todos los pasos intermedios, para la demostración:
@@ -226,7 +229,7 @@ def tfidf_cosine_similarity(
         coseno = 0.0
     else:
         coseno = producto_punto / (norma_a * norma_b)
-    angulo_grados = angle_degrees(coseno)
+    angulo_grados = angle_degrees(coseno) if con_angulo else None
 
     return {
         "vocabulario": vocabulario,

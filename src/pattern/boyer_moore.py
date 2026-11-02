@@ -156,10 +156,14 @@ def buscar(texto: str, patron: str) -> list[int]:
     n, m = len(texto), len(patron)
     if m == 0 or m > n:
         return []
+    return buscar_con_tablas(texto, patron, tabla_caracter_malo(patron),
+                             tabla_sufijo_bueno(patron))
 
-    malo = tabla_caracter_malo(patron)
-    bueno = tabla_sufijo_bueno(patron)
 
+def buscar_con_tablas(texto: str, patron: str, malo: dict[str, int],
+                      bueno: list[int]) -> list[int]:
+    """La fase de búsqueda, con las tablas ya construidas. Permite medirla por separado."""
+    n, m = len(texto), len(patron)
     ocurrencias: list[int] = []
     desplazado = 0
 

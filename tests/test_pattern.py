@@ -123,6 +123,17 @@ def test_las_metricas_son_coherentes():
         assert m["comparaciones"] > 0
 
 
+def test_las_fases_por_separado_dan_lo_mismo_que_buscar():
+    texto, patron = "abracadabra " * 40, "abra"
+    esperado = busqueda_ingenua(texto, patron)
+    assert kmp.buscar_con_tabla(texto, patron, kmp.construir_lps(patron)) == esperado
+    assert boyer_moore.buscar_con_tablas(
+        texto, patron, boyer_moore.tabla_caracter_malo(patron),
+        boyer_moore.tabla_sufijo_bueno(patron)) == esperado
+    assert rabin_karp.buscar_con_hashes(
+        texto, patron, *rabin_karp.preprocesar(texto, patron)) == esperado
+
+
 def test_boyer_moore_peor_caso_con_muchas_ocurrencias():
     """Con ocurrencias en todas las posiciones, las comparaciones crecen como n·m."""
     n, m = 2000, 100

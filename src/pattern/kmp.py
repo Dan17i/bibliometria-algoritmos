@@ -126,8 +126,12 @@ def buscar(texto: str, patron: str) -> list[int]:
     n, m = len(texto), len(patron)
     if m == 0 or m > n:
         return []
+    return buscar_con_tabla(texto, patron, construir_lps(patron))
 
-    lps = construir_lps(patron)
+
+def buscar_con_tabla(texto: str, patron: str, lps: list[int]) -> list[int]:
+    """La fase de búsqueda, con la tabla ya construida. Permite medirla por separado."""
+    n, m = len(texto), len(patron)
     ocurrencias: list[int] = []
     i = j = 0
 

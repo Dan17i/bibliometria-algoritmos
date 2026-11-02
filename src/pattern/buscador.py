@@ -66,7 +66,7 @@ def _contexto(texto: str, pos: int, largo: int, margen: int = 40) -> str:
     return ("..." if inicio > 0 else "") + fragmento + ("..." if fin < len(texto) else "")
 
 
-def medir(funcion, texto: str, patron: str, repeticiones: int = 7) -> float:
+def medir(funcion, texto: str, patron: str, repeticiones: int = 101) -> float:
     """Mediana del tiempo en milisegundos."""
     funcion(texto, patron)
     tiempos = []
