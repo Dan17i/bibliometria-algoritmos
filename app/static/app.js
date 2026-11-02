@@ -31,7 +31,12 @@ function miles(n) {
 
 async function pedir(ruta, opciones) {
   const respuesta = await fetch(ruta, opciones);
-  const datos = await respuesta.json();
+  let datos = null;
+  try {
+    datos = await respuesta.json();
+  } catch {
+    throw new Error("El servidor no pudo responder. Reinícialo si lo acabas de actualizar.");
+  }
   if (!respuesta.ok) throw new Error(datos.error || "No se pudo completar la consulta.");
   return datos;
 }
@@ -328,14 +333,25 @@ function dibujarDendro(indice) {
       <figcaption>Enlace ${e}${e === r.mejor_enlace ? " — el más fiel a las distancias originales" : ""}</figcaption>
     </figure>`).join("");
 
+  const botones = enlaces.map((e) => `
+    <button type="button" class="boton-suave" data-agrupar="${e}">Ver demostración · ${e}</button>`).join(" ");
+
   $("#dendro").innerHTML = `
     <div class="dendro__cpcc">${cpcc}</div>
+    <p class="acciones-dendro">${botones}</p>
     <figure class="figura">
       <img src="${r.comparacion}" alt="Comparación de los tres criterios de enlace" loading="lazy">
       <figcaption>Los tres enlaces en la misma escala. Cada panel rotula sus propias hojas:
         cada criterio ordena los artículos de forma distinta.</figcaption>
     </figure>
     ${figuras}`;
+
+  $("#dendro").querySelectorAll("[data-agrupar]").forEach((boton) => {
+    boton.addEventListener("click", () => {
+      const nombre = `Enlace ${boton.dataset.agrupar}`;
+      Demostracion.mostrarAgrupamiento(r.clave, boton.dataset.agrupar, nombre, `Agrupamiento jerárquico · ${r.etiqueta}`, boton);
+    });
+  });
 }
 
 /* --------------------------------------------------------------------- */

@@ -185,3 +185,18 @@ def test_tus_palabras_redacta_bien_una_sola_edicion(cliente):
 def test_las_formulas_de_la_pagina_estan_en_el_proyecto(cliente):
     assert cliente.get("/static/vendor/katex/katex.min.js").status_code == 200
     assert cliente.get("/static/demostraciones.js").status_code == 200
+
+
+# --- Agrupamiento -------------------------------------------------------------
+
+@pytest.mark.parametrize("representacion", ["minilm", "glove", "glove_centrado", "jaccard"])
+@pytest.mark.parametrize("enlace", ["single", "complete", "average"])
+def test_demostracion_del_agrupamiento_coincide_con_el_dendrograma(cliente, representacion, enlace):
+    d = cliente.post("/api/demostracion-agrupamiento", json={"representacion": representacion, "enlace": enlace}).get_json()
+    publicado = {r["clave"]: r["cpcc"][enlace] for r in cliente.get("/api/clustering").get_json()["representaciones"]}
+    assert d["similitud"] == pytest.approx(publicado[representacion], abs=1e-9)
+    assert d["conclusiones"] and d["pasos"] and d["codigo"]["archivo"].startswith("src/")
+
+
+def test_agrupamiento_peticion_invalida(cliente):
+    assert cliente.post("/api/demostracion-agrupamiento", json={"representacion": "x", "enlace": "single"}).status_code == 400

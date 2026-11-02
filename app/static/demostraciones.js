@@ -64,16 +64,24 @@ const Demostracion = (() => {
   /* Peticiones                                                            */
   /* ------------------------------------------------------------------- */
 
-  async function pedir(cuerpoPeticion) {
+  async function pedir(cuerpoPeticion, ruta = "/api/demostracion") {
     if (solicitud) solicitud.abort();
     solicitud = new AbortController();
-    const respuesta = await fetch("/api/demostracion", {
+    const respuesta = await fetch(ruta, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(cuerpoPeticion),
       signal: solicitud.signal,
     });
-    const datos = await respuesta.json();
+    let datos = null;
+    try {
+      datos = await respuesta.json();
+    } catch {
+      // El servidor respondió con una página de error y no con datos
+      throw new Error(respuesta.status === 404
+        ? "El servidor no tiene esta función. Reinícialo para cargar la versión nueva."
+        : "El servidor no pudo calcularlo. Inténtalo de nuevo.");
+    }
     if (!respuesta.ok) throw new Error(datos.error || "No se pudo calcular.");
     return datos;
   }
@@ -98,12 +106,12 @@ const Demostracion = (() => {
   /* ------------------------------------------------------------------- */
 
   function cabecera(d) {
-    const quienes = d.textos
+    const quienes = d.subtitulo ? seguro(d.subtitulo) : d.textos
       ? `«${seguro(d.textos[0])}» y «${seguro(d.textos[1])}»`
       : d.articulos.map((a) => a.id).join(" y ");
     return `
       <div class="dem-resultado">
-        <span class="dem-valor">${d.similitud.toFixed(4)}</span>
+        <span class="dem-valor">${d.similitud.toFixed(4)}</span>${d.etiqueta_valor ? `<span class="dem-par">${d.etiqueta_valor}</span>` : ""}
         <span class="dem-par">${quienes} · ${d.ms.toFixed(d.ms < 10 ? 2 : 0)} ms</span>
       </div>
       <p class="dem-frase">${seguro(d.en_una_frase)}</p>`;
@@ -401,6 +409,7 @@ const Demostracion = (() => {
       ${seccion("Paso a paso, con estos valores", pasos(d.pasos))}
       ${seccion("Para verlo", d.visual.map((v) => VISUALES[v.tipo](v)).join(""))}
       ${lectura(d)}
+      ${d.conclusiones ? seccion("Conclusiones", `<div class="dem-tarjeta">${d.conclusiones.map((c) => `<p>${seguro(c)}</p>`).join("")}</div>`) : ""}
       ${tusPalabras(d)}
       ${codigo(d.codigo)}
       ${abstracts ? seccion("Los textos comparados", abstracts) : ""}`;
@@ -435,5 +444,18 @@ const Demostracion = (() => {
     }
   }
 
-  return { mostrar };
+  async function mostrarAgrupamiento(representacion, enlace, nombre, grupo, disparador) {
+    titulo.textContent = nombre;
+    familia.textContent = grupo;
+    cuerpo.innerHTML = `<p class="hoja__espera" role="status">Agrupando los abstracts…</p>`;
+    paresVigentes = null;
+    abrir(disparador);
+    try {
+      dibujar(await pedir({ representacion, enlace }, "/api/demostracion-agrupamiento"));
+    } catch (error) {
+      if (error.name !== "AbortError") cuerpo.innerHTML = `<p class="error">${seguro(error.message)}</p>`;
+    }
+  }
+
+  return { mostrar, mostrarAgrupamiento };
 })();

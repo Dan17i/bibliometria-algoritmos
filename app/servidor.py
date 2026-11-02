@@ -36,6 +36,7 @@ import time
 
 from flask import Flask, jsonify, request, send_from_directory
 
+from app import explicaciones_clustering
 from app.explicaciones import ACEPTAN_TEXTOS, LADO_CORPUS, LADO_TEXTOS, NOMBRES, demostracion
 from src.pattern import boyer_moore, kmp, rabin_karp
 from src.similarity.classic.cosine import compute_idf, tfidf_cosine_similarity
@@ -437,6 +438,16 @@ def clustering():
 
     disponibles.sort(key=lambda d: max(d["cpcc"].values()), reverse=True)
     return jsonify({"representaciones": disponibles})
+
+
+@app.post("/api/demostracion-agrupamiento")
+def demostracion_agrupamiento():
+    """La demostración de un enlace con una representación, ejecutada en el momento."""
+    datos = request.get_json(silent=True) or {}
+    clave, enlace = datos.get("representacion"), datos.get("enlace")
+    if clave not in explicaciones_clustering.REPRESENTACIONES or enlace not in explicaciones_clustering.ENLACES:
+        return jsonify({"error": "Representación o enlace desconocidos."}), 400
+    return jsonify(explicaciones_clustering.demostracion(clave, enlace, VECTORES, TEXTOS, VECTORES["ids"]))
 
 
 @app.get("/api/corpus")

@@ -404,6 +404,8 @@ main { max-width: 1180px; margin: 0 auto; padding: 0 1.5rem 4rem; }
 .dendro__cpcc .mejor span:last-child { font-weight: 700; color: var(--acento); }
 
 /* Los dendrogramas son imágenes con fondo blanco: su tarjeta es blanca en los dos modos */
+.acciones-dendro { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 1.25rem; max-width: none; }
+
 .figura { background: #fff; border-radius: 16px; box-shadow: var(--sombra); padding: 1rem; margin: 0 0 1.25rem; }
 .figura img { width: 100%; height: auto; display: block; }
 .figura figcaption { font-size: .875rem; color: #515154; margin-top: .7rem; }
