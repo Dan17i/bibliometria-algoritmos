@@ -6,16 +6,16 @@ las mismas posiciones: en una búsqueda de coincidencia exacta no hay margen
 de interpretación.
 
 La referencia se construye con una búsqueda ingenua escrita aquí mismo, no
-con `str.find`: el requerimiento prohíbe las funciones de alto nivel del
-lenguaje, y una prueba que las usara dejaría la puerta abierta a que alguien
-las copiara al código de producción.
+con `str.find`: el proyecto no usa funciones de alto nivel del lenguaje para
+buscar, y una prueba que las usara dejaría la puerta abierta a que alguien las
+copiara al código de producción.
 """
 
 from __future__ import annotations
 
 import pytest
 
-from src.pattern import boyer_moore, kmp, rabin_karp
+from src.pattern import boyer_moore, buscador, kmp, rabin_karp
 
 ALGORITMOS = [
     pytest.param(kmp, id="kmp"),
@@ -121,6 +121,30 @@ def test_las_metricas_son_coherentes():
         m = modulo.buscar_con_metricas(texto, "abra")
         assert m["ocurrencias"] == modulo.buscar(texto, "abra")
         assert m["comparaciones"] > 0
+
+
+def test_boyer_moore_peor_caso_con_muchas_ocurrencias():
+    """Con ocurrencias en todas las posiciones, las comparaciones crecen como n·m."""
+    n, m = 2000, 100
+    metricas = boyer_moore.buscar_con_metricas("a" * n, "a" * m)
+    assert len(metricas["ocurrencias"]) == n - m + 1
+    assert metricas["comparaciones"] == (n - m + 1) * m
+
+
+@pytest.mark.parametrize("algoritmo", ALGORITMOS)
+def test_la_coincidencia_es_exacta(algoritmo):
+    """Mayúsculas y minúsculas son caracteres distintos: "AI" no está en "training"."""
+    texto = "AI training and ai tools"
+    assert algoritmo.buscar(texto, "AI") == [0]
+    assert algoritmo.buscar(texto, "ai") == [5, 16]
+
+
+def test_el_buscador_no_transforma_el_texto():
+    registros = [{"id": "P1", "titulo": "t", "texto": "AI and training"}]
+    assert buscador.comparar(registros, "AI")["total_ocurrencias"] == 1
+    assert buscador.comparar(registros, "ai")["total_ocurrencias"] == 1
+    assert buscador.comparar(registros, "ai")["por_articulo"][0]["posiciones"] == [9]
+    assert buscador.comparar(registros, "Training")["total_ocurrencias"] == 0
 
 
 def test_boyer_moore_salta_parte_del_texto():

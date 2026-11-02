@@ -2,8 +2,7 @@
 Medición de tiempos de ejecución de los algoritmos del proyecto
 ----------------------------------------------------------------
 Produce la evidencia empírica con la que se contrasta la complejidad asintótica
-teórica de cada algoritmo, tal como exige el análisis crítico de los
-requerimientos.
+teórica de cada algoritmo.
 
 QUÉ SE MIDE Y POR QUÉ
 =====================

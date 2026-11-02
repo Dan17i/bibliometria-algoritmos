@@ -163,7 +163,7 @@ def demostracion_markdown(
         "##### Enfoque 2: all-MiniLM-L6-v2 (embedding de oración)",
         "",
         "**Paso 1.** El modelo recibe cada abstract completo y devuelve un vector de "
-        f"{comp2['dim']} dimensiones (caja negra permitida por el enunciado). "
+        f"{comp2['dim']} dimensiones (la inferencia del modelo es una caja negra). "
         "**Paso 2. Comparación**, con la misma fórmula:",
         "",
     ]

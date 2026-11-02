@@ -28,7 +28,7 @@
 > * **Cayón:**  
   * Desarrollo del módulo de visualización de datos (replicando la arquitectura del directorio python\_viz y la exportación de CSVs de rendimiento del repositorio de referencia).  
   * Generación automatizada de las gráficas comparativas de rendimiento (benchmarks) de todos los algoritmos.  
-  * Graficación visual (renderizado) de los 3 dendrogramas exigidos en el Requerimiento 2\.
+  * Graficación visual (renderizado) de los 3 dendrogramas del Requerimiento 2\.
 
 ### **4\. Requerimiento 6 y Transversales: Datos, Despliegue y Documentación**
 
@@ -40,4 +40,4 @@
 ### **5\. Restricciones Técnicas Absolutas**
 
 > * **Transparencia Algorítmica:** Está terminantemente prohibido usar funciones de alto nivel que resuelvan los algoritmos directamente. Todo el comportamiento interno debe ser transparente y analizable.  
-> * **Uso de IA:** No reemplaza bajo ninguna circunstancia el diseño algorítmico formal exigido.
+> * **Uso de IA:** No reemplaza bajo ninguna circunstancia el diseño algorítmico formal.

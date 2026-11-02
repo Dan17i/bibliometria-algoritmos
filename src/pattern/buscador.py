@@ -27,7 +27,7 @@ ALGORITMOS = {
 COMPLEJIDAD = {
     "KMP": {"preproceso": "O(m)", "busqueda": "O(n)", "peor": "O(n + m)"},
     "Boyer-Moore": {"preproceso": "O(m + s)", "busqueda": "O(n/m) mejor caso",
-                    "peor": "O(n)"},
+                    "peor": "O(n * m)"},
     "Rabin-Karp": {"preproceso": "O(m)", "busqueda": "O(n + m) promedio",
                    "peor": "O(n * m)"},
 }
@@ -38,15 +38,12 @@ def buscar_en_corpus(registros: list[dict], patron: str, algoritmo
     """
     Busca el patrón en los abstracts y devuelve las coincidencias por artículo.
 
-    La búsqueda es sensible a mayúsculas por definición del requerimiento
-    (coincidencia exacta de cadenas), así que el texto se normaliza a
-    minúsculas antes de buscar para que el usuario no tenga que adivinar la
-    capitalización del corpus.
+    La búsqueda distingue mayúsculas de minúsculas porque la coincidencia es
+    exacta: el patrón y el texto no se transforman.
     """
     resultados = []
     for registro in registros:
-        texto = registro["texto"].lower()
-        posiciones = algoritmo.buscar(texto, patron.lower())
+        posiciones = algoritmo.buscar(registro["texto"], patron)
         if posiciones:
             resultados.append({
                 "id": registro["id"],
@@ -93,14 +90,13 @@ def comparar(registros: list[dict], patron: str) -> dict:
     uno (comparaciones, saltos, colisiones), que es lo que permite explicar
     por qué uno es más rápido que otro sobre los mismos datos.
     """
-    corpus = "\n".join(r["texto"].lower() for r in registros)
-    p = patron.lower()
+    corpus = "\n".join(r["texto"] for r in registros)
 
     salidas, tiempos, metricas = {}, {}, {}
     for nombre, modulo in ALGORITMOS.items():
-        salidas[nombre] = modulo.buscar(corpus, p)
-        tiempos[nombre] = medir(modulo.buscar, corpus, p)
-        metricas[nombre] = modulo.buscar_con_metricas(corpus, p)
+        salidas[nombre] = modulo.buscar(corpus, patron)
+        tiempos[nombre] = medir(modulo.buscar, corpus, patron)
+        metricas[nombre] = modulo.buscar_con_metricas(corpus, patron)
 
     nombres = list(salidas)
     coinciden = all(salidas[nombres[0]] == salidas[o] for o in nombres[1:])
@@ -123,7 +119,7 @@ def main() -> None:
         registros = json.load(fh)
 
     patrones = ["artificial intelligence", "learning", "assessment",
-                "systematic review", "chatgpt"]
+                "systematic review", "ChatGPT"]
 
     print(f"Corpus: {len(registros)} abstracts, "
           f"{sum(len(r['texto']) for r in registros)} caracteres\n")

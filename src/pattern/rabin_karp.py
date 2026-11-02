@@ -155,8 +155,7 @@ def buscar_con_pasos(texto: str, patron: str, max_pasos: int = 12
     """
     Búsqueda que registra el hash de cada ventana y si hubo colisión.
 
-    Permite mostrar el cálculo numérico iterativo del hash y las colisiones,
-    que es lo que pide el análisis del requerimiento.
+    Permite mostrar el cálculo numérico iterativo del hash y las colisiones.
     """
     n, m = len(texto), len(patron)
     if m == 0 or m > n:

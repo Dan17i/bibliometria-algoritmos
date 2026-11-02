@@ -1,7 +1,7 @@
 """
 Demo de punta a punta con modelos reales (4 abstracts de docs/articulos/).
 --------------------------------------------------------------------------
-Genera todo lo que pide el documento para P1-P3 y el flujo completo:
+Genera los datos del documento para P1-P3 y el flujo completo:
 
     .venv\\Scripts\\python.exe -m src.similarity.ai.demo_flujo
 

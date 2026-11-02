@@ -44,7 +44,7 @@ Los resultados de la sección [Resultados](#resultados) se obtuvieron con los 20
 
 ## Regla de implementación explícita
 
-El enunciado prohíbe usar funciones de alto nivel que implementen los algoritmos pedidos. Todo el cálculo se escribe con estructuras básicas de Python (listas, diccionarios, bucles y aritmética), de modo que el funcionamiento interno sea transparente y analizable, y las funciones devuelven los **pasos intermedios** (matriz de programación dinámica, pesos, historial de fusiones) para poder demostrarlos paso a paso.
+No se usan funciones de alto nivel que implementen los algoritmos. Todo el cálculo se escribe con estructuras básicas de Python (listas, diccionarios, bucles y aritmética), de modo que el funcionamiento interno sea transparente y analizable, y las funciones devuelven los **pasos intermedios** (matriz de programación dinámica, pesos, historial de fusiones) para poder demostrarlos paso a paso.
 
 | No se usa para los algoritmos | Sí se permite |
 |---|---|
@@ -220,4 +220,4 @@ Los valores son el CPCC (correlación cofenética). **Average** es el enlace má
 
 ## Uso de IA generativa
 
-El enunciado permite la IA generativa solo como apoyo y exige declararla. Durante el desarrollo se usó **Claude** (Anthropic) como asistente de programación en el módulo de IA, las métricas, el clustering y sus pruebas. La IA no reemplaza el diseño algorítmico ni el análisis formal, que son del equipo. La declaración formal completa irá en el documento de diseño final.
+La IA generativa se usó solo como apoyo. Durante el desarrollo se usó **Claude** (Anthropic) como asistente de programación en el módulo de IA, las métricas, el clustering y sus pruebas. La IA no reemplaza el diseño algorítmico ni el análisis formal, que son del equipo. La declaración formal completa irá en el documento de diseño final.

@@ -294,24 +294,28 @@ def similitud():
 
 @app.post("/api/buscar")
 def buscar():
-    """Busca un patrón en los 20 abstracts con los tres algoritmos."""
+    """
+    Busca un patrón en los 20 abstracts con los tres algoritmos.
+
+    La coincidencia es exacta: el patrón y el texto se comparan tal cual, así
+    que "AI" y "ai" son cadenas distintas.
+    """
     datos = request.get_json(silent=True) or {}
-    patron = (datos.get("patron") or "").strip()
+    patron = datos.get("patron") or ""
 
     if not patron:
         return jsonify({"error": "Escribe un patrón para buscar."}), 400
     if len(patron) > 120:
         return jsonify({"error": "El patrón no puede superar 120 caracteres."}), 400
 
-    objetivo = patron.lower()
-    corpus_unido = "\n".join(r["texto"].lower() for r in CORPUS)
+    corpus_unido = "\n".join(r["texto"] for r in CORPUS)
 
     algoritmos = []
     salidas = {}
     for nombre, modulo in (("KMP", kmp), ("Boyer-Moore", boyer_moore),
                            ("Rabin-Karp", rabin_karp)):
-        posiciones, ms = _cronometrar(modulo.buscar, corpus_unido, objetivo)
-        metricas = modulo.buscar_con_metricas(corpus_unido, objetivo)
+        posiciones, ms = _cronometrar(modulo.buscar, corpus_unido, patron)
+        metricas = modulo.buscar_con_metricas(corpus_unido, patron)
         salidas[nombre] = posiciones
         extra = (f"{metricas['saltos']} saltos" if nombre == "KMP"
                  else f"{metricas['alineaciones']} alineaciones"
@@ -333,7 +337,7 @@ def buscar():
     por_articulo = []
     for registro in CORPUS:
         texto = registro["texto"]
-        posiciones = kmp.buscar(texto.lower(), objetivo)
+        posiciones = kmp.buscar(texto, patron)
         if not posiciones:
             continue
         por_articulo.append({
@@ -341,7 +345,7 @@ def buscar():
             "titulo": registro["titulo"],
             "ocurrencias": len(posiciones),
             "contextos": [
-                _contexto(texto, p, len(objetivo)) for p in posiciones[:3]
+                _contexto(texto, p, len(patron)) for p in posiciones[:3]
             ],
         })
 

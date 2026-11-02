@@ -16,15 +16,15 @@ La clave es comparar empezando por el ÚLTIMO carácter del patrón:
     Patrón:  E J E M P L O
              . . . . . . ✗
 
-             Compara primero la 'O' final del patrón contra la ' ' del texto.
-             No coinciden. Y además el espacio NO APARECE en el patrón.
+             Compara primero la 'O' final del patrón contra la 'S' del texto.
+             No coinciden. Y además la 'S' NO APARECE en el patrón.
 
-             Si el espacio no está en el patrón, ninguna alineación que lo
-             incluya puede funcionar. Se puede saltar el patrón entero:
+             Si la 'S' no está en el patrón, ninguna alineación que la incluya
+             puede funcionar. Se puede saltar el patrón entero:
 
     Texto:   E S T O   E S   U N   E J E M P L O
-    Patrón:          E J E M P L O
-                     ↑ siete posiciones de un golpe, sin mirarlas
+    Patrón:                E J E M P L O
+                           ↑ siete posiciones de un golpe, sin mirarlas
 
 Una sola comparación descartó siete posiciones. Ese es el truco.
 
@@ -54,17 +54,19 @@ COMPLEJIDAD: EL MATIZ IMPORTANTE
 ---------------------------------
     Preprocesamiento: O(m + σ), con σ el tamaño del alfabeto
     Mejor caso:       O(n / m)   ← sublineal: no lee todo el texto
-    Peor caso:        O(n · m)   ← solo con la regla del carácter malo
-    Espacio:          O(σ)
+    Peor caso:        O(n · m)   ← cuando el patrón aparece muchas veces
+    Espacio:          O(m + σ)
 
 Es el único de los tres que puede ser **sublineal**: con un patrón largo sobre
 texto natural, salta la mayoría de los caracteres. Por eso en la práctica suele
 ganar, pese a tener peor cota teórica que KMP.
 
-El peor caso O(n·m) aparece con textos muy repetitivos ("AAAA..." buscando
-"BAAA"). La implementación completa de Boyer-Moore añade la **regla del sufijo
-bueno**, que lo baja a O(n); aquí se implementan ambas reglas y se toma el
-mayor de los dos saltos, que es lo que hace el algoritmo original.
+Aquí se implementan las dos reglas, carácter malo y **sufijo bueno**, y se toma
+el mayor de los dos saltos. Si el patrón NO aparece en el texto, esas dos reglas
+dejan la búsqueda en O(n). Pero aquí se buscan TODAS las ocurrencias: con "AAA"
+sobre "AAAAAA...", cada alineación compara los m caracteres y solo avanza una
+posición, lo que da O(n·m). Evitarlo requiere la regla de Galil, que recuerda lo
+ya comparado y que esta implementación no incluye.
 """
 
 from __future__ import annotations
@@ -148,7 +150,8 @@ def buscar(texto: str, patron: str) -> list[int]:
     proponen las dos reglas: ambas son seguras, así que el mayor también lo es
     y avanza más rápido.
 
-    Complejidad: O(n/m) en el mejor caso, O(n) en el peor con ambas reglas.
+    Complejidad: O(n/m) en el mejor caso y O(n·m) en el peor, que ocurre cuando
+    el patrón aparece muchas veces en el texto.
     """
     n, m = len(texto), len(patron)
     if m == 0 or m > n:
@@ -192,8 +195,7 @@ def buscar_con_pasos(texto: str, patron: str, max_pasos: int = 12
     """
     Búsqueda que registra cada alineación y el salto que la siguió.
 
-    Sirve para graficar las iteraciones y desplazamientos sobre el texto, que
-    es justo lo que pide el análisis del requerimiento.
+    Sirve para graficar las iteraciones y los desplazamientos sobre el texto.
     """
     n, m = len(texto), len(patron)
     if m == 0 or m > n:

@@ -147,7 +147,7 @@ main { max-width: 1180px; margin: 0 auto; padding: 0 1.5rem 4rem; }
 .bloque__encabezado p { color: var(--tinta-media); }
 
 /* Marcador de requerimiento: estructura, no adorno — dice a qué
-   entregable del enunciado corresponde cada bloque. */
+   requerimiento corresponde cada bloque. */
 .req {
   font-family: var(--mono);
   font-size: .8rem;

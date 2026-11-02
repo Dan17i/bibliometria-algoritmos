@@ -317,8 +317,8 @@ def procesar_corpus(dir_pdfs: str, dir_salida: str) -> list[dict]:
     Procesa todos los PDF de un directorio y escribe abstracts.json y .csv.
 
     El esquema de salida (id, archivo, titulo, texto) es el que consumen los
-    módulos de similitud y clustering; 'autores' es el otro metadato que pide
-    el enunciado.
+    módulos de similitud y clustering; 'autores' completa los metadatos del
+    artículo.
     """
     def orden(nombre: str) -> int:
         m = re.match(r"(\d+)", nombre)
