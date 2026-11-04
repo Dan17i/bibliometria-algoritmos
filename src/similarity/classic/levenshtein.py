@@ -7,6 +7,17 @@ def levenshtein_distance(str1: str, str2: str) -> tuple[int, list[list[int]]]:
     - Inserción
     - Eliminación
     - Sustitución
+
+    Fórmula Matemática:
+        D(i, 0) = i,  D(0, j) = j
+        D(i, j) = min(
+            D(i-1, j) + 1,      # Eliminación
+            D(i, j-1) + 1,      # Inserción
+            D(i-1, j-1) + c     # Sustitución: c = 0 si str1[i-1] == str2[j-1], c = 1 si no
+        )
+
+    Complejidad Temporal: O(m * n), donde m y n son las longitudes de las cadenas.
+    Complejidad Espacial: O(m * n) para almacenar la matriz de Programación Dinámica.
     
     Args:
         str1 (str): Primera cadena de texto.
